@@ -203,8 +203,10 @@
       "colors": "Complete “Easy” in Guess the view and in Build it.",
       "pixel": "Win a duel.",
       "gifts": "Comes on St. Nicholas’ Day and at Christmas.",
-      "eyes": "Complete “Medium” in Guess the view and in Build it."
+      "eyes": "Complete “Medium” in Guess the view and in Build it.",
+      "galaxy": "Complete “Hard” in Guess the view and in Build it."
     },
-    "eyes": "Googly eyes"
+    "eyes": "Googly eyes",
+    "galaxy": "Galaxy"
   }
 }

@@ -203,8 +203,10 @@
       "colors": "Schaffe „Leicht“ beim Raten und beim Nachbauen.",
       "pixel": "Gewinne ein Duell.",
       "gifts": "Kommt an Nikolaus und Weihnachten.",
-      "eyes": "Schaffe „Mittel“ beim Raten und beim Nachbauen."
+      "eyes": "Schaffe „Mittel“ beim Raten und beim Nachbauen.",
+      "galaxy": "Schaffe „Schwer“ beim Raten und beim Nachbauen."
     },
-    "eyes": "Kulleraugen"
+    "eyes": "Kulleraugen",
+    "galaxy": "Galaxie"
   }
 }

@@ -203,8 +203,10 @@
       "colors": "Riješi razinu „Lagano“ u igrama Pogodi pogled i Sagradi.",
       "pixel": "Pobijedi u dvoboju.",
       "gifts": "Stiže za Svetog Nikolu i Božić.",
-      "eyes": "Riješi razinu „Srednje“ u igrama Pogodi pogled i Sagradi."
+      "eyes": "Riješi razinu „Srednje“ u igrama Pogodi pogled i Sagradi.",
+      "galaxy": "Riješi razinu „Teško“ u igrama Pogodi pogled i Sagradi."
     },
-    "eyes": "Okice"
+    "eyes": "Okice",
+    "galaxy": "Galaksija"
   }
 }

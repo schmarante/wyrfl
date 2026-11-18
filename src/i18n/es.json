@@ -203,8 +203,10 @@
       "colors": "Supera «Fácil» en Adivina la vista y en Constrúyelo.",
       "pixel": "Gana un duelo.",
       "gifts": "Llega en San Nicolás y en Navidad.",
-      "eyes": "Supera «Medio» en Adivina la vista y en Constrúyelo."
+      "eyes": "Supera «Medio» en Adivina la vista y en Constrúyelo.",
+      "galaxy": "Supera «Difícil» en Adivina la vista y en Constrúyelo."
     },
-    "eyes": "Ojos saltones"
+    "eyes": "Ojos saltones",
+    "galaxy": "Galaxia"
   }
 }

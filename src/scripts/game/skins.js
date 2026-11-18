@@ -4,6 +4,7 @@
 // - colors:  seven bright colors, picked per cube position (stays the same while building around it)
 // - pixel:   original pixel-art blocks drawn in code – grass on top of a column, earth below, stone at the bottom
 // - eyes:    'googly eyes' – only eyes (own design, drawn in the shader); they follow the pointer and blink now and then
+// - galaxy:  every cube a window into the same night sky (shader), glowing cyan outline
 // - gifts:   six wrapping papers with a ribbon cross
 import * as THREE from 'three';
 import { createRng } from './rng.js';
@@ -233,6 +234,84 @@ function eyesSkin() {
   };
 }
 
+// ---- galaxy ------------------------------------------------------------------------------------
+// Every cube is a window into the same night sky (nebulae + stars, drawn in the shader, continuous across all cubes
+// and fixed to the view – the building turns "in front of" space) with a glowing cyan outline. Opaque on purpose: real
+// transparency would let the cubes overlap and the puzzle could no longer be read.
+
+const GALAXY_VERTEX = /* glsl */ `
+  vGalaxyView = (modelViewMatrix * vec4(transformed, 1.0)).xy;
+  vGalaxyLocal = transformed;
+  vGalaxyNormal = normal;   // MeshBasicMaterial has no objectNormal – the attribute is always there
+  vGalaxyWorldN = normalize(mat3(modelMatrix) * normal);`;
+
+const GALAXY_FUNCTIONS = /* glsl */ `
+  varying vec2 vGalaxyView;
+  varying vec3 vGalaxyLocal;
+  varying vec3 vGalaxyNormal;
+  varying vec3 vGalaxyWorldN;
+  float gHash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+  float gNoise(vec2 p) {
+    vec2 i = floor(p), f = fract(p), u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(gHash(i), gHash(i + vec2(1.0, 0.0)), u.x), mix(gHash(i + vec2(0.0, 1.0)), gHash(i + vec2(1.0, 1.0)), u.x), u.y);
+  }
+  float gFbm(vec2 p) {
+    float v = 0.0, a = 0.5;
+    for (int i = 0; i < 5; i++) { v += a * gNoise(p); p *= 2.03; a *= 0.5; }
+    return v;
+  }
+  float gStars(vec2 p, float density, float size) {
+    vec2 cell = floor(p * density), f = fract(p * density) - 0.5;
+    float h = gHash(cell);
+    vec2 offset = vec2(gHash(cell + 1.7), gHash(cell + 5.3)) - 0.5;
+    return smoothstep(size, 0.0, length(f - offset * 0.7)) * step(0.72, h) * (0.55 + 0.45 * h);
+  }
+  vec3 galaxy(vec2 p) {
+    vec2 q = p * 0.33;
+    float n = gFbm(q + gFbm(q * 1.7));
+    vec3 col = mix(vec3(0.02, 0.01, 0.07), vec3(0.16, 0.04, 0.30), smoothstep(0.25, 0.85, n));
+    col += vec3(0.90, 0.25, 0.62) * pow(smoothstep(0.52, 0.95, gFbm(q * 1.3 + 3.1)), 2.0) * 0.65;   // pink nebula
+    col += vec3(0.20, 0.60, 1.00) * pow(smoothstep(0.55, 1.00, gFbm(q * 0.8 - 7.3)), 2.0) * 0.55;  // blue nebula
+    col += vec3(1.0) * gStars(p, 7.0, 0.09);                                                      // small stars
+    col += vec3(0.85, 0.92, 1.0) * gStars(p + 13.7, 2.2, 0.06) * 1.4;                              // a few bright ones
+    return col;
+  }`;
+
+const GALAXY_FRAGMENT = /* glsl */ `
+  {
+    vec3 sky = galaxy(vGalaxyView);
+    vec3 nW = normalize(vGalaxyWorldN);
+    float shade = 0.82 + 0.28 * max(nW.y, 0.0);   // top a bit brighter, so the shape still reads
+    // glowing rim along the edges of every face
+    vec3 a = abs(vGalaxyLocal), nL = abs(vGalaxyNormal);
+    float e = max(max(a.x * (1.0 - nL.x), a.y * (1.0 - nL.y)), a.z * (1.0 - nL.z));
+    float rim = smoothstep(0.40, 0.495, e);
+    diffuseColor.rgb = sky * shade + vec3(0.45, 0.95, 1.0) * rim * 0.75;
+  }`;
+
+function galaxySkin() {
+  const material = new THREE.MeshBasicMaterial({ vertexColors: true });   // unlit: space glows by itself (AO still darkens corners)
+  material.userData.shared = true;
+  material.onBeforeCompile = shader => {
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec2 vGalaxyView;\nvarying vec3 vGalaxyLocal;\nvarying vec3 vGalaxyNormal;\nvarying vec3 vGalaxyWorldN;')
+      .replace('#include <begin_vertex>', `#include <begin_vertex>${GALAXY_VERTEX}`);
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', `#include <common>${GALAXY_FUNCTIONS}`)
+      .replace('#include <color_fragment>', `${GALAXY_FRAGMENT}\n#include <color_fragment>`);
+  };
+  material.customProgramCacheKey = () => 'wyrfl-galaxy';
+  const edge = edges(0x8ef6ff);
+  return {
+    material: () => material,
+    edge,
+    dispose() {
+      material.dispose();
+      edge.dispose();
+    },
+  };
+}
+
 // ---- solid colors ----------------------------------------------------------------------------------
 
 function colorSkin() {
@@ -255,5 +334,5 @@ function classicSkin() {
 }
 
 export function createSkin(name) {
-  return { colors: colorSkin, pixel: pixelSkin, eyes: eyesSkin, gifts: giftSkin }[name]?.() ?? classicSkin();
+  return { colors: colorSkin, pixel: pixelSkin, eyes: eyesSkin, galaxy: galaxySkin, gifts: giftSkin }[name]?.() ?? classicSkin();
 }

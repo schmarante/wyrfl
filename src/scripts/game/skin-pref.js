@@ -5,6 +5,7 @@
 // - colors:  unlocked by completing "easy" in both game modes
 // - pixel:   unlocked by winning a duel
 // - eyes:    unlocked by completing "medium" in both game modes
+// - galaxy:  unlocked by completing "hard" in both game modes
 // - gifts:   comes by itself on St. Nicholas' Day (Dec 6) and at Christmas (Dec 24–26) – active automatically on those
 //            days unless the player picked another style that day
 // The choice is stored on this device only.
@@ -12,7 +13,7 @@
 import { dailyDate } from './rng.js';
 import { levelDone, duelWins, MODES, seenSkins, markSkinsSeen, DEBUG_ALL_KEY } from './progress.js';
 
-export const SKINS = ['classic', 'colors', 'pixel', 'eyes', 'gifts'];
+export const SKINS = ['classic', 'colors', 'pixel', 'eyes', 'galaxy', 'gifts'];
 const KEY = 'wyrfl:skin';
 const DAY_KEY = 'wyrfl:skin-day';
 
@@ -39,6 +40,8 @@ export function skinUnlocked(name, date = dailyDate()) {
       return duelWins() >= 1;
     case 'eyes':
       return MODES.every(mode => levelDone(mode, 'medium'));
+    case 'galaxy':
+      return MODES.every(mode => levelDone(mode, 'hard'));
     case 'gifts':
       return isGiftDay(date);
     default:

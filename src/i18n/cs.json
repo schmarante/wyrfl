@@ -203,8 +203,10 @@
       "colors": "Zvládni úroveň „Lehká“ v hrách Uhodni pohled a Postav to.",
       "pixel": "Vyhraj souboj.",
       "gifts": "Přichází na Mikuláše a o Vánocích.",
-      "eyes": "Zvládni úroveň „Střední“ v hrách Uhodni pohled a Postav to."
+      "eyes": "Zvládni úroveň „Střední“ v hrách Uhodni pohled a Postav to.",
+      "galaxy": "Zvládni úroveň „Těžká“ v hrách Uhodni pohled a Postav to."
     },
-    "eyes": "Očička"
+    "eyes": "Očička",
+    "galaxy": "Galaxie"
   }
 }

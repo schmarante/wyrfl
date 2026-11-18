@@ -203,8 +203,10 @@
       "colors": "Réussis « Facile » dans Devine la vue et dans Construis-le.",
       "pixel": "Gagne un duel.",
       "gifts": "Arrive à la Saint-Nicolas et à Noël.",
-      "eyes": "Réussis « Moyen » dans Devine la vue et dans Construis-le."
+      "eyes": "Réussis « Moyen » dans Devine la vue et dans Construis-le.",
+      "galaxy": "Réussis « Difficile » dans Devine la vue et dans Construis-le."
     },
-    "eyes": "Yeux rigolos"
+    "eyes": "Yeux rigolos",
+    "galaxy": "Galaxie"
   }
 }
