@@ -31,11 +31,26 @@ export const ICONS = {
 const flag = body => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20" width="22" height="22" preserveAspectRatio="xMidYMid slice" aria-hidden="true" class="block shrink-0 rounded-full ring-1 ring-black/15">${body}</svg>`;
 const stripesH = (...colors) => colors.map((c, i) => `<rect y="${(20 / colors.length) * i}" width="30" height="${20 / colors.length + 0.05}" fill="${c}"/>`).join('');
 const stripesV = (...colors) => colors.map((c, i) => `<rect x="${(30 / colors.length) * i}" width="${30 / colors.length + 0.05}" height="20" fill="${c}"/>`).join('');
-// Croatian chequy shield (5 × 5), red top left
+// Croatian coat of arms, simplified: chequy shield (red top left) clipped to its shape – straight top, rounded
+// bottom, reaching from the red into the blue stripe – and a crown of five small shields above it
 const hrShield = (() => {
+  const cell = 1.4;
+  const x0 = 15 - 2.5 * cell;
+  const x1 = x0 + 5 * cell;
+  const y0 = 6.2;   // crown in the red stripe, shield from the white into the blue one
+  const shield = `M${x0} ${y0}H${x1}V${y0 + 4.7}C${x1} ${y0 + 6.6} 17 ${y0 + 7.9} 15 ${y0 + 7.9}S${x0} ${y0 + 6.6} ${x0} ${y0 + 4.7}Z`;
   let cells = '';
-  for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) if ((r + c) % 2 === 0) cells += `<rect x="${12.5 + c}" y="${5.5 + r}" width="1" height="1" fill="#FF0000"/>`;
-  return `<path d="M12.5 5.5h5v5a2.5 2.5 0 0 1-5 0Z" fill="#fff"/>${cells}<path d="M12.5 5.5h5v5a2.5 2.5 0 0 1-5 0Z" fill="none" stroke="#FF0000" stroke-width="0.3"/>`;
+  for (let r = 0; r < 6; r++) for (let c = 0; c < 5; c++) if ((r + c) % 2 === 0) cells += `<rect x="${x0 + c * cell}" y="${y0 + r * cell}" width="${cell}" height="${cell}" fill="#FF0000"/>`;
+  const w = cell - 0.2;
+  const crown = [0.5, 0.15, 0, 0.15, 0.5]
+    .map((drop, i) => {
+      const x = x0 + i * cell + 0.1;
+      const y = y0 - 1.75 + drop;
+      return `<path d="M${x} ${y}h${w}v0.75c0 0.55-${w * 0.25} 0.85-${w / 2} 0.85s-${w / 2}-0.3-${w / 2}-0.85Z" fill="${i % 2 ? '#171796' : '#0093DD'}" stroke="#fff" stroke-width="0.14"/>`;
+    })
+    .join('');
+  return `<clipPath id="flag-hr-shield"><path d="${shield}"/></clipPath>${crown}<path d="${shield}" fill="#fff"/>`
+    + `<g clip-path="url(#flag-hr-shield)">${cells}</g><path d="${shield}" fill="none" stroke="#FF0000" stroke-width="0.25"/>`;
 })();
 
 export const FLAGS = {
