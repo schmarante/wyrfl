@@ -139,7 +139,7 @@ function giftSkin() {
 }
 
 // ---- googly eyes ---------------------------------------------------------------------------------
-// Only eyes, and only on each cube's front face (towards the yellow edge – they turn away when the building turns) –
+// Only eyes, and only on one side face per cube (picked from its position – they turn away when the building turns) –
 // drawn in the shader, so every pupil can look at the pointer on its own: the scene passes the pointer as a point in
 // 3D (lookAt), each eye turns its pupil towards it. All other faces stay plain. Blinking: the scene swaps a
 // cube to the "closed" twin of its material for a moment.
@@ -150,13 +150,13 @@ const EYES_VERTEX = /* glsl */ `
   vEyeWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;
   vEyeNormal = normalize(mat3(modelMatrix) * objectNormal);
   vEyeCenter = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-  vEyeFront = objectNormal.z;   // eyes only on the cube's own front face (turns with the building)`;
+  vEyeFront = dot(objectNormal, EYE_DIR);   // eyes only on one face of the cube (turns with the building)`;
 
 const EYES_FRAGMENT = /* glsl */ `
   float eyeGlow = 0.0;   // the eye white glows a little so it reads as white on the shaded side faces
   {
     vec3 n = normalize(vEyeNormal);
-    if (vEyeFront > 0.5) {   // front face only
+    if (vEyeFront > 0.5) {   // the cube's eye face only
       vec3 u = normalize(cross(vec3(0.0, 1.0, 0.0), n));
       vec3 face = vEyeCenter + n * 0.5;
       vec3 rel = vEyeWorld - face;
@@ -187,9 +187,12 @@ const EYES_FRAGMENT = /* glsl */ `
     }
   }`;
 
-function eyeMaterial(color, closed, target) {
+// the face that gets the eyes: +z, +x, -z, -x (per cube, from its position)
+const EYE_FACES = ['vec3(0.0, 0.0, 1.0)', 'vec3(1.0, 0.0, 0.0)', 'vec3(0.0, 0.0, -1.0)', 'vec3(-1.0, 0.0, 0.0)'];
+
+function eyeMaterial(color, face, closed, target) {
   const material = lambert({ color });
-  if (closed) material.defines = { EYES_CLOSED: '' };
+  material.defines = { EYE_DIR: EYE_FACES[face], ...(closed ? { EYES_CLOSED: '' } : {}) };
   material.onBeforeCompile = shader => {
     shader.uniforms.uEyeTarget = target;   // shared object – one update moves every pupil
     shader.vertexShader = shader.vertexShader
@@ -200,18 +203,22 @@ function eyeMaterial(color, closed, target) {
       .replace('#include <color_fragment>', `#include <color_fragment>${EYES_FRAGMENT}`)
       .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\ntotalEmissiveRadiance += vec3(0.38) * eyeGlow;');
   };
-  material.customProgramCacheKey = () => (closed ? 'wyrfl-eyes-closed' : 'wyrfl-eyes');
+  material.customProgramCacheKey = () => `wyrfl-eyes-${face}-${closed ? 'closed' : 'open'}`;
   return material;
 }
 
 function eyesSkin() {
   const target = { value: new THREE.Vector3(10, 10, 10) };
-  const open = EYE_COLORS.map(color => eyeMaterial(color, false, target));
-  const closed = EYE_COLORS.map(color => eyeMaterial(color, true, target));
-  const closedOf = new Map(open.map((m, i) => [m, closed[i]]));
+  // per color × eye face one material, and its closed twin for blinking
+  const open = EYE_COLORS.map(color => EYE_FACES.map((_, face) => eyeMaterial(color, face, false, target)));
+  const closed = EYE_COLORS.map(color => EYE_FACES.map((_, face) => eyeMaterial(color, face, true, target)));
+  const closedOf = new Map(open.flatMap((row, c) => row.map((m, f) => [m, closed[c][f]])));
   const edge = edges(0x3b2412, 0.35);
   return {
-    material: (x, y, z) => open[cellHash(x, y, z) % open.length],
+    material: (x, y, z) => {
+      const h = cellHash(x, y, z);
+      return open[h % EYE_COLORS.length][(h >>> 5) % EYE_FACES.length];
+    },
     /** the same cube with closed eyes (the scene blinks a few cubes now and then) */
     blink: base => closedOf.get(base),
     /** point in world space the pupils look at (pointer / finger, or the camera when idle) */
@@ -220,7 +227,7 @@ function eyesSkin() {
     },
     edge,
     dispose() {
-      [...open, ...closed].forEach(m => m.dispose());
+      [...open.flat(), ...closed.flat()].forEach(m => m.dispose());
       edge.dispose();
     },
   };
