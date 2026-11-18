@@ -19,6 +19,7 @@ import { renderLevelBadge } from '../ui/level-picker.js';
 import { AVATARS, avatarImg } from './avatars.js';
 import { localePath, DEFAULT_LOCALE } from '../../i18n/index.js';
 import { setLiveLocale } from '../ui/live-locale.js';
+import { fireConfetti } from '../ui/confetti.js';
 import { secureGet, secureSet } from '../game/store.js';
 
 const AVATAR_KEY = 'wyrfl:duel-avatar';
@@ -340,6 +341,7 @@ export function startDuelApp(root, t) {
     renderResults();
     show('results');
     if (lastResult.winner === 'mine') {
+      setTimeout(fireConfetti, 200);   // the winner's device: a short paper confetti burst
       recordDuelWin();
       setTimeout(() => celebrateNewSkins(t), 900);   // first win: new cube style
     }
