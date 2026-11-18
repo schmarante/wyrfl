@@ -5,7 +5,8 @@
   },
   "home": {
     "dragHint": "Desliza el dedo sobre el edificio para girarlo. El borde amarillo es la parte delantera.",
-    "noWebgl": "Lo sentimos, tu navegador no puede mostrar gráficos 3D."
+    "noWebgl": "Lo sentimos, tu navegador no puede mostrar gráficos 3D.",
+    "claim": "Entrena tu visión espacial."
   },
   "views": {
     "top": "desde arriba",

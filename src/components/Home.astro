@@ -1,5 +1,6 @@
 ---
-// Start page: straight to the game modes.
+// Start page: hero (claim + turntable with buildings that assemble themselves, changing sizes) and the game modes –
+// side by side from tablet landscape / desktop on, below each other on phones.
 import { useTranslations, localePath } from '../i18n/index.js';
 import Icon from './Icon.astro';
 
@@ -13,20 +14,76 @@ const modes = [
   { id: 'build', path: 'build/', icon: 'build', tint: 'bg-front/20 text-front' },
   { id: 'duel', path: 'duel/', icon: 'duel', tint: 'bg-cube/15 text-cube' },
 ] as const;
+const side = 'lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] land:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]';
 ---
 
-<h1 class="sr-only">Wyrfl – {t('modes.title')}</h1>
-<ul class="mt-2 grid gap-3 sm:grid-cols-3">
-  {modes.map(mode => (
-    <li>
-      <a href={localePath(locale, mode.path)}
-         class="press flex h-full items-center gap-4 rounded-3xl border border-line bg-surface p-4 hover:border-cube sm:flex-col sm:items-start">
-        <span class:list={['grid h-14 w-14 shrink-0 place-items-center rounded-2xl', mode.tint]}><Icon name={mode.icon} /></span>
-        <span class="flex flex-col gap-1">
-          <span class="text-lg font-bold">{t(`modes.${mode.id}.title`)}</span>
-          <span class="text-sm text-muted">{t(`modes.${mode.id}.text`)}</span>
-        </span>
-      </a>
-    </li>
-  ))}
-</ul>
+<div class={`mt-1 grid gap-3 lg:gap-4 ${side}`}>
+  <section id="hero" class="relative overflow-hidden rounded-3xl border border-line bg-surface aspect-[6/5] sm:aspect-[16/10] lg:aspect-auto lg:min-h-[30rem] land:aspect-auto land:h-[calc(100dvh-5.5rem)]">
+    <canvas data-hero class="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing" aria-hidden="true"></canvas>
+    <h1 class="pointer-events-none absolute inset-x-4 top-3 text-2xl font-extrabold leading-tight sm:top-5 sm:text-3xl lg:inset-x-6 lg:text-4xl">
+      {t('home.claim')}
+    </h1>
+  </section>
+
+  <ul class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 lg:content-center land:grid-cols-1 land:content-center">
+    {modes.map(mode => (
+      <li>
+        <a href={localePath(locale, mode.path)}
+           class="press flex h-full items-center gap-4 rounded-3xl border border-line bg-surface p-4 hover:border-cube sm:flex-col sm:items-start lg:flex-row lg:items-center land:flex-row land:items-center lg:p-5">
+          <span class:list={['grid h-14 w-14 shrink-0 place-items-center rounded-2xl', mode.tint]}><Icon name={mode.icon} /></span>
+          <span class="flex flex-col gap-1">
+            <span class="text-lg font-bold">{t(`modes.${mode.id}.title`)}</span>
+            <span class="text-sm text-muted">{t(`modes.${mode.id}.text`)}</span>
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<script>
+  // Turntable: a building assembles itself, turns for a while, fades out – next one, sizes 3×3 … 6×6.
+  // Runs only while the hero is on screen; with "reduce motion" a single building just stands there.
+  import { generateStructure } from '../scripts/game/structure.js';
+
+  const LEVELS = ['easy', 'medium', 'hard', 'hardcore'];
+  const SPEED = 0.35;        // rad/s
+  const SHOW_FOR = 6500;     // ms per building
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-hero]')!;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const seed = () => Array.from(crypto.getRandomValues(new Uint32Array(2)), n => n.toString(36)).join('');
+
+  import('../scripts/game/scene.js')
+    .then(({ createCubeScene }) => {
+      const scene = createCubeScene(canvas, { frameFor: { size: 6, maxHeight: 5 } });
+      let index = Math.floor(Math.random() * LEVELS.length);
+      let timer = 0;
+      let visible = true;
+
+      const show = (first: boolean) =>
+        scene.setStructure(generateStructure(seed(), LEVELS[index++ % LEVELS.length]), { animate: !reduce, keepView: !first });
+      const next = async () => {
+        if (!visible) return;
+        await scene.clear();
+        if (!visible) return;
+        show(false);
+        timer = window.setTimeout(next, SHOW_FOR);
+      };
+
+      show(true);
+      if (reduce) return;
+      scene.setAutoRotate(SPEED);
+      timer = window.setTimeout(next, SHOW_FOR);
+
+      // pause off screen (battery): no frame loop, no new buildings
+      new IntersectionObserver(([entry]) => {
+        visible = entry.isIntersecting;
+        clearTimeout(timer);
+        scene.setAutoRotate(visible ? SPEED : 0);
+        if (visible) timer = window.setTimeout(next, SHOW_FOR / 2);
+      }).observe(canvas);
+    })
+    .catch(() => {
+      /* no WebGL: the hero just shows the claim */
+    });
+</script>

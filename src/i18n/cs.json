@@ -5,7 +5,8 @@
   },
   "home": {
     "dragHint": "Přejeď prstem po stavbě a otoč ji. Žlutý okraj je předek.",
-    "noWebgl": "Bohužel tvůj prohlížeč neumí zobrazit 3D grafiku."
+    "noWebgl": "Bohužel tvůj prohlížeč neumí zobrazit 3D grafiku.",
+    "claim": "Trénuj prostorovou představivost."
   },
   "views": {
     "top": "shora",

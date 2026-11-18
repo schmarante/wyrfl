@@ -5,7 +5,8 @@
   },
   "home": {
     "dragHint": "Fais glisser ton doigt sur le bâtiment pour le tourner. Le bord jaune est l’avant.",
-    "noWebgl": "Désolé, ton navigateur ne peut pas afficher de 3D."
+    "noWebgl": "Désolé, ton navigateur ne peut pas afficher de 3D.",
+    "claim": "Entraîne ta vision dans l’espace."
   },
   "views": {
     "top": "vu de dessus",

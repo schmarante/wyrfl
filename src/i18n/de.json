@@ -5,7 +5,8 @@
   },
   "home": {
     "dragHint": "Wische über das Gebäude, um es zu drehen. Der gelbe Rand ist vorne.",
-    "noWebgl": "Dein Browser kann leider keine 3D-Grafik anzeigen."
+    "noWebgl": "Dein Browser kann leider keine 3D-Grafik anzeigen.",
+    "claim": "Trainiere dein räumliches Denken."
   },
   "views": {
     "top": "von oben",

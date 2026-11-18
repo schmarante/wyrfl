@@ -49,9 +49,11 @@ const theme = () => (document.documentElement.dataset.theme === 'light' ? 'light
 
 /**
  * @param {HTMLCanvasElement} canvas
- * @param {{ editable?: boolean, marker?: boolean, onTap?: (column: { x: number, z: number }, tool: 'add' | 'remove') => void }} [options]
+ * @param {{ editable?: boolean, marker?: boolean, frameFor?: { size: number, maxHeight: number },
+ *           onTap?: (column: { x: number, z: number }, tool: 'add' | 'remove') => void }} [options]
+ *   frameFor: keep the camera frame for this grid (home page hero – buildings of different sizes look different in size)
  */
-export function createCubeScene(canvas, { editable = false, marker: withMarker = false, onTap } = {}) {
+export function createCubeScene(canvas, { editable = false, marker: withMarker = false, frameFor = null, onTap } = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
@@ -115,6 +117,8 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   let cameraAnimation = null;
   const tweens = new Set();
   let frame = 0;
+  let autoRotate = 0;   // rad/s – home page hero
+  let lastFrame = 0;
 
   const offset = () => (size - 1) / 2;
 
@@ -126,6 +130,9 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
 
   function loop(now) {
     frame = 0;
+    const dt = lastFrame ? Math.min(0.05, (now - lastFrame) / 1000) : 0;
+    lastFrame = now;
+    if (autoRotate && !gesture?.dragging) pivot.rotation.y += autoRotate * dt;
     for (const tw of tweens) {
       const t = Math.min(1, Math.max(0, (now - tw.start) / tw.duration));
       tw.step(t);
@@ -136,7 +143,8 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     }
     if (lightingDirty) refreshLighting();
     render();
-    if (tweens.size) frame = requestAnimationFrame(loop);
+    if (tweens.size || autoRotate) frame = requestAnimationFrame(loop);
+    else lastFrame = 0;
   }
   function addTween(tw) {
     tweens.add(tw);
@@ -280,12 +288,14 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
    *  vertically the iso projection of that cylinder – much less empty space than a bounding sphere. */
   function frame3d() {
     const side = markerView === 'front' || markerView === 'side';
-    const reach = Math.max((size / 2 + 0.25) * Math.SQRT2, side ? size / 2 + ARROW.gap + 0.15 : 0);
-    const top = maxHeight + (markerView === 'top' ? ARROW.top + 0.1 : 0.05);
+    const fs = frameFor?.size ?? size;
+    const fh = frameFor?.maxHeight ?? maxHeight;
+    const reach = Math.max((fs / 2 + 0.25) * Math.SQRT2, side ? fs / 2 + ARROW.gap + 0.15 : 0);
+    const top = fh + (markerView === 'top' ? ARROW.top + 0.1 : 0.05);
     const bottom = -0.12;
     target.set(0, (top + bottom) / 2, 0);
     halfWidth = reach;
-    halfHeight = Math.max(((top - bottom) / 2) * Math.cos(ISO_ELEVATION) + reach * Math.sin(ISO_ELEVATION), size / 2 + 0.4);
+    halfHeight = Math.max(((top - bottom) / 2) * Math.cos(ISO_ELEVATION) + reach * Math.sin(ISO_ELEVATION), fs / 2 + 0.4);
     fitCamera();
   }
 
@@ -582,8 +592,9 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   return {
     setGrid,
     setHeights,
-    /** Shows a structure ({ size, maxHeight, heights }) in the standard view; it assembles layer by layer. */
-    setStructure(structure, { animate = true } = {}) {
+    /** Shows a structure ({ size, maxHeight, heights }) in the standard view; it assembles layer by layer.
+     *  keepView: don't turn back to the standard view (hero: the turntable keeps turning). */
+    setStructure(structure, { animate = true, keepView = false } = {}) {
       if (cameraAnimation) cancelAnimationFrame(cameraAnimation.frame);
       cameraAnimation = null;
       finishTweens();
@@ -593,12 +604,24 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
         mesh.geometry.dispose();
       }
       cubeMap.clear();
-      camDir.copy(CAMERA_VIEWS.iso.dir);
-      camUp.copy(CAMERA_VIEWS.iso.up);
-      currentView = 'iso';
-      pivot.rotation.y = 0;
+      if (!keepView) {
+        camDir.copy(CAMERA_VIEWS.iso.dir);
+        camUp.copy(CAMERA_VIEWS.iso.up);
+        currentView = 'iso';
+        pivot.rotation.y = 0;
+      }
       setGrid(structure.size, structure.maxHeight);
       setHeights(structure.heights, { stagger: true, animate });
+    },
+    /** Fades all cubes out (they rise a little); resolves when they are gone. */
+    clear() {
+      setHeights(heights.map(row => row.map(() => 0)));
+      return new Promise(resolve => setTimeout(resolve, reducedMotion() ? 0 : FADE_OUT + 50));
+    },
+    /** Turntable: turns the building by `speed` rad/s (0 stops). Runs a frame loop – stop it when not visible. */
+    setAutoRotate(speed) {
+      autoRotate = speed;
+      if (speed && !frame) frame = requestAnimationFrame(loop);
     },
     lookFrom,
     get view() {
