@@ -6,8 +6,10 @@
 // - lookFrom('front' | 'side' | 'top' | 'iso') moves the camera straight onto a view (learning aid)
 // - setViewMarker(view) shows an arrow from the asked direction (View Guesser) – explains "from the right" without words
 // - follows the light/dark theme (window event 'wyrfl-theme')
+// - fake global illumination (lighting.js): voxel AO as vertex colors, soft shadows on and under the plate
 
 import * as THREE from 'three';
+import { cubeAO, plateShadow, dropShadow } from './lighting.js';
 
 const PALETTES = {
   dark: { plate: 0x2a3142, plateLine: 0x3b4458, marker: 0xeef1f7 },
@@ -66,7 +68,9 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
 
   const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
   const edgeGeometry = new THREE.EdgesGeometry(cubeGeometry);
-  const cubeMaterial = new THREE.MeshLambertMaterial({ color: COLORS.cube });
+  const cubeMaterial = new THREE.MeshLambertMaterial({ color: COLORS.cube, vertexColors: true });   // vertex colors = AO
+  const BOX_POS = cubeGeometry.attributes.position.array;
+  const BOX_NRM = cubeGeometry.attributes.normal.array;
   const edgeMaterial = new THREE.LineBasicMaterial({ color: COLORS.edge });
 
   const ghostMaterial = new THREE.MeshBasicMaterial({ color: COLORS.ghostAdd, transparent: true, opacity: 0.35, depthWrite: false });
@@ -94,6 +98,9 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   let heights = [];
   const cubeMap = new Map();   // "x,y,z" → mesh
   let plate = null;
+  let shadowTexture = null;   // plate shadow (alpha), rebuilt when the building changes
+  let dropTexture = null;
+  let lightingDirty = false;
   let tool = 'add';
   let markerView = null;
   let halfWidth = 1;    // half extents the camera has to show (rotation-safe around the vertical axis)
@@ -124,6 +131,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
         tw.done?.();
       }
     }
+    if (lightingDirty) refreshLighting();
     render();
     if (tweens.size) frame = requestAnimationFrame(loop);
   }
@@ -182,6 +190,78 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     const frontEdge = new THREE.Mesh(new THREE.BoxGeometry(size + 0.2, 0.12, 0.14), new THREE.MeshLambertMaterial({ color: COLORS.front }));
     frontEdge.position.set(0, -0.04, size / 2 + 0.17);
     base.add(plate, grid, frontEdge);
+
+    // soft shadows (fake GI): on the plate (updated with the building) and under the whole plate
+    const plateSize = size + 0.2;
+    shadowTexture?.dispose();
+    shadowTexture = alphaTexture(plateShadow(settledHeights(), plateSize));
+    const shadowPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(plateSize, plateSize),
+      new THREE.MeshBasicMaterial({ color: 0x000000, alphaMap: shadowTexture, transparent: true, depthWrite: false }),
+    );
+    shadowPlane.rotation.x = -Math.PI / 2;
+    shadowPlane.position.y = 0.004;
+    shadowPlane.name = 'plate-shadow';
+    dropTexture?.dispose();
+    const drop = dropShadow(plateSize);
+    dropTexture = alphaTexture(drop);
+    const dropPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(drop.total, drop.total),
+      new THREE.MeshBasicMaterial({ color: 0x000000, alphaMap: dropTexture, transparent: true, depthWrite: false, opacity: theme() === 'light' ? 0.22 : 0.5 }),
+    );
+    dropPlane.rotation.x = -Math.PI / 2;
+    dropPlane.position.set(0.12, -0.13, 0.12);
+    base.add(shadowPlane, dropPlane);
+  }
+
+  /** alpha values (0..1, row 0 = back) → texture for alphaMap (green channel) */
+  function alphaTexture({ alpha, width, height }) {
+    const data = new Uint8Array(width * height * 4);
+    for (let row = 0; row < height; row++) {
+      const src = (height - 1 - row) * width;   // texture row 0 = front (+z) after the plane is laid down
+      for (let x = 0; x < width; x++) {
+        const v = Math.round(alpha[src + x] * 255);
+        const i = (row * width + x) * 4;
+        data[i] = data[i + 1] = data[i + 2] = v;
+        data[i + 3] = 255;
+      }
+    }
+    const texture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat);
+    texture.magFilter = texture.minFilter = THREE.LinearFilter;
+    texture.needsUpdate = true;
+    return texture;
+  }
+
+  /** heights of the cubes that have landed (dropping ones don't cast shadows yet) */
+  function settledHeights() {
+    const h = Array.from({ length: size }, () => Array(size).fill(0));
+    for (const mesh of cubeMap.values()) {
+      if (mesh.userData.tween) continue;
+      const { x, y, z } = mesh.userData;
+      h[z][x] = Math.max(h[z][x], y + 1);
+    }
+    return h;
+  }
+
+  /** Recomputes AO of all cubes and the plate shadow from the landed cubes. */
+  function refreshLighting() {
+    lightingDirty = false;
+    const landed = new Set();
+    for (const [key, mesh] of cubeMap) if (!mesh.userData.tween) landed.add(key);
+    const occupied = (x, y, z) => y < 0 || landed.has(`${x},${y},${z}`);
+    for (const mesh of cubeMap.values()) {
+      const { x, y, z } = mesh.userData;
+      const colors = mesh.geometry.attributes.color;
+      cubeAO(occupied, x, y, z, BOX_POS, BOX_NRM, colors.array);
+      colors.needsUpdate = true;
+    }
+    const plane = base.getObjectByName('plate-shadow');
+    if (plane) {
+      shadowTexture.dispose();
+      shadowTexture = alphaTexture(plateShadow(settledHeights(), size + 0.2));
+      plane.material.alphaMap = shadowTexture;
+      plane.material.needsUpdate = true;
+    }
   }
 
   /** Grid size and height limit: rebuilds the base plate and fits the camera. */
@@ -208,7 +288,9 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
 
   /** A cube mesh; `fading` gives it its own transparent materials for a fade (switched back when done). */
   function makeCube(x, y, z, fading) {
-    const mesh = new THREE.Mesh(cubeGeometry, fading ? cubeMaterial.clone() : cubeMaterial);
+    const geometry = cubeGeometry.clone();   // own vertex colors for AO
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(BOX_POS.length).fill(1), 3));
+    const mesh = new THREE.Mesh(geometry, fading ? cubeMaterial.clone() : cubeMaterial);
     const lines = new THREE.LineSegments(edgeGeometry, fading ? edgeMaterial.clone() : edgeMaterial);
     if (fading) {
       mesh.material.transparent = lines.material.transparent = true;
@@ -250,6 +332,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       if (!motion) {
         if (mesh.userData.tween) tweens.delete(mesh.userData.tween);
         settle(mesh);
+        mesh.geometry.dispose();
         continue;
       }
       leaving.add(mesh);
@@ -271,6 +354,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
           leaving.remove(mesh);
           mesh.material.dispose();
           mesh.children[0].material.dispose();
+          mesh.geometry.dispose();
         },
       });
     }
@@ -297,10 +381,12 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
           mesh.position.y = yEnd;
           mesh.userData.tween = null;
           settle(mesh);
+          lightingDirty = true;   // landed: now it occludes and casts a shadow
         },
       });
     }
     ghost.visible = false;
+    refreshLighting();
     render();
   }
 
@@ -502,6 +588,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       for (const mesh of cubeMap.values()) {
         cubes.remove(mesh);
         settle(mesh);
+        mesh.geometry.dispose();
       }
       cubeMap.clear();
       camDir.copy(CAMERA_VIEWS.iso.dir);
@@ -544,6 +631,8 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       canvas.removeEventListener('pointerleave', onLeave);
       canvas.removeEventListener('contextmenu', onContextMenu);
       [base, cubes, leaving].forEach(disposeGroup);
+      shadowTexture?.dispose();
+      dropTexture?.dispose();
       [cubeGeometry, edgeGeometry, cubeMaterial, edgeMaterial, ghostMaterial, ghostEdges, markerMaterial, shaft.geometry, head.geometry].forEach(o => o.dispose());
       renderer.dispose();
     },

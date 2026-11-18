@@ -13,12 +13,12 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 const primary = 'press inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-cube px-6 text-lg font-bold text-white hover:brightness-110 disabled:opacity-40';
 const secondary = 'press inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-line px-5 text-sm font-semibold hover:bg-cube/40 disabled:opacity-40';
-const card = 'rounded-3xl border border-line bg-surface p-4 sm:p-6';
+const card = 'mx-auto w-full max-w-3xl rounded-3xl border border-line bg-surface p-4 sm:p-6';
 const qrBox = 'mx-auto aspect-square w-full max-w-72 overflow-hidden rounded-2xl bg-white p-2';
 ---
 
 <section id="duel" class="flex flex-col gap-4">
-  <p data-banner hidden class="rounded-2xl border border-front/60 bg-front/10 p-3 text-sm font-semibold" role="alert"></p>
+  <p data-banner hidden class="mx-auto w-full max-w-3xl rounded-2xl border border-front/60 bg-front/10 p-3 text-sm font-semibold" role="alert"></p>
 
   <!-- start -->
   <div data-screen="start" class={card}>
@@ -121,8 +121,9 @@ const qrBox = 'mx-auto aspect-square w-full max-w-72 overflow-hidden rounded-2xl
       <div data-my-bar class="h-1.5 flex-1 overflow-hidden rounded-full bg-line"><div class="h-full w-0 bg-cube transition-all"></div></div>
       <div data-their-bar class="h-1.5 flex-1 overflow-hidden rounded-full bg-line"><div class="h-full w-0 bg-front transition-all"></div></div>
     </div>
-    <GuessBoard locale={locale} />
-    <p data-wait hidden class="mt-2 text-center font-semibold text-muted" aria-live="polite"></p>
+    <GuessBoard locale={locale}>
+      <p data-wait hidden class="mt-2 text-center font-semibold text-muted" aria-live="polite"></p>
+    </GuessBoard>
   </div>
 
   <!-- results -->

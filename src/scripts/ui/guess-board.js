@@ -70,7 +70,7 @@ export function createGuessBoard(root, t, { onSolved } = {}) {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'press relative flex w-full flex-col items-center rounded-2xl border-2 border-line bg-bg/60 p-2 sm:p-3 hover:border-cube disabled:cursor-default';
-        button.innerHTML = `<span class="sr-only">${t('guess.option', { n: i + 1 })}</span><span data-grid class="grid w-full max-w-28 gap-0.5" aria-hidden="true"></span><span data-badge class="hidden"></span>`;
+        button.innerHTML = `<span class="sr-only">${t('guess.option', { n: i + 1 })}</span><span data-grid class="grid w-full max-w-28 gap-0.5 land:max-w-none" aria-hidden="true"></span><span data-badge class="hidden"></span>`;
         renderViewGrid(button.querySelector('[data-grid]'), option.grid);
         button.addEventListener('click', () => choose(i, button));
         li.append(button);

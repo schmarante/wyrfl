@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* tablet in landscape and up: answers beside the 3D view (one column), two columns when there is room */
+@custom-variant land (@media (min-width: 900px) and (orientation: landscape));
+@custom-variant land-wide (@media (min-width: 1280px) and (orientation: landscape));
+
 /* Dark mode is the default; colors come from these tokens. System fonts only – no external font requests. */
 @theme {
   --color-bg: #12151c;
