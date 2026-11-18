@@ -14,8 +14,12 @@ self.addEventListener('activate', event => {
   );
 });
 
+// the copy for the cache has to be made right away – once the page has read the response, it can't be cloned anymore
 const put = (request, response) => {
-  if (response.ok && response.type === 'basic') caches.open(CACHE).then(cache => cache.put(request, response.clone()));
+  if (response.ok && response.type === 'basic') {
+    const copy = response.clone();
+    caches.open(CACHE).then(cache => cache.put(request, copy));
+  }
   return response;
 };
 
