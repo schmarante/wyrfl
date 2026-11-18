@@ -3,7 +3,7 @@
 import { LEVELS, UNLOCK_AFTER, isUnlocked, solvedCount, lastLevel, setLastLevel } from '../game/progress.js';
 import { ICONS } from './icons.js';
 
-const CHIP = 'pointer-events-auto inline-flex items-center gap-0.5 rounded-full bg-surface/85 py-1 pl-1 pr-2.5 text-front shadow-sm backdrop-blur';
+const CHIP = 'pointer-events-auto inline-flex items-center gap-0 rounded-full bg-surface/85 py-1 pl-2 pr-2.5 text-front shadow-sm backdrop-blur';
 
 function label(t, level, extra = '') {
   return `<span class="ml-1 text-xs font-semibold text-text">${t(`levels.${level}`)}</span>${extra}`;
@@ -32,7 +32,7 @@ export function createLevelPicker(root, mode, t, onChange) {
       b.setAttribute('aria-pressed', String(level === current));
       b.setAttribute('aria-label', t(`levels.${level}`));
       b.title = unlocked ? t(`levels.${level}`) : t('level.locked', { count: UNLOCK_AFTER, level: t(`levels.${LEVELS[i - 1]}`) });
-      b.className = `press grid h-8 w-7 place-items-center ${unlocked ? '' : 'cursor-not-allowed opacity-35'}`;
+      b.className = `press grid h-8 w-5 place-items-center ${unlocked ? '' : 'cursor-not-allowed opacity-35'}`;
       b.innerHTML = i <= index ? ICONS.star : ICONS.starEmpty;
       b.addEventListener('click', () => {
         if (level === current) return;
@@ -63,7 +63,7 @@ export function createLevelPicker(root, mode, t, onChange) {
 /** Read-only stars (duel: the host picked the level). */
 export function renderLevelBadge(root, level, t) {
   const index = LEVELS.indexOf(level);
-  root.innerHTML = `<div class="${CHIP}" role="img" aria-label="${t(`levels.${level}`)}">${LEVELS.map((_, i) => `<span class="grid h-8 w-6 place-items-center">${i <= index ? ICONS.star : ICONS.starEmpty}</span>`).join('')}${label(t, level)}</div>`;
+  root.innerHTML = `<div class="${CHIP}" role="img" aria-label="${t(`levels.${level}`)}">${LEVELS.map((_, i) => `<span class="grid h-8 w-5 place-items-center">${i <= index ? ICONS.star : ICONS.starEmpty}</span>`).join('')}${label(t, level)}</div>`;
 }
 
 let urlSeed = typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('seed');

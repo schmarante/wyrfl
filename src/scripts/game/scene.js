@@ -12,13 +12,14 @@ import * as THREE from 'three';
 import { cubeAO, plateShadow, dropShadow } from './lighting.js';
 
 const PALETTES = {
-  dark: { plate: 0x2a3142, plateLine: 0x3b4458, marker: 0xeef1f7 },
-  light: { plate: 0xcfd6e3, plateLine: 0xb3bccc, marker: 0x151b27 },
+  dark: { plate: 0x2a3142, plateLine: 0x3b4458 },
+  light: { plate: 0xcfd6e3, plateLine: 0xb3bccc },
 };
 const COLORS = {
   cube: 0x4f8cff,
   edge: 0x0b1530,
   front: 0xffc53d,   // marks the front edge – same color as the "front" label in the UI
+  arrow: 0xffbf1f,   // direction arrow: yellow, lit (shaded like the cubes)
   ghostAdd: 0xffffff,
   ghostRemove: 0xff6b6b,
 };
@@ -29,7 +30,9 @@ const CAMERA_DISTANCE = 30;
 const DROP = { height: 1.6, duration: 320, layerDelay: 110, cellDelay: 28 };
 const FADE_OUT = 200;
 const ISO_ELEVATION = Math.asin(1 / Math.sqrt(3));   // 35.26° – camera height angle of the iso view
-const ARROW = { shaft: 0.8, head: 0.5, gap: 1.6 };    // arrow base this far outside the plate centre line (+ size/2)
+// direction arrow: base this far outside the plate edge (front/side, level, just above the ground – a tilted arrow
+// points into the screen in the iso view and looks stubby) or above the building (top)
+const ARROW = { shaft: 0.8, head: 0.5, gap: 1.9, top: 1.6, height: 0.45 };
 
 // camera direction (from target to camera) and up vector per view; iso = front (+z), right (+x) and top visible
 const CAMERA_VIEWS = {
@@ -81,12 +84,12 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   pivot.add(ghost);
 
   // arrow pointing at the building from the asked direction
-  const markerMaterial = new THREE.MeshBasicMaterial({ color: PALETTES[theme()].marker });
+  const markerMaterial = new THREE.MeshLambertMaterial({ color: COLORS.arrow, emissive: 0x3a2400 });   // lit → shaded, slight glow keeps it readable in shadow
   const marker = new THREE.Group();
   // built pointing down (-y) from the group origin = the arrow's base; rotated per view
-  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, ARROW.shaft, 12), markerMaterial);
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, ARROW.shaft, 24), markerMaterial);
   shaft.position.y = -ARROW.shaft / 2;
-  const head = new THREE.Mesh(new THREE.ConeGeometry(0.32, ARROW.head, 20), markerMaterial);
+  const head = new THREE.Mesh(new THREE.ConeGeometry(0.34, ARROW.head, 32), markerMaterial);
   head.rotation.x = Math.PI;
   head.position.y = -ARROW.shaft - ARROW.head / 2;
   marker.add(shaft, head);
@@ -278,7 +281,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   function frame3d() {
     const side = markerView === 'front' || markerView === 'side';
     const reach = Math.max((size / 2 + 0.25) * Math.SQRT2, side ? size / 2 + ARROW.gap + 0.15 : 0);
-    const top = maxHeight + (markerView === 'top' ? ARROW.gap + 0.1 : 0.05);
+    const top = maxHeight + (markerView === 'top' ? ARROW.top + 0.1 : 0.05);
     const bottom = -0.12;
     target.set(0, (top + bottom) / 2, 0);
     halfWidth = reach;
@@ -398,12 +401,12 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     const gap = size / 2 + ARROW.gap;   // arrow base; the tip ends just outside the plate
     marker.rotation.set(0, 0, 0);
     if (markerView === 'top') {
-      marker.position.set(0, maxHeight + ARROW.gap - 0.2, 0);   // pointing down (as built)
+      marker.position.set(0, maxHeight + ARROW.top - 0.2, 0);   // pointing down (as built)
     } else if (markerView === 'front') {
-      marker.position.set(0, maxHeight / 2, gap);
+      marker.position.set(0, ARROW.height, gap);
       marker.rotation.x = Math.PI / 2;   // -y → -z
     } else {
-      marker.position.set(gap, maxHeight / 2, 0);
+      marker.position.set(gap, ARROW.height, 0);
       marker.rotation.z = -Math.PI / 2;   // -y → -x
     }
   }
@@ -568,7 +571,6 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   canvas.addEventListener('contextmenu', onContextMenu);
 
   const onTheme = () => {
-    markerMaterial.color.setHex(PALETTES[theme()].marker);
     buildBase();
     render();
   };
