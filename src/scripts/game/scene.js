@@ -14,14 +14,13 @@ import { createSkin } from './skins.js';
 import { currentSkin } from './skin-pref.js';
 
 const PALETTES = {
-  dark: { plate: 0x2a3142, plateLine: 0x3b4458, ghost: 0xffffff },   // ghost: preview cube when building
-  light: { plate: 0xcfd6e3, plateLine: 0xb3bccc, ghost: 0x3a4150 },
+  // ghost: preview cube when building; front + arrow: the accent of the UI – yellow in the dark theme, blue in the light one
+  dark: { plate: 0x2a3142, plateLine: 0x3b4458, ghost: 0xffffff, front: 0xffc53d, arrow: 0xffbf1f, arrowGlow: 0x3a2400 },
+  light: { plate: 0xcfd6e3, plateLine: 0xb3bccc, ghost: 0x3a4150, front: 0x4f8cff, arrow: 0x3d7bf0, arrowGlow: 0x0a1c44 },
 };
 const COLORS = {
   cube: 0x4f8cff,
   edge: 0x0b1530,
-  front: 0xffc53d,   // marks the front edge – same color as the "front" label in the UI
-  arrow: 0xffbf1f,   // direction arrow: yellow, lit (shaded like the cubes)
   ghostRemove: 0xff6b6b,
 };
 
@@ -91,7 +90,8 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   pivot.add(ghost);
 
   // arrow pointing at the building from the asked direction
-  const markerMaterial = new THREE.MeshLambertMaterial({ color: COLORS.arrow, emissive: 0x3a2400 });   // lit → shaded, slight glow keeps it readable in shadow
+  // direction arrow: lit → shaded like the cubes, a slight glow keeps it readable in shadow; color follows the theme
+  const markerMaterial = new THREE.MeshLambertMaterial({ color: PALETTES[theme()].arrow, emissive: PALETTES[theme()].arrowGlow });
   const marker = new THREE.Group();
   // built pointing down (-y) from the group origin = the arrow's base; rotated per view
   const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, ARROW.shaft, 24), markerMaterial);
@@ -204,7 +204,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     plate.position.y = -0.05;
     const grid = new THREE.GridHelper(size, size, palette.plateLine, palette.plateLine);
     grid.position.y = 0.002;
-    const frontEdge = new THREE.Mesh(new THREE.BoxGeometry(size + 0.2, 0.12, 0.14), new THREE.MeshLambertMaterial({ color: COLORS.front }));
+    const frontEdge = new THREE.Mesh(new THREE.BoxGeometry(size + 0.2, 0.12, 0.14), new THREE.MeshLambertMaterial({ color: palette.front }));
     frontEdge.position.set(0, -0.04, size / 2 + 0.17);
     base.add(plate, grid, frontEdge);
 
@@ -681,6 +681,8 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   eyesLookAtViewer();
 
   const onTheme = () => {
+    markerMaterial.color.setHex(PALETTES[theme()].arrow);
+    markerMaterial.emissive.setHex(PALETTES[theme()].arrowGlow);
     buildBase();
     ghostEdges.color.setHex(PALETTES[theme()].ghost);
     ghostMaterial.color.setHex(PALETTES[theme()].ghost);
