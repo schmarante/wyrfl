@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import { createHash } from 'node:crypto';
+import { execSync } from 'node:child_process';
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -43,6 +44,22 @@ function serviceWorker() {
 const inDdev = process.env.IS_DDEV_PROJECT === 'true';
 
 // https://astro.build/config
+// App version ("About"), like ../rindr: major.minor from package.json (raised by hand), patch = number of git commits –
+// counts up with every commit, the same commit always gives the same version, nothing is written back. "-dev": built
+// with uncommitted changes. Without git (source archive): package.json as it is. CI needs the full history
+// (fetch-depth: 0 in .github/workflows/static.yml – a shallow clone counts 1).
+function appVersion() {
+  const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
+  const git = args => execSync(`git ${args}`, { cwd: fileURLToPath(new URL('.', import.meta.url)), stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+  try {
+    const commits = git('rev-list --count HEAD');
+    const dirty = git('status --porcelain') !== '';
+    return `${version.split('.').slice(0, 2).join('.')}.${commits}${dirty ? '-dev' : ''}`;
+  } catch {
+    return version;
+  }
+}
+
 export default defineConfig({
   output: 'static',
   outDir: './dist',
@@ -62,6 +79,7 @@ export default defineConfig({
   },
   vite: {
     plugins: [tailwindcss()],
+    define: { __APP_VERSION__: JSON.stringify(appVersion()) },
     server: inDdev ? { hmr: { protocol: 'wss', clientPort: 4321 } } : {},
     // flags always as their own files (not inlined as data URI): loaded only when shown, cached like every file
     build: { assetsInlineLimit: file => (file.includes('flag-icons') ? false : undefined) },

@@ -2,7 +2,6 @@
 import { useTranslations } from '../i18n/index.js';
 import { RUNTIME, ASSETS, BUILD, ABOUT } from '../data/credits.js';
 import { ICONS } from '../scripts/ui/icons.js';
-import pkg from '../../package.json';
 
 interface Props {
   locale: string;
@@ -24,7 +23,7 @@ const groups = [
   <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
     <dt class="text-muted">{t('about.author')}</dt><dd>{ABOUT.author}</dd>
     <dt class="text-muted">{t('about.email')}</dt><dd><a href={`mailto:${ABOUT.email}`} class="text-link underline-offset-2 hover:underline">{ABOUT.email}</a></dd>
-    <dt class="text-muted">{t('about.version')}</dt><dd>{pkg.version}</dd>
+    <dt class="text-muted">{t('about.version')}</dt><dd>{__APP_VERSION__}</dd>
   </dl>
   <p class="font-semibold"><Fragment set:html={t('about.madeWith').replace('{heart}', ICONS.heart)} /></p>
   <p class="text-muted">{t('about.openSource')}</p>
