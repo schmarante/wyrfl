@@ -20,10 +20,11 @@ const iconButton = 'press grid h-12 w-12 shrink-0 place-items-center rounded-ful
     {VIEWS.map(view => (
       <li>
         <button type="button" data-plan={view} aria-pressed="false"
-                class="press flex h-full w-full flex-col items-center gap-1.5 rounded-2xl border-2 border-line bg-bg/60 p-2 hover:border-cube aria-pressed:border-cube">
+                class="press relative flex h-full w-full flex-col items-center gap-1.5 rounded-2xl border-2 border-line bg-bg/60 p-2 hover:border-cube aria-pressed:bg-cube/20">
           <span data-grid class="grid w-full max-w-24 gap-0.5" aria-hidden="true"></span>
           <span class:list={['text-xs font-semibold sm:text-sm', view === 'front' ? 'text-front' : 'text-muted']}>{t(`views.${view}`)}</span>
-          <span data-status class="hidden text-xs"></span>
+          <span data-status class="sr-only"></span>
+          <span data-badge hidden aria-hidden="true"></span>
         </button>
       </li>
     ))}
@@ -118,9 +119,14 @@ const iconButton = 'press grid h-12 w-12 shrink-0 place-items-center rounded-ful
         fill: view === 'front' ? 'front' : 'cube',
         marks: checked && !ok ? diffView(want, have) : null,
       });
-      const status = button.querySelector<HTMLElement>('[data-status]')!;
-      status.textContent = checked ? (ok ? `✓ ${t('build.ok')}` : `✗ ${t('build.notOk')}`) : '';
-      status.className = checked ? `text-xs ${ok ? 'text-front' : 'text-text'}` : 'hidden text-xs';
+      // after a check: matching plans get a yellow outline + ✓ badge, the others a ✗ badge (like the View Guesser)
+      button.querySelector<HTMLElement>('[data-status]')!.textContent = checked ? t(ok ? 'build.ok' : 'build.notOk') : '';
+      button.classList.toggle('border-front', checked && ok);
+      button.classList.toggle('border-line', !(checked && ok));
+      const badge = button.querySelector<HTMLElement>('[data-badge]')!;
+      badge.hidden = !checked;
+      badge.textContent = ok ? '✓' : '✗';
+      badge.className = `absolute -right-2.5 -top-2.5 grid h-6 w-6 place-items-center rounded-full text-xs font-bold shadow-sm ring-2 ring-surface ${ok ? 'bg-front text-bg' : 'bg-line text-text'}`;
     }
   }
 

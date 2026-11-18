@@ -50,7 +50,7 @@ export function createGuessBoard(root, t, { onSolved } = {}) {
   function badge(button, ok) {
     const b = button.querySelector('[data-badge]');
     b.textContent = ok ? '✓' : '✗';
-    b.className = `absolute -right-1 -top-1 grid h-7 w-7 place-items-center rounded-full text-sm font-bold ${ok ? 'bg-front text-bg' : 'bg-line text-text'}`;
+    b.className = `absolute -right-2.5 -top-2.5 grid h-6 w-6 place-items-center rounded-full text-xs font-bold shadow-sm ring-2 ring-surface ${ok ? 'bg-front text-bg' : 'bg-line text-text'}`;
   }
 
   function show(next) {
