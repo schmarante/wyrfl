@@ -318,7 +318,7 @@ function galaxySkin() {
 // ---- skyscrapers ----------------------------------------------------------------------------------
 // Every column is one building (facade + window layout picked from its position), every cube a floor, a flat roof on
 // top. Dark theme: windows glow (emissive map) – each floor lit differently: warm and cool light, TV glow, half-closed
-// blinds, slatted blinds, some floors nearly dark, some nearly all lit. Light theme: dark glass.
+// blinds, slatted blinds, some floors nearly dark, some nearly all lit – no people in the windows. Light theme: dark glass.
 
 const grid = (cols, rows, x0, y0, w, h, gx, gy) => {
   const out = [];
@@ -389,15 +389,7 @@ function citySkin() {
     } else if (kind < 0.37) {   // slatted blinds
       for (let yy = y; yy < y + h; yy += 3) ctx.fillRect(x, yy, w, 1.6);
     } else {
-      ctx.fillRect(x, y, w, h);
-      if (rng() < 0.25) {   // someone at home: a dark silhouette
-        ctx.fillStyle = '#000';
-        const cx = x + w * (0.3 + rng() * 0.4);
-        ctx.beginPath();
-        ctx.arc(cx, y + h * 0.55, Math.min(w, h) * 0.16, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillRect(cx - Math.min(w, h) * 0.22, y + h * 0.68, Math.min(w, h) * 0.44, h * 0.32);
-      }
+      ctx.fillRect(x, y, w, h);   // no people in the windows (user's decision)
     }
   };
   const lightMaps = FACADES.map(f => Array.from({ length: 6 }, () => tex((ctx, s) => {
