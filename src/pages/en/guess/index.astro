@@ -1,0 +1,9 @@
+---
+import Base from '../../../layouts/Base.astro';
+import GuessGame from '../../../components/GuessGame.astro';
+import { useTranslations } from '../../../i18n/index.js';
+---
+
+<Base locale="en" page="guess/" title={useTranslations('en')('modes.guess.title')}>
+  <GuessGame locale="en" />
+</Base>

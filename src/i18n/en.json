@@ -20,14 +20,25 @@
     "side": "from the right"
   },
   "modes": {
-    "guess": { "title": "Guess the view", "text": "Which picture shows the building from the front? Find the right one out of six." },
-    "build": { "title": "Build it", "text": "You get three blueprints – place the cubes so everything fits." },
-    "timeAttack": { "title": "Time Attack", "text": "As many puzzles as you can – against the clock. Only if you're in the mood." }
+    "guess": {
+      "title": "Guess the view",
+      "text": "Which picture shows the building from the front? Find the right one out of six."
+    },
+    "build": {
+      "title": "Build it",
+      "text": "You get three blueprints – place the cubes so everything fits."
+    },
+    "timeAttack": {
+      "title": "Time Attack",
+      "text": "As many puzzles as you can – against the clock. Only if you're in the mood."
+    }
   },
   "nav": {
     "about": "About Wyrfl",
     "home": "Play",
-    "language": "Deutsch"
+    "language": "Deutsch",
+    "guess": "Guess the view",
+    "build": "Build it"
   },
   "about": {
     "title": "About Wyrfl",
@@ -46,5 +57,63 @@
       "tailwindcss": "Styling (CSS)",
       "vitest": "Automated tests of the game logic"
     }
+  },
+  "levels": {
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard",
+    "hardcore": "Hardcore"
+  },
+  "level": {
+    "label": "Difficulty",
+    "solved": "Solved: {count}",
+    "toUnlock": "{count} more to unlock “{level}”",
+    "locked": "Solve {count} puzzles in “{level}” to open this one.",
+    "unlocked": "Unlocked: “{level}”!"
+  },
+  "game": {
+    "next": "Next puzzle",
+    "back": "Back to overview",
+    "play": "Play",
+    "loading": "Loading 3D …"
+  },
+  "guess": {
+    "question": "What does the building look like {view}?",
+    "sideNote": "“From the right” means: you stand at the front and walk around the building to the right.",
+    "option": "Answer {n}",
+    "correct": "Exactly! That’s how it looks {view}.",
+    "tryAgain": "Not yet – give it another try!",
+    "hint": "Show me",
+    "hintDone": "Look: this is the building {view}. Which picture matches?",
+    "backToIso": "Tilted view",
+    "why": {
+      "fromBack": "That’s mirrored – it’s the building seen from the back.",
+      "fromLeft": "That’s mirrored – it’s the building seen from the left.",
+      "isSide": "That’s the view from the right, not from the front.",
+      "isFront": "That’s the view from the front, not from the right.",
+      "otherSide": "That’s the view from a different side.",
+      "rotated": "That’s turned around. Seen from the top, the front (yellow edge) is always at the bottom.",
+      "mirrorTop": "That’s mirrored – left and right are swapped.",
+      "flipped": "Front and back are swapped. Seen from the top, the front is always at the bottom.",
+      "nearMiss": "So close! Take another look at the marked squares."
+    }
+  },
+  "build": {
+    "intro": "Build a building that matches all three blueprints. Tap a blueprint to see your building from that direction.",
+    "plans": "Blueprints",
+    "add": "Build",
+    "remove": "Remove",
+    "undo": "Undo",
+    "clear": "Clear all",
+    "check": "Check",
+    "cubes": "{count} cubes",
+    "tapHint": "Tap a square or a cube. Swipe to turn the building.",
+    "full": "Can’t go higher – at most {max} cubes on top of each other.",
+    "ok": "matches",
+    "notOk": "not yet",
+    "success": "Great! Your building matches all three blueprints.",
+    "successNote": "By the way: there is often more than one right answer.",
+    "almost": "Almost! The dashed squares don’t match yet.",
+    "empty": "Put a few cubes on the board first."
   }
 }

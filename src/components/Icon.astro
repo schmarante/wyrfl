@@ -1,0 +1,9 @@
+---
+import { ICONS } from '../scripts/ui/icons.js';
+
+interface Props {
+  name: keyof typeof ICONS;
+}
+---
+
+<Fragment set:html={ICONS[Astro.props.name]} />

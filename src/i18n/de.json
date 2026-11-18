@@ -20,14 +20,25 @@
     "side": "von rechts"
   },
   "modes": {
-    "guess": { "title": "Ansichten raten", "text": "Welches Bild zeigt das Gebäude von vorne? Finde das richtige von sechs." },
-    "build": { "title": "Nachbauen", "text": "Du siehst drei Baupläne – stell die Würfel so hin, dass alles passt." },
-    "timeAttack": { "title": "Zeit-Rennen", "text": "So viele Rätsel wie möglich – gegen die Uhr. Nur wenn du Lust drauf hast." }
+    "guess": {
+      "title": "Ansichten raten",
+      "text": "Welches Bild zeigt das Gebäude von vorne? Finde das richtige von sechs."
+    },
+    "build": {
+      "title": "Nachbauen",
+      "text": "Du siehst drei Baupläne – stell die Würfel so hin, dass alles passt."
+    },
+    "timeAttack": {
+      "title": "Zeit-Rennen",
+      "text": "So viele Rätsel wie möglich – gegen die Uhr. Nur wenn du Lust drauf hast."
+    }
   },
   "nav": {
     "about": "Über Wyrfl",
     "home": "Zum Spiel",
-    "language": "English"
+    "language": "English",
+    "guess": "Ansichten raten",
+    "build": "Nachbauen"
   },
   "about": {
     "title": "Über Wyrfl",
@@ -46,5 +57,63 @@
       "tailwindcss": "Gestaltung (CSS)",
       "vitest": "Automatische Tests der Spiellogik"
     }
+  },
+  "levels": {
+    "easy": "Leicht",
+    "medium": "Mittel",
+    "hard": "Schwer",
+    "hardcore": "Profi"
+  },
+  "level": {
+    "label": "Schwierigkeit",
+    "solved": "Gelöst: {count}",
+    "toUnlock": "noch {count} bis „{level}“",
+    "locked": "Löse {count} Rätsel in „{level}“, dann geht’s hier weiter.",
+    "unlocked": "Neu freigeschaltet: „{level}“!"
+  },
+  "game": {
+    "next": "Nächstes Rätsel",
+    "back": "Zur Übersicht",
+    "play": "Spielen",
+    "loading": "3D wird geladen …"
+  },
+  "guess": {
+    "question": "Wie sieht das Gebäude {view} aus?",
+    "sideNote": "„Von rechts“ heißt: Du stehst vorne und gehst nach rechts um das Gebäude herum.",
+    "option": "Antwort {n}",
+    "correct": "Genau! So sieht es {view} aus.",
+    "tryAgain": "Noch nicht – probier’s noch mal!",
+    "hint": "Zeig’s mir",
+    "hintDone": "Schau: So siehst du das Gebäude {view}. Welches Bild passt?",
+    "backToIso": "Schräg ansehen",
+    "why": {
+      "fromBack": "Das ist gespiegelt – so sieht das Gebäude von hinten aus.",
+      "fromLeft": "Das ist gespiegelt – so sieht das Gebäude von links aus.",
+      "isSide": "Das ist die Ansicht von rechts, nicht von vorne.",
+      "isFront": "Das ist die Ansicht von vorne, nicht von rechts.",
+      "otherSide": "Das ist die Ansicht von einer anderen Seite.",
+      "rotated": "Das ist verdreht. Von oben gesehen ist vorne (der gelbe Rand) immer unten.",
+      "mirrorTop": "Das ist gespiegelt – links und rechts sind vertauscht.",
+      "flipped": "Vorne und hinten sind vertauscht. Von oben gesehen ist vorne immer unten.",
+      "nearMiss": "Ganz knapp! Schau dir die markierten Kästchen noch mal genau an."
+    }
+  },
+  "build": {
+    "intro": "Baue ein Gebäude, das zu allen drei Plänen passt. Tippe auf einen Plan, um dein Gebäude aus dieser Richtung zu sehen.",
+    "plans": "Baupläne",
+    "add": "Bauen",
+    "remove": "Wegnehmen",
+    "undo": "Rückgängig",
+    "clear": "Alles weg",
+    "check": "Prüfen",
+    "cubes": "{count} Würfel",
+    "tapHint": "Tippe auf ein Feld oder einen Würfel. Wischen dreht das Gebäude.",
+    "full": "Höher geht’s nicht – höchstens {max} Würfel übereinander.",
+    "ok": "passt",
+    "notOk": "noch nicht",
+    "success": "Super! Dein Gebäude passt zu allen drei Plänen.",
+    "successNote": "Übrigens: Oft gibt es mehrere richtige Lösungen.",
+    "almost": "Fast! Die gestrichelten Kästchen passen noch nicht.",
+    "empty": "Stell zuerst ein paar Würfel auf die Platte."
   }
 }

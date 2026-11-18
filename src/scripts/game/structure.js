@@ -55,6 +55,16 @@ export function viewsEqual(a, b) {
   return a.length === b.length && a.every((row, r) => row.length === b[r].length && row.every((v, c) => v === b[r][c]));
 }
 
+/** Cells where two views of the same size differ (true = differs). */
+export function diffView(a, b) {
+  return a.map((row, r) => row.map((v, c) => v !== b[r][c]));
+}
+
+/** Empty structure (Builder start). */
+export function emptyStructure(size, maxHeight) {
+  return { size, maxHeight, heights: Array.from({ length: size }, () => Array(size).fill(0)) };
+}
+
 /** True if `candidate` has exactly the same top, front and side views as `target` (Builder check). */
 export function matchesViews(candidate, target) {
   return VIEWS.every(v => viewsEqual(computeView(candidate, v), computeView(target, v)));

@@ -1,0 +1,14 @@
+---
+import { useTranslations } from '../i18n/index.js';
+
+interface Props {
+  locale: 'de' | 'en';
+}
+const t = useTranslations(Astro.props.locale);
+---
+
+<div data-level-picker class="flex flex-col gap-2">
+  <span class="sr-only">{t('level.label')}</span>
+  <div data-levels class="flex gap-2" role="group" aria-label={t('level.label')}></div>
+  <p data-level-status class="min-h-5 text-sm text-muted" aria-live="polite"></p>
+</div>

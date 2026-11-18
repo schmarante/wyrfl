@@ -1,6 +1,6 @@
 ---
 // Start page: today's Wyrfl as a 3D preview with its three views, plus the upcoming game modes.
-import { useTranslations } from '../i18n/index.js';
+import { useTranslations, localePath } from '../i18n/index.js';
 import { VIEWS } from '../scripts/game/structure.js';
 
 interface Props {
@@ -9,6 +9,7 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 const modes = ['guess', 'build', 'timeAttack'];
+const playable: Record<string, string> = { guess: 'guess/', build: 'build/' };
 ---
 
 <section class="flex flex-col gap-6">
@@ -49,13 +50,24 @@ const modes = ['guess', 'build', 'timeAttack'];
   <section>
     <h2 class="mb-3 text-lg font-bold">{t('home.modesTitle')}</h2>
     <ul class="grid gap-3 sm:grid-cols-3">
-      {modes.map(mode => (
-        <li class="flex flex-col gap-2 rounded-2xl border border-line bg-surface p-4 opacity-80">
-          <span class="font-bold">{t(`modes.${mode}.title`)}</span>
-          <span class="text-sm text-muted">{t(`modes.${mode}.text`)}</span>
-          <span class="mt-auto self-start rounded-full bg-line px-3 py-1 text-xs text-muted">{t('home.comingSoon')}</span>
-        </li>
-      ))}
+      {modes.map(mode => {
+        const ready = mode in playable;
+        const Tag = ready ? 'a' : 'div';
+        return (
+          <li>
+            <Tag href={ready ? localePath(locale, playable[mode]) : undefined}
+                 class:list={['flex h-full flex-col gap-2 rounded-2xl border border-line bg-surface p-4',
+                              ready ? 'press hover:border-cube' : 'opacity-70']}>
+              <span class="font-bold">{t(`modes.${mode}.title`)}</span>
+              <span class="text-sm text-muted">{t(`modes.${mode}.text`)}</span>
+              <span class:list={['mt-auto self-start rounded-full px-3 py-1 text-xs',
+                                 ready ? 'bg-cube font-semibold text-white' : 'bg-line text-muted']}>
+                {ready ? `${t('game.play')} →` : t('home.comingSoon')}
+              </span>
+            </Tag>
+          </li>
+        );
+      })}
     </ul>
   </section>
 </section>
@@ -63,6 +75,7 @@ const modes = ['guess', 'build', 'timeAttack'];
 <script>
   import { dailyDate, puzzleNumber } from '../scripts/game/rng.js';
   import { generateStructure, computeView, cubeCount, VIEWS } from '../scripts/game/structure.js';
+  import { renderViewGrid } from '../scripts/ui/view-grid.js';
 
   const root = document.getElementById('daily')!;
   const date = dailyDate();
@@ -73,14 +86,9 @@ const modes = ['guess', 'build', 'timeAttack'];
 
   // 2D views as small CSS grids
   for (const view of VIEWS) {
-    const grid = computeView(structure, view);
-    const el = root.querySelector<HTMLElement>(`[data-view="${view}"]`)!;
-    el.style.gridTemplateColumns = `repeat(${grid[0].length}, 1fr)`;
-    el.replaceChildren(...grid.flat().map(filled => {
-      const cell = document.createElement('span');
-      cell.className = `aspect-square rounded-[3px] ${filled ? (view === 'front' ? 'bg-front' : 'bg-cube') : 'bg-line/50'}`;
-      return cell;
-    }));
+    renderViewGrid(root.querySelector<HTMLElement>(`[data-view="${view}"]`)!, computeView(structure, view), {
+      fill: view === 'front' ? 'front' : 'cube',
+    });
   }
 
   // 3D view – three.js is loaded only here

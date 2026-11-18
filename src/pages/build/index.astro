@@ -1,0 +1,9 @@
+---
+import Base from '../../layouts/Base.astro';
+import BuildGame from '../../components/BuildGame.astro';
+import { useTranslations } from '../../i18n/index.js';
+---
+
+<Base locale="de" page="build/" title={useTranslations('de')('modes.build.title')}>
+  <BuildGame locale="de" />
+</Base>

@@ -1,0 +1,180 @@
+---
+// Mode A – View Guesser: a 3D building, one asked view, six pictures to choose from.
+import { useTranslations } from '../i18n/index.js';
+import LevelPicker from './LevelPicker.astro';
+import Icon from './Icon.astro';
+
+interface Props {
+  locale: 'de' | 'en';
+}
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<section id="guess" class="flex flex-col gap-4">
+  <LevelPicker locale={locale} />
+
+  <div class="rounded-3xl border border-line bg-surface p-4 sm:p-6">
+    <h1 data-question class="text-xl font-bold">&nbsp;</h1>
+    <p data-side-note hidden class="mt-1 text-sm text-muted">{t('guess.sideNote')}</p>
+
+    <div class="relative mt-3 aspect-square w-full sm:aspect-[4/3]">
+      <canvas data-canvas class="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing" role="img"
+              aria-label={t('home.dragHint')}></canvas>
+      <p data-loading class="absolute inset-0 grid place-items-center text-muted">{t('game.loading')}</p>
+    </div>
+
+    <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+      <p class="text-sm text-muted">{t('home.dragHint')}</p>
+      <div class="flex gap-2">
+        <button type="button" data-iso hidden class="press min-h-11 rounded-full bg-line px-4 text-sm font-semibold hover:bg-cube/40">
+          {t('guess.backToIso')}
+        </button>
+        <button type="button" data-hint disabled
+                class="press inline-flex min-h-11 items-center gap-1.5 rounded-full bg-line px-4 text-sm font-semibold hover:bg-cube/40 disabled:cursor-not-allowed disabled:opacity-40">
+          <Icon name="bulb" /> {t('guess.hint')}
+        </button>
+      </div>
+    </div>
+
+    <ul data-options class="mt-4 grid grid-cols-3 gap-2 sm:gap-3"></ul>
+
+    <p data-feedback class="mt-4 min-h-12 rounded-2xl px-1 text-base font-semibold" aria-live="polite"></p>
+
+    <button type="button" data-next hidden
+            class="press mt-2 min-h-12 w-full rounded-full bg-cube px-6 text-lg font-bold text-white hover:brightness-110">
+      {t('game.next')} →
+    </button>
+  </div>
+</section>
+
+<script>
+  import { useTranslations } from '../i18n/index.js';
+  import { createGuessPuzzle } from '../scripts/game/guess.js';
+  import { computeView, diffView } from '../scripts/game/structure.js';
+  import { recordSolved } from '../scripts/game/progress.js';
+  import { renderViewGrid } from '../scripts/ui/view-grid.js';
+  import { createLevelPicker, practiceSeed } from '../scripts/ui/level-picker.js';
+
+  const MODE = 'guess';
+  const t = useTranslations(document.documentElement.lang);
+  const root = document.getElementById('guess')!;
+  const $ = <T extends HTMLElement = HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+
+  const canvas = $<HTMLCanvasElement>('[data-canvas]');
+  const options = $('[data-options]');
+  const feedback = $('[data-feedback]');
+  const hintButton = $<HTMLButtonElement>('[data-hint]');
+  const isoButton = $<HTMLButtonElement>('[data-iso]');
+  const nextButton = $<HTMLButtonElement>('[data-next]');
+
+  type Scene = Awaited<ReturnType<typeof loadScene>>;
+  let scene: Scene | null = null;
+  let puzzle: ReturnType<typeof createGuessPuzzle>;
+  let solved = false;
+
+  async function loadScene() {
+    const { createCubeScene } = await import('../scripts/game/scene.js');
+    return createCubeScene(canvas);
+  }
+
+  const picker = createLevelPicker($('[data-level-picker]'), MODE, t, () => newPuzzle());
+
+  function say(text: string, tone: 'good' | 'info' = 'info') {
+    feedback.textContent = text;
+    feedback.classList.toggle('text-front', tone === 'good');
+    feedback.classList.remove('pop');
+    if (tone === 'good') {
+      void feedback.offsetWidth;   // restart the animation
+      feedback.classList.add('pop');
+    }
+  }
+
+  function newPuzzle() {
+    puzzle = createGuessPuzzle(practiceSeed(), picker.level);
+    solved = false;
+    const view = t(`views.${puzzle.view}`);
+    $('[data-question]').textContent = t('guess.question', { view });
+    $('[data-side-note]').hidden = puzzle.view !== 'side';
+    hintButton.disabled = true;
+    isoButton.hidden = true;
+    nextButton.hidden = true;
+    say('');
+    scene?.setStructure(puzzle.structure);
+
+    options.replaceChildren(
+      ...puzzle.options.map((option, i) => {
+        const li = document.createElement('li');
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'press relative flex w-full flex-col items-center rounded-2xl border-2 border-line bg-bg/60 p-2 sm:p-3 hover:border-cube disabled:cursor-default';
+        button.innerHTML = `<span class="sr-only">${t('guess.option', { n: i + 1 })}</span><span data-grid class="grid w-full max-w-28 gap-0.5" aria-hidden="true"></span><span data-badge class="absolute -right-1 -top-1 hidden h-7 w-7 place-items-center rounded-full text-sm font-bold"></span>`;
+        renderViewGrid(button.querySelector('[data-grid]')!, option.grid);
+        button.addEventListener('click', () => choose(i, button));
+        li.append(button);
+        return li;
+      }),
+    );
+  }
+
+  function badge(button: HTMLElement, ok: boolean) {
+    const b = button.querySelector<HTMLElement>('[data-badge]')!;
+    b.textContent = ok ? '✓' : '✗';
+    b.className = `absolute -right-1 -top-1 grid h-7 w-7 place-items-center rounded-full text-sm font-bold ${ok ? 'bg-front text-bg' : 'bg-line text-text'}`;
+  }
+
+  function choose(index: number, button: HTMLButtonElement) {
+    if (solved) return;
+    const option = puzzle.options[index];
+    const view = t(`views.${puzzle.view}`);
+
+    if (option.correct) {
+      solved = true;
+      badge(button, true);
+      button.classList.replace('border-line', 'border-front');
+      options.querySelectorAll('button').forEach(b => {
+        b.disabled = true;
+        if (b !== button) b.classList.add('opacity-50');
+      });
+      const unlocked = recordSolved(MODE, picker.level);
+      picker.refresh();
+      say(t('guess.correct', { view }) + (unlocked ? ' ★ ' + t('level.unlocked', { level: t(`levels.${unlocked}`) }) : ''), 'good');
+      hintButton.disabled = true;
+      isoButton.hidden = false;
+      // show the answer in 3D: the camera moves straight onto the asked view
+      scene?.lookFrom(puzzle.view);
+      nextButton.hidden = false;
+      nextButton.focus({ preventScroll: true });
+      return;
+    }
+
+    // wrong: explain why, mark the cells that differ, let them try again (+ offer the hint)
+    button.disabled = true;
+    button.classList.add('opacity-60');
+    badge(button, false);
+    const correct = computeView(puzzle.structure, puzzle.view);
+    renderViewGrid(button.querySelector('[data-grid]')!, option.grid, { marks: diffView(option.grid, correct) });
+    say(`${t('guess.tryAgain')} ${t(`guess.why.${option.kind}`)}`);
+    hintButton.disabled = false;
+  }
+
+  hintButton.addEventListener('click', () => {
+    scene?.lookFrom(puzzle.view);
+    isoButton.hidden = false;
+    say(t('guess.hintDone', { view: t(`views.${puzzle.view}`) }));
+  });
+  isoButton.addEventListener('click', () => {
+    scene?.lookFrom('iso');
+    isoButton.hidden = true;
+  });
+  nextButton.addEventListener('click', () => newPuzzle());
+
+  newPuzzle();
+  loadScene()
+    .then(s => {
+      scene = s;
+      $('[data-loading]').hidden = true;
+      scene.setStructure(puzzle.structure);
+    })
+    .catch(() => ($('[data-loading]').textContent = t('home.noWebgl')));
+</script>
