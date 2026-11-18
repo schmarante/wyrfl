@@ -36,7 +36,8 @@
   "nav": {
     "about": "O Wyrflu",
     "theme": "Svijetlo / tamno",
-    "language": "Jezik"
+    "language": "Jezik",
+    "skin": "Stil kockica"
   },
   "about": {
     "title": "O Wyrflu",
@@ -190,5 +191,11 @@
     "pineapple": "Ananas",
     "watermelon": "Lubenica",
     "grapes": "Grožđe"
+  },
+  "skins": {
+    "classic": "Klasično",
+    "colors": "Šareno",
+    "pixel": "Pikseli",
+    "gifts": "Pokloni"
   }
 }

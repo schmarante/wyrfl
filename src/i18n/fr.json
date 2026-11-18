@@ -31,7 +31,8 @@
   "nav": {
     "about": "À propos de Wyrfl",
     "theme": "Clair / sombre",
-    "language": "Langue"
+    "language": "Langue",
+    "skin": "Style des cubes"
   },
   "about": {
     "title": "À propos de Wyrfl",
@@ -190,5 +191,11 @@
     "top": "dessus",
     "front": "face",
     "side": "droite"
+  },
+  "skins": {
+    "classic": "Classique",
+    "colors": "Coloré",
+    "pixel": "Pixel",
+    "gifts": "Cadeaux"
   }
 }

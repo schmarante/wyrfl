@@ -36,7 +36,8 @@
   "nav": {
     "about": "O Wyrfl",
     "theme": "Jasny / ciemny",
-    "language": "Język"
+    "language": "Język",
+    "skin": "Styl klocków"
   },
   "about": {
     "title": "O Wyrfl",
@@ -190,5 +191,11 @@
     "pineapple": "Ananas",
     "watermelon": "Arbuz",
     "grapes": "Winogrona"
+  },
+  "skins": {
+    "classic": "Klasyczny",
+    "colors": "Kolorowy",
+    "pixel": "Piksele",
+    "gifts": "Prezenty"
   }
 }

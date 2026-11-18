@@ -13,12 +13,12 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 const primary = 'press inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-cube px-6 text-lg font-bold text-white hover:brightness-110 disabled:opacity-40';
 const secondary = 'press inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-line px-5 text-sm font-semibold hover:bg-cube/40 disabled:opacity-40';
-const card = 'mx-auto w-full max-w-3xl rounded-3xl border border-line bg-surface p-4 sm:p-6';
+const card = 'mx-auto w-full max-w-3xl rounded-3xl border-2 border-line bg-surface p-4 sm:p-6';
 const qrBox = 'mx-auto aspect-square w-full max-w-72 overflow-hidden rounded-2xl bg-white p-2';
 ---
 
 <section id="duel" class="flex flex-col gap-4">
-  <p data-banner hidden class="mx-auto w-full max-w-3xl rounded-2xl border border-front/60 bg-front/10 p-3 text-sm font-semibold" role="alert"></p>
+  <p data-banner hidden class="mx-auto w-full max-w-3xl rounded-2xl border-2 border-front/60 bg-front/10 p-3 text-sm font-semibold" role="alert"></p>
 
   <!-- start -->
   <div data-screen="start" class={card}>
@@ -99,7 +99,7 @@ const qrBox = 'mx-auto aspect-square w-full max-w-72 overflow-hidden rounded-2xl
   </div>
 
   <!-- play -->
-  <div data-screen="play" hidden class="rounded-3xl border border-line bg-surface p-3 sm:p-5">
+  <div data-screen="play" hidden class="rounded-3xl border-2 border-line bg-surface p-3 sm:p-5">
     <div class="mb-2 flex items-center justify-between gap-2 text-sm">
       <span data-round class="font-semibold"></span>
       <span data-opponent class="inline-flex items-center gap-1.5 rounded-full bg-line py-1 pl-1 pr-3 text-muted"></span>
@@ -121,7 +121,7 @@ const qrBox = 'mx-auto aspect-square w-full max-w-72 overflow-hidden rounded-2xl
       <div class="flex flex-col items-center gap-1 rounded-2xl bg-front/15 p-3"><span data-them-avatar></span><p data-them-name class="text-sm text-muted"></p><p data-them-points class="text-2xl font-bold"></p></div>
     </div>
     <ul data-highlights class="mt-4 flex flex-col gap-1 text-sm"></ul>
-    <div class="mt-4 overflow-x-auto rounded-2xl border border-line">
+    <div class="mt-4 overflow-x-auto rounded-2xl border-2 border-line">
       <table class="w-full text-left text-sm">
         <thead class="bg-bg/60 text-muted"><tr><th class="p-2">{t('duel.roundCol')}</th><th data-th-me class="p-2"></th><th data-th-them class="p-2"></th></tr></thead>
         <tbody data-rows></tbody>

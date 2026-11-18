@@ -10,7 +10,7 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 ---
 
-<section id="guess" class="rounded-3xl border border-line bg-surface p-3 sm:p-5">
+<section id="guess" class="rounded-3xl border-2 border-line bg-surface p-3 sm:p-5">
   <GuessBoard locale={locale}>
     <button type="button" data-next hidden
             class="press mt-2 min-h-12 w-full rounded-full bg-cube px-6 text-lg font-bold text-white hover:brightness-110">

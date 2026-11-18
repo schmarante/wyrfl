@@ -46,3 +46,12 @@ export const FLAGS = {
   pl: flag(stripesH('#fff', '#DC143C')),
   cs: flag('<rect width="30" height="10" fill="#fff"/><rect y="10" width="30" height="10" fill="#D7141A"/><path d="M0 0 15 10 0 20Z" fill="#11457E"/>'),
 };
+
+// cube style previews (header menu): an iso cube in the colors of each style
+const isoCube = (top, left, right, extra = '') => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="2 1 28 31" width="22" height="22" aria-hidden="true" class="block shrink-0"><polygon points="16,3 28,10 16,17 4,10" fill="${top}"/><polygon points="4,10 16,17 16,30 4,23" fill="${left}"/><polygon points="28,10 16,17 16,30 28,23" fill="${right}"/>${extra}<path d="M16 3 28 10 28 23 16 30 4 23 4 10Z M4 10 16 17 28 10 M16 17V30" fill="none" stroke="#0b1530" stroke-width="1.3" stroke-linejoin="round"/></svg>`;
+export const SKIN_PREVIEWS = {
+  classic: isoCube('#8fb4ff', '#4f8cff', '#2f63c9'),
+  colors: isoCube('#facc15', '#ef4444', '#22c3ee'),
+  pixel: isoCube('#5aa83a', '#8b5a34', '#6f4527', '<polygon points="4,10 16,17 16,20.5 4,13.5" fill="#4f9a33"/><polygon points="28,10 16,17 16,20.5 28,13.5" fill="#3f7f28"/>'),
+  gifts: isoCube('#e04a5a', '#d62839', '#a51f2c', '<path d="M22 6.5 10 13.5M10 6.5 22 13.5M10 13.5V26.5M22 13.5V26.5" stroke="#f6d860" stroke-width="2.4"/>'),
+};

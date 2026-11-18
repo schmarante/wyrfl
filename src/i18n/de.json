@@ -31,7 +31,8 @@
   "nav": {
     "about": "Über Wyrfl",
     "theme": "Hell / Dunkel",
-    "language": "Sprache"
+    "language": "Sprache",
+    "skin": "Würfel-Stil"
   },
   "about": {
     "title": "Über Wyrfl",
@@ -190,5 +191,11 @@
     "top": "oben",
     "front": "vorne",
     "side": "rechts"
+  },
+  "skins": {
+    "classic": "Klassisch",
+    "colors": "Bunt",
+    "pixel": "Pixel",
+    "gifts": "Geschenke"
   }
 }

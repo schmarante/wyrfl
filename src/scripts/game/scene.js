@@ -5,11 +5,13 @@
 // - Builder (editable): tap / left click → onTap(column, tool), right click or long press → onTap(column, 'remove')
 // - lookFrom('front' | 'side' | 'top' | 'iso') moves the camera straight onto a view (learning aid)
 // - setViewMarker(view) shows an arrow from the asked direction (View Guesser) – explains "from the right" without words
-// - follows the light/dark theme (window event 'wyrfl-theme')
+// - follows the light/dark theme (window event 'wyrfl-theme') and the cube style (skins.js, window event 'wyrfl-skin')
 // - fake global illumination (lighting.js): voxel AO as vertex colors, soft shadows on and under the plate
 
 import * as THREE from 'three';
 import { cubeAO, plateShadow, dropShadow } from './lighting.js';
+import { createSkin } from './skins.js';
+import { currentSkin } from './skin-pref.js';
 
 const PALETTES = {
   dark: { plate: 0x2a3142, plateLine: 0x3b4458 },
@@ -73,10 +75,12 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
 
   const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
   const edgeGeometry = new THREE.EdgesGeometry(cubeGeometry);
-  const cubeMaterial = new THREE.MeshLambertMaterial({ color: COLORS.cube, vertexColors: true });   // vertex colors = AO
   const BOX_POS = cubeGeometry.attributes.position.array;
   const BOX_NRM = cubeGeometry.attributes.normal.array;
-  const edgeMaterial = new THREE.LineBasicMaterial({ color: COLORS.edge });
+  // cube style: shared materials per cube position (vertex colors = AO); a style without edges hides the lines
+  let skin = createSkin(currentSkin());
+  const noEdge = new THREE.LineBasicMaterial({ color: COLORS.edge });
+  noEdge.userData.shared = true;
 
   const ghostMaterial = new THREE.MeshBasicMaterial({ color: COLORS.ghostAdd, transparent: true, opacity: 0.35, depthWrite: false });
   const ghostEdges = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 });
@@ -185,7 +189,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     for (const child of [...group.children]) {
       child.traverse(o => {
         if (o.geometry && o.geometry !== cubeGeometry && o.geometry !== edgeGeometry) o.geometry.dispose();
-        if (o.material && o.material !== cubeMaterial && o.material !== edgeMaterial) o.material.dispose();
+        if (o.material) mats(o.material).forEach(m => !m.userData.shared && m.dispose());
       });
       group.remove(child);
     }
@@ -262,6 +266,10 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     const occupied = (x, y, z) => y < 0 || landed.has(`${x},${y},${z}`);
     for (const mesh of cubeMap.values()) {
       const { x, y, z } = mesh.userData;
+      if (skin.dependsOnNeighbours) {
+        mesh.userData.base = skin.material(x, y, z, { topFree: !landed.has(`${x},${y + 1},${z}`) });
+        if (!mesh.userData.fading) applyStyle(mesh);
+      }
       const colors = mesh.geometry.attributes.color;
       cubeAO(occupied, x, y, z, BOX_POS, BOX_NRM, colors.array);
       colors.needsUpdate = true;
@@ -299,32 +307,58 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     fitCamera();
   }
 
-  /** A cube mesh; `fading` gives it its own transparent materials for a fade (switched back when done). */
+  // ---- materials: shared per style; a fading cube gets transparent copies until it has settled -------------
+
+  const mats = m => (Array.isArray(m) ? m : [m]);
+  const transparentCopy = m => {
+    if (Array.isArray(m)) return m.map(transparentCopy);
+    const copy = m.clone();
+    copy.userData = {};   // a copy is never shared
+    copy.transparent = true;
+    return copy;
+  };
+  const edgeOf = () => skin.edge ?? noEdge;
+
+  function applyStyle(mesh) {
+    const lines = mesh.children[0];
+    mesh.material = mesh.userData.base;
+    lines.material = edgeOf();
+    lines.visible = Boolean(skin.edge);
+  }
+  function startFade(mesh) {
+    if (mesh.userData.fading) return;
+    mesh.userData.fading = true;
+    mesh.material = transparentCopy(mesh.userData.base);
+    mesh.children[0].material = transparentCopy(edgeOf());
+  }
+  function setOpacity(mesh, opacity) {
+    mats(mesh.material).forEach(m => (m.opacity = opacity));
+    const lines = mesh.children[0].material;
+    lines.opacity = opacity * (edgeOf().opacity ?? 1);
+  }
+  /** back to the shared style materials (or just drop the copies of a cube that is gone) */
+  function settle(mesh) {
+    if (!mesh.userData.fading) return;
+    mats(mesh.material).forEach(m => m.dispose());
+    mesh.children[0].material.dispose();
+    mesh.userData.fading = false;
+    applyStyle(mesh);
+  }
+
+  /** A cube mesh; `fading` starts it invisible with transparent copies (for the drop-in). */
   function makeCube(x, y, z, fading) {
     const geometry = cubeGeometry.clone();   // own vertex colors for AO
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(BOX_POS.length).fill(1), 3));
-    const mesh = new THREE.Mesh(geometry, fading ? cubeMaterial.clone() : cubeMaterial);
-    const lines = new THREE.LineSegments(edgeGeometry, fading ? edgeMaterial.clone() : edgeMaterial);
+    const mesh = new THREE.Mesh(geometry);
+    mesh.add(new THREE.LineSegments(edgeGeometry, edgeOf()));
+    mesh.userData = { x, y, z, base: skin.material(x, y, z, { topFree: true }), fading: false };
+    applyStyle(mesh);
     if (fading) {
-      mesh.material.transparent = lines.material.transparent = true;
-      mesh.material.opacity = lines.material.opacity = 0;
+      startFade(mesh);
+      setOpacity(mesh, 0);
     }
-    mesh.add(lines);
     mesh.position.set(x - offset(), y + 0.5, z - offset());
-    mesh.userData = { x, y, z };
     return mesh;
-  }
-
-  function settle(mesh) {
-    const lines = mesh.children[0];
-    if (mesh.material !== cubeMaterial) {
-      mesh.material.dispose();
-      mesh.material = cubeMaterial;
-    }
-    if (lines.material !== edgeMaterial) {
-      lines.material.dispose();
-      lines.material = edgeMaterial;
-    }
   }
 
   /**
@@ -350,23 +384,18 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       }
       leaving.add(mesh);
       if (mesh.userData.tween) tweens.delete(mesh.userData.tween);   // removed while still dropping in
-      if (mesh.material === cubeMaterial) {
-        mesh.material = cubeMaterial.clone();
-        mesh.children[0].material = edgeMaterial.clone();
-        mesh.material.transparent = mesh.children[0].material.transparent = true;
-      }
+      startFade(mesh);
       const y0 = mesh.position.y;
       addTween({
         start: performance.now(), duration: FADE_OUT,
         step: t => {
-          mesh.material.opacity = mesh.children[0].material.opacity = 1 - t;
+          setOpacity(mesh, 1 - t);
           mesh.position.y = y0 + 0.35 * t;
           mesh.scale.setScalar(1 - 0.15 * t);
         },
         done: () => {
           leaving.remove(mesh);
-          mesh.material.dispose();
-          mesh.children[0].material.dispose();
+          settle(mesh);
           mesh.geometry.dispose();
         },
       });
@@ -388,7 +417,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
         start: now + delay, duration: DROP.duration,
         step: t => {
           mesh.position.y = yEnd + DROP.height * (1 - easeOutBack(t));
-          mesh.material.opacity = mesh.children[0].material.opacity = Math.min(1, t * 1.6);
+          setOpacity(mesh, Math.min(1, t * 1.6));
         },
         done: () => {
           mesh.position.y = yEnd;
@@ -586,6 +615,22 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   };
   window.addEventListener('wyrfl-theme', onTheme);
 
+  // another cube style: swap the materials of all cubes (running animations finish first)
+  const onSkin = e => {
+    finishTweens();
+    const old = skin;
+    skin = createSkin(e.detail);
+    for (const mesh of cubeMap.values()) {
+      const { x, y, z } = mesh.userData;
+      mesh.userData.base = skin.material(x, y, z, { topFree: true });
+      applyStyle(mesh);
+    }
+    old.dispose();
+    refreshLighting();
+    render();
+  };
+  window.addEventListener('wyrfl-skin', onSkin);
+
   const resize = new ResizeObserver(fitCamera);
   resize.observe(canvas);
 
@@ -649,6 +694,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       tweens.clear();
       resize.disconnect();
       window.removeEventListener('wyrfl-theme', onTheme);
+      window.removeEventListener('wyrfl-skin', onSkin);
       canvas.removeEventListener('pointerdown', onDown);
       canvas.removeEventListener('pointermove', onMove);
       canvas.removeEventListener('pointerup', onUp);
@@ -658,7 +704,8 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       [base, cubes, leaving].forEach(disposeGroup);
       shadowTexture?.dispose();
       dropTexture?.dispose();
-      [cubeGeometry, edgeGeometry, cubeMaterial, edgeMaterial, ghostMaterial, ghostEdges, markerMaterial, shaft.geometry, head.geometry].forEach(o => o.dispose());
+      skin.dispose();
+      [cubeGeometry, edgeGeometry, noEdge, ghostMaterial, ghostEdges, markerMaterial, shaft.geometry, head.geometry].forEach(o => o.dispose());
       renderer.dispose();
     },
   };

@@ -18,7 +18,7 @@ const side = 'lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] land:grid-cols-[minm
 ---
 
 <div class={`mt-1 grid gap-3 lg:gap-x-10 land:gap-x-8 xl:gap-x-14 ${side}`}>
-  <section id="hero" class="relative overflow-hidden rounded-3xl border border-line bg-surface aspect-[4/3] sm:aspect-[2/1] lg:aspect-auto lg:min-h-[30rem] land:aspect-auto land:h-[calc(100dvh-5.5rem)]">
+  <section id="hero" class="relative overflow-hidden rounded-3xl border-2 border-line bg-surface aspect-[4/3] sm:aspect-[2/1] lg:aspect-auto lg:min-h-[30rem] land:aspect-auto land:h-[calc(100dvh-5.5rem)]">
     <canvas data-hero class="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing" aria-hidden="true"></canvas>
   </section>
 
@@ -31,7 +31,7 @@ const side = 'lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] land:grid-cols-[minm
     {modes.map(mode => (
       <li>
         <a href={localePath(locale, mode.path)}
-           class="press flex h-full items-center gap-4 rounded-3xl border border-line bg-surface p-4 hover:border-cube sm:flex-col sm:items-start lg:flex-row lg:items-center land:flex-row land:items-center lg:p-5">
+           class="press flex h-full items-center gap-4 rounded-3xl border-2 border-line bg-surface p-4 hover:border-cube sm:flex-col sm:items-start lg:flex-row lg:items-center land:flex-row land:items-center lg:p-5">
           <span class:list={['grid h-14 w-14 shrink-0 place-items-center rounded-2xl', mode.tint]}><Icon name={mode.icon} /></span>
           <span class="flex flex-col gap-1">
             <span class="text-lg font-bold">{t(`modes.${mode.id}.title`)}</span>

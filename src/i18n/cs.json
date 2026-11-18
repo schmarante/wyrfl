@@ -36,7 +36,8 @@
   "nav": {
     "about": "O hře Wyrfl",
     "theme": "Světlý / tmavý",
-    "language": "Jazyk"
+    "language": "Jazyk",
+    "skin": "Styl kostek"
   },
   "about": {
     "title": "O hře Wyrfl",
@@ -190,5 +191,11 @@
     "pineapple": "Ananas",
     "watermelon": "Meloun",
     "grapes": "Hrozny"
+  },
+  "skins": {
+    "classic": "Klasický",
+    "colors": "Barevný",
+    "pixel": "Pixely",
+    "gifts": "Dárky"
   }
 }
