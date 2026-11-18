@@ -63,5 +63,7 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     server: inDdev ? { hmr: { protocol: 'wss', clientPort: 4321 } } : {},
+    // flags always as their own files (not inlined as data URI): loaded only when shown, cached like every file
+    build: { assetsInlineLimit: file => (file.includes('flag-icons') ? false : undefined) },
   },
 });

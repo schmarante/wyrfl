@@ -34,8 +34,9 @@ export const ICONS = {
 };
 
 // language flags: flag-icons (MIT, github.com/lipis/flag-icons), square versions cropped round – same 22 px as the
-// header icons. Bundled by Vite: the small ones inline, the big ones (coats of arms) as files – no external request.
-const flag = src => `<img src="${src}" alt="" width="22" height="22" class="block shrink-0 rounded-full ring-1 ring-black/15" draggable="false" />`;
+// header icons. Every flag is its own bundled file (astro.config.mjs: never inlined), loaded lazily – the ones in the
+// closed language menu only when it opens. No external request; the service worker precaches them for offline use.
+const flag = src => `<img src="${src}" alt="" width="22" height="22" loading="lazy" decoding="async" class="block shrink-0 rounded-full ring-1 ring-black/15" draggable="false" />`;
 export const FLAGS = {
   de: flag(flagDe),
   en: flag(flagGb),
