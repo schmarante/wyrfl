@@ -22,7 +22,7 @@ const debug = import.meta.env.PUBLIC_DEBUG === 'true';
 <section id="duel" class="flex flex-col gap-4">
   <p data-banner hidden class="mx-auto w-full max-w-3xl rounded-2xl border-2 border-front/60 bg-front/10 p-3 text-sm font-semibold" role="alert"></p>
 
-  <!-- start -->
+  {/* start */}
   <div data-screen="start" class={card}>
     <h1 class="text-xl font-bold" data-i18n="modes.duel.title">{t('modes.duel.title')}</h1>
     <p class="mt-2" data-i18n="duel.intro">{t('duel.intro')}</p>
@@ -43,7 +43,7 @@ const debug = import.meta.env.PUBLIC_DEBUG === 'true';
     </div>
   </div>
 
-  <!-- host: show offer, scan answer -->
+  {/* host: show offer, scan answer */}
   <div data-screen="host" hidden class={card}>
     <h1 class="text-xl font-bold" data-i18n="duel.host">{t('duel.host')}</h1>
     <p class="mt-3" data-i18n="duel.step1">{t('duel.step1')}</p>
@@ -62,7 +62,7 @@ const debug = import.meta.env.PUBLIC_DEBUG === 'true';
     )}
   </div>
 
-  <!-- guest: show answer -->
+  {/* guest: show answer */}
   <div data-screen="guest" hidden class={card}>
     <h1 class="text-xl font-bold" data-i18n="duel.answerTitle">{t('duel.answerTitle')}</h1>
     <p class="mt-3" data-i18n="duel.answerText">{t('duel.answerText')}</p>
@@ -76,7 +76,7 @@ const debug = import.meta.env.PUBLIC_DEBUG === 'true';
     )}
   </div>
 
-  <!-- lobby -->
+  {/* lobby */}
   <div data-screen="lobby" hidden class={card}>
     <div data-versus class="flex items-center justify-center gap-4 py-2"></div>
     <h1 data-connected class="text-center text-xl font-bold"></h1>
@@ -107,7 +107,7 @@ const debug = import.meta.env.PUBLIC_DEBUG === 'true';
     <p class="mt-4 text-xs text-muted" data-i18n="duel.rules">{t('duel.rules')}</p>
   </div>
 
-  <!-- countdown -->
+  {/* countdown */}
   <div data-screen="countdown" hidden class={`${card} grid min-h-80 place-items-center text-center`}>
     <div>
       <p class="text-muted" data-i18n="duel.get_ready">{t('duel.get_ready')}</p>
@@ -115,7 +115,7 @@ const debug = import.meta.env.PUBLIC_DEBUG === 'true';
     </div>
   </div>
 
-  <!-- play -->
+  {/* play */}
   <div data-screen="play" hidden class="rounded-3xl border-2 border-line bg-surface p-3 sm:p-5">
     <div class="mb-2 flex items-center justify-between gap-2 text-sm">
       <span data-round class="font-semibold"></span>
@@ -130,7 +130,7 @@ const debug = import.meta.env.PUBLIC_DEBUG === 'true';
     </GuessBoard>
   </div>
 
-  <!-- results -->
+  {/* results */}
   <div data-screen="results" hidden class={card}>
     <h1 data-result-title class="pop text-2xl font-extrabold"></h1>
     <div class="mt-4 grid grid-cols-2 gap-3 text-center">
@@ -149,9 +149,11 @@ const debug = import.meta.env.PUBLIC_DEBUG === 'true';
       <button type="button" data-rematch class={primary} data-i18n="duel.rematch">{t('duel.rematch')}</button>
       <button type="button" data-end class={`${secondary} min-h-12`} data-i18n="duel.end">{t('duel.end')}</button>
     </div>
+    {/* how points work (rendered by duel-app.js – contains the other player's name) */}
+    <footer data-scoring class="mt-5 border-t-2 border-line pt-3 text-xs text-muted"></footer>
   </div>
 
-  <!-- camera scanner (full screen) -->
+  {/* camera scanner (full screen) */}
   <div data-scanner hidden class="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-bg/95 p-4">
     <p class="text-lg font-bold" data-i18n="duel.scanTitle">{t('duel.scanTitle')}</p>
     <video data-video playsinline muted class="aspect-square w-full max-w-sm rounded-2xl bg-black object-cover"></video>

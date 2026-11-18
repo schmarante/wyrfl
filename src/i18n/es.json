@@ -154,6 +154,12 @@
     "you": "Tú",
     "roundCol": "Acertijo",
     "faster": "más rápido",
+    "firstTry": "1.er intento",
+    "secondTry": "2.º intento",
+    "laterTry": "resuelto más tarde",
+    "hintUsed": "pista",
+    "notSolved": "sin resolver",
+    "scoringTitle": "Así se ganan puntos",
     "rules": "Puntos: 3 al primer intento, 2 al segundo y si no, 1. Una pista cuesta 1. El más rápido gana 1 punto rayo.",
     "hl": {
       "allFirstTry": "¡Todos los acertijos bien al primer intento!",

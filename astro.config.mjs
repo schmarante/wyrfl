@@ -19,6 +19,9 @@ function serviceWorker() {
           .map(f => relative(root, f).split(sep).join('/'))
           .filter(f => f !== 'sw.js' && !f.endsWith('.map') && !f.endsWith('.txt') && !f.startsWith('.'))
           .sort();
+        // no HTML comments in the published pages – write comments in .astro templates as {/* … */}
+        const commented = files.filter(f => f.endsWith('.html') && readFileSync(join(root, f), 'utf8').includes('<!--'));
+        if (commented.length) throw new Error(`HTML comments in the build (use {/* … */} in .astro): ${commented.slice(0, 5).join(', ')}`);
         const hash = createHash('sha256');
         for (const f of files) hash.update(f).update(readFileSync(join(root, f)));
         const build = hash.digest('hex').slice(0, 16);

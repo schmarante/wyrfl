@@ -159,6 +159,12 @@
     "you": "Ty",
     "roundCol": "Hádanka",
     "faster": "rychleji",
+    "firstTry": "1. pokus",
+    "secondTry": "2. pokus",
+    "laterTry": "vyřešeno později",
+    "hintUsed": "nápověda",
+    "notSolved": "nevyřešeno",
+    "scoringTitle": "Jak se získávají body",
     "rules": "Body: 3 za první pokus, 2 za druhý, jinak 1. Nápověda stojí 1. Rychlejší hráč dostane 1 bleskový bod.",
     "hl": {
       "allFirstTry": "Všechny hádanky na první pokus!",

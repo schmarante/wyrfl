@@ -9,13 +9,14 @@
 // Times are measured on each device (puzzle shown → solved), so network delay never matters.
 
 import { rtcSupported, createOffer, answerOffer, messenger } from './rtc.js';
-import { compareResults } from './score.js';
+import { compareResults, POINTS } from './score.js';
 import { createGuessPuzzle } from '../game/guess.js';
 import { LEVELS, recordDuelWin } from '../game/progress.js';
 import { celebrateNewSkins } from '../ui/celebrate.js';
 import { createGuessBoard } from '../ui/guess-board.js';
 import { renderQr, startScanner } from '../ui/qr.js';
 import { renderLevelBadge } from '../ui/level-picker.js';
+import { ICONS } from '../ui/icons.js';
 import { AVATARS, avatarImg } from './avatars.js';
 import { localePath, DEFAULT_LOCALE } from '../../i18n/index.js';
 import { setLiveLocale } from '../ui/live-locale.js';
@@ -369,10 +370,28 @@ export function startDuelApp(root, t) {
         return li;
       }),
     );
-    const cell = (points, faster) => `${points}${faster ? ` <span class="text-xs text-front">(+1 ${t('duel.faster')})</span>` : ''}`;
+    // every cell: the points, below them where they come from (try, hint, faster)
+    const tryKey = tries => (tries === 1 ? 'duel.firstTry' : tries === 2 ? 'duel.secondTry' : 'duel.laterTry');
+    const part = (label, value, cls = '') => `<span class="whitespace-nowrap ${cls}">${label} ${value}</span>`;
+    const cell = (result, points, faster) => {
+      const parts = result
+        ? [part(t(tryKey(result.tries)), `+${POINTS[Math.min(result.tries, POINTS.length) - 1]}`)]
+        : [part(t('duel.notSolved'), '0')];
+      if (result?.hint) parts.push(part(t('duel.hintUsed'), '−1'));
+      if (faster) parts.push(part(`${ICONS.bolt} ${t('duel.faster')}`, '+1', 'text-front'));
+      return `<span class="block font-bold">${points}</span><span class="block text-xs leading-snug text-muted">${parts.join(' · ')}</span>`;
+    };
     $('[data-rows]').innerHTML = r.rows
-      .map(row => `<tr class="border-t border-line"><td class="p-2">${row.round + 1}</td><td class="p-2">${cell(row.mine, row.faster === 'mine')}</td><td class="p-2">${cell(row.theirs, row.faster === 'theirs')}</td></tr>`)
+      .map(row => `<tr class="border-t border-line align-top"><td class="p-2">${row.round + 1}</td><td class="p-2">${cell(game.mine[row.round], row.mine, row.faster === 'mine')}</td><td class="p-2">${cell(game.theirs[row.round], row.theirs, row.faster === 'theirs')}</td></tr>`)
       .join('');
+
+    // footer: how points work
+    const rules = [
+      [t('duel.firstTry'), `+${POINTS[0]}`], [t('duel.secondTry'), `+${POINTS[1]}`], [t('duel.laterTry'), `+${POINTS[2]}`],
+      [t('duel.hintUsed'), '−1'], [`${ICONS.bolt} ${t('duel.faster')}`, '+1'],
+    ];
+    $('[data-scoring]').innerHTML = `<p class="mb-1.5 font-semibold text-text">${t('duel.scoringTitle')}</p>`
+      + `<ul class="flex flex-wrap gap-x-4 gap-y-1">${rules.map(([label, value]) => `<li class="whitespace-nowrap">${label} <b class="text-text">${value}</b></li>`).join('')}</ul>`;
   }
 
   // ---- rematch / end -------------------------------------------------------------------------

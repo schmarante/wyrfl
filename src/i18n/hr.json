@@ -159,6 +159,12 @@
     "you": "Ti",
     "roundCol": "Zadatak",
     "faster": "brže",
+    "firstTry": "1. pokušaj",
+    "secondTry": "2. pokušaj",
+    "laterTry": "riješeno kasnije",
+    "hintUsed": "pomoć",
+    "notSolved": "nije riješeno",
+    "scoringTitle": "Kako se dobivaju bodovi",
     "rules": "Bodovi: 3 za prvi pokušaj, 2 za drugi, inače 1. Pomoć košta 1. Brži igrač dobiva 1 munja-bod.",
     "hl": {
       "allFirstTry": "Svi zadaci riješeni iz prvog pokušaja!",

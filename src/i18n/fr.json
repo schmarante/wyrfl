@@ -154,6 +154,12 @@
     "you": "Toi",
     "roundCol": "Énigme",
     "faster": "plus rapide",
+    "firstTry": "1er essai",
+    "secondTry": "2e essai",
+    "laterTry": "trouvé plus tard",
+    "hintUsed": "indice",
+    "notSolved": "pas trouvé",
+    "scoringTitle": "Comment on gagne des points",
     "rules": "Points : 3 au premier essai, 2 au deuxième, sinon 1. Un indice coûte 1. Le plus rapide gagne 1 point éclair.",
     "hl": {
       "allFirstTry": "Toutes les énigmes réussies du premier coup !",

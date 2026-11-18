@@ -23,12 +23,12 @@ const rightColumn = 'land:col-start-2 land:w-[calc(var(--opt)*2+0.75rem)]';
 ---
 
 <div data-guess-board class={layout}>
-  <!-- the question: above the 3D view on phones, at the top of the right column (above the answers) in landscape -->
+  {/* the question: above the 3D view on phones, at the top of the right column (above the answers) in landscape */}
   <h1 data-question class={`text-lg font-bold leading-snug sm:text-xl land:row-start-1 land:mb-3 land:text-lg ${rightColumn}`}>&nbsp;</h1>
 
   <div class="min-w-0 land:col-start-1 land:row-span-3 land:row-start-1">
     <div class="mt-2 overflow-hidden rounded-2xl bg-bg/50 land:mt-0">
-      <!-- own bar above the 3D picture: tall columns get their room below it, nothing is covered -->
+      {/* own bar above the 3D picture: tall columns get their room below it, nothing is covered */}
       <div class="flex min-h-12 items-center justify-between gap-2 px-2 pt-2">
         <div data-level-picker></div>
         <div class="flex gap-1.5">

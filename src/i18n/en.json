@@ -154,6 +154,12 @@
     "you": "You",
     "roundCol": "Puzzle",
     "faster": "faster",
+    "firstTry": "1st try",
+    "secondTry": "2nd try",
+    "laterTry": "solved later",
+    "hintUsed": "hint",
+    "notSolved": "not solved",
+    "scoringTitle": "How points work",
     "rules": "Points: 3 for the first try, 2 for the second, otherwise 1. A hint costs 1. The faster player gets 1 lightning point.",
     "hl": {
       "allFirstTry": "Every puzzle right on the first try!",

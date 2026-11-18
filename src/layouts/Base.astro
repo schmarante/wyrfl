@@ -17,7 +17,7 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
 ---
 
 <!doctype html>
-<!-- translate="no": our own texts are already in the reader's language – no browser translation offer -->
+{/* translate="no": our own texts are already in the reader's language – no browser translation offer */}
 <html lang={locale} translate="no">
   <head>
     <meta charset="utf-8" />
@@ -26,7 +26,7 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
     <meta name="theme-color" content="#12151c" />
     <meta name="referrer" content="no-referrer" />
     <meta name="google" content="notranslate" />
-    <!-- installable app (PWA): manifest + icons; the service worker is registered at the end of the page -->
+    {/* installable app (PWA): manifest + icons; the service worker is registered at the end of the page */}
     <link rel="manifest" href={`${base}/manifest.webmanifest`} />
     <link rel="apple-touch-icon" href={`${base}/pwa/apple-touch-icon.png`} />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -36,10 +36,10 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
     <meta name="description" content={t('meta.description')} />
     <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
     {LANGUAGES.map(({ code }) => <link rel="alternate" hreflang={code} href={localePath(code, page)} />)}
-    <!-- language, like ../rindr and ../mixr: ?lang=… > stored choice ('wyrfl:lang', set by the language menu) >
+    {/* language, like ../rindr and ../mixr: ?lang=… > stored choice ('wyrfl:lang', set by the language menu) >
          browser languages in order > German. The language lives in the URL here (/en/, /fr/ …): ?lang= works on every
          page, the rest only on German (unprefixed) pages – a shared /en/… link always opens in English.
-         Runs before the first paint. -->
+         Runs before the first paint. */}
     <script is:inline define:vars={{ codes: LANGUAGES.map(l => l.code), fallback: DEFAULT_LOCALE, current: locale, paths: Object.fromEntries(LANGUAGES.map(l => [l.code, localePath(l.code, page)])) }}>
       try {
         const match = value => {
@@ -60,7 +60,7 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
         }
       } catch {}
     </script>
-    <!-- theme before the first paint (no flash); dark is the default -->
+    {/* theme before the first paint (no flash); dark is the default */}
     <script is:inline>
       try {
         if (localStorage.getItem('wyrfl:theme') === 'light') {
@@ -78,7 +78,7 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
           Wyrfl
         </a>
         <nav class="flex items-center gap-1">
-          <!-- language menu: current flag, opens a list of all languages (each named in itself) -->
+          {/* language menu: current flag, opens a list of all languages (each named in itself) */}
           <details data-lang-menu class="relative">
             <summary class="press flex h-10 cursor-pointer list-none items-center gap-1 rounded-full px-2 text-muted hover:text-text [&::-webkit-details-marker]:hidden"
                      aria-label={t('nav.language')} data-i18n-aria="nav.language" title={t('nav.language')} data-i18n-title="nav.language">
@@ -98,7 +98,7 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
               ))}
             </ul>
           </details>
-          <!-- cube style menu: preview of the current style; the choice is stored on this device -->
+          {/* cube style menu: preview of the current style; the choice is stored on this device */}
           <details data-skin-menu class="relative">
             <summary class="press flex h-10 cursor-pointer list-none items-center gap-1 rounded-full px-2 text-muted hover:text-text [&::-webkit-details-marker]:hidden"
                      aria-label={t('nav.skin')} data-i18n-aria="nav.skin" title={t('nav.skin')} data-i18n-title="nav.skin">

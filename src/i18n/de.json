@@ -154,6 +154,12 @@
     "you": "Du",
     "roundCol": "Rätsel",
     "faster": "schneller",
+    "firstTry": "1. Versuch",
+    "secondTry": "2. Versuch",
+    "laterTry": "später gelöst",
+    "hintUsed": "Tipp",
+    "notSolved": "nicht gelöst",
+    "scoringTitle": "So gibt’s Punkte",
     "rules": "Punkte: 3 für den ersten Versuch, 2 für den zweiten, sonst 1. Tipp kostet 1. Wer schneller ist, bekommt 1 Blitz-Punkt.",
     "hl": {
       "allFirstTry": "Jedes Rätsel beim ersten Versuch gelöst!",

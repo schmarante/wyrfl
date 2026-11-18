@@ -159,6 +159,12 @@
     "you": "Ty",
     "roundCol": "Zagadka",
     "faster": "szybciej",
+    "firstTry": "1. próba",
+    "secondTry": "2. próba",
+    "laterTry": "rozwiązane później",
+    "hintUsed": "podpowiedź",
+    "notSolved": "nierozwiązane",
+    "scoringTitle": "Jak zdobywa się punkty",
     "rules": "Punkty: 3 za pierwszą próbę, 2 za drugą, w innym razie 1. Podpowiedź kosztuje 1. Szybszy gracz dostaje 1 punkt błyskawicy.",
     "hl": {
       "allFirstTry": "Wszystkie zagadki za pierwszym razem!",

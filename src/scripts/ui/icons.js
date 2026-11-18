@@ -16,6 +16,7 @@ export const ICONS = {
   sun: svg('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>', 22),
   moon: svg('<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/>', 22),
   star: svg(`<path d="${STAR}" fill="currentColor"/>`, 16),
+  bolt: svg('<path d="M13 2 4 14h7l-1 8 9-12h-7Z" fill="currentColor" stroke="none"/>', 13, ' style="vertical-align:-2px"'),
   heart: svg('<path d="M12 20.5s-7.5-4.6-9.2-9.4C1.6 7.6 3.9 4 7.4 4c2 0 3.5 1.1 4.6 2.7C13.1 5.1 14.6 4 16.6 4c3.5 0 5.8 3.6 4.6 7.1-1.7 4.8-9.2 9.4-9.2 9.4Z" fill="#ef4444" stroke="none"/>', 16, ' style="vertical-align:-2px"'),
   chevron: svg('<path d="m6 9 6 6 6-6"/>', 14),
   starEmpty: svg(`<path d="${STAR}"/>`, 16, ' stroke-width="2"'),
