@@ -453,10 +453,17 @@ function colorSkin() {
   };
 }
 
+// classic: the main color of the theme – blue in the dark theme, yellow in the light one (the two colors swap)
+const classicColor = () => (document.documentElement.dataset.theme === 'light' ? 0xffc53d : 0x4f8cff);
 function classicSkin() {
-  const material = lambert({ color: 0x4f8cff });
+  const material = lambert({ color: classicColor() });
   const edge = edges(0x0b1530);
-  return { material: () => material, edge, dispose: () => (material.dispose(), edge.dispose()) };
+  return {
+    material: () => material,
+    onTheme: () => material.color.setHex(classicColor()),
+    edge,
+    dispose: () => (material.dispose(), edge.dispose()),
+  };
 }
 
 export function createSkin(name) {

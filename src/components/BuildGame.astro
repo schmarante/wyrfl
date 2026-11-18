@@ -10,7 +10,7 @@ interface Props {
 }
 const { locale } = Astro.props;
 const t = useTranslations(locale);
-const iconButton = 'press grid h-12 w-12 shrink-0 place-items-center rounded-full bg-line text-text hover:bg-cube/40 disabled:opacity-35 aria-pressed:bg-cube aria-pressed:text-white';
+const iconButton = 'press grid h-12 w-12 shrink-0 place-items-center rounded-full bg-line text-text hover:bg-cube/40 disabled:opacity-35 aria-pressed:bg-cube aria-pressed:text-on-cube';
 ---
 
 <section id="build" class="rounded-3xl border-2 border-line bg-surface p-3 sm:p-5 land:grid land:grid-cols-[minmax(0,1fr)_22rem] land:grid-rows-[auto_1fr] land:gap-x-5">
@@ -49,7 +49,7 @@ const iconButton = 'press grid h-12 w-12 shrink-0 place-items-center rounded-ful
     <button type="button" data-tool="remove" aria-pressed="false" class={iconButton} aria-label={t('build.remove')} title={t('build.removeHint')}><Icon name="minus" /></button>
     <button type="button" data-undo disabled class={iconButton} aria-label={t('build.undo')} title={t('build.undo')}><Icon name="undo" /></button>
     <button type="button" data-check
-            class="press min-h-12 flex-1 rounded-full bg-cube px-4 text-lg font-bold text-white hover:brightness-110">
+            class="press min-h-12 flex-1 rounded-full bg-cube px-4 text-lg font-bold text-on-cube hover:brightness-110">
       {t('build.check')}
     </button>
   </div>

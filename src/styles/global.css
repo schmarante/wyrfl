@@ -11,9 +11,11 @@
   --color-line: #2c3343;
   --color-text: #eef1f7;
   --color-muted: #a3acc0;
-  --color-cube: #4f8cff;
-  --color-front: #ffc53d;   /* accent: yellow in the dark theme, blue in the light one */
-  --color-star: #ffc53d;    /* difficulty stars – yellow in both themes */
+  /* The light theme swaps the two brand colors: what is blue here is yellow there and vice versa. */
+  --color-cube: #4f8cff;     /* main color: cubes, views, primary buttons */
+  --color-front: #ffc53d;    /* accent: front, highlighted word, correct answer, badges */
+  --color-star: #ffc53d;     /* difficulty stars */
+  --color-on-cube: #ffffff;  /* text on --color-cube */
   --font-sans: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -24,7 +26,11 @@
   --color-line: #d9dfe9;
   --color-text: #151b27;
   --color-muted: #5a6477;
-  --color-front: #4f8cff;   /* light theme: the accent is the Wyrfl blue (stars stay yellow: --color-star) */
+  /* swapped: blue ↔ yellow */
+  --color-cube: #ffc53d;
+  --color-front: #4f8cff;
+  --color-star: #4f8cff;
+  --color-on-cube: #151b27;
   color-scheme: light;
 }
 
