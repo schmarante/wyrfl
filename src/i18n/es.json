@@ -72,7 +72,8 @@
     "solved": "Resueltos: {count}",
     "toUnlock": "faltan {count} para «{level}»",
     "locked": "Resuelve {count} acertijos en «{level}» para desbloquear este nivel.",
-    "unlocked": "¡Desbloqueado: «{level}»!"
+    "next": "Seguimos con «{level}»",
+    "allDone": "¡Todos los niveles superados!"
   },
   "game": {
     "next": "Siguiente acertijo",
@@ -196,6 +197,14 @@
     "classic": "Clásico",
     "colors": "De colores",
     "pixel": "Píxel",
-    "gifts": "Regalos"
+    "gifts": "Regalos",
+    "newStyle": "¡Nuevo estilo de cubos!",
+    "unlock": {
+      "colors": "Supera «Fácil» en Adivina la vista y en Constrúyelo.",
+      "pixel": "Gana un duelo.",
+      "gifts": "Llega en San Nicolás y en Navidad.",
+      "eyes": "Supera «Medio» en Adivina la vista y en Constrúyelo."
+    },
+    "eyes": "Ojos saltones"
   }
 }

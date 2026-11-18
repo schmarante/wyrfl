@@ -57,6 +57,14 @@ export function createLevelPicker(root, mode, t, onChange) {
       return current;
     },
     refresh: render,
+    /** switch to a level from code (level completed → next one); starts a new puzzle via onChange */
+    select(level) {
+      if (!LEVELS.includes(level)) return;
+      current = level;
+      setLastLevel(mode, level);
+      render();
+      onChange(level);
+    },
   };
 }
 

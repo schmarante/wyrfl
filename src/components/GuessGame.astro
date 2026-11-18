@@ -25,6 +25,7 @@ const t = useTranslations(locale);
   import { recordSolved } from '../scripts/game/progress.js';
   import { createGuessBoard } from '../scripts/ui/guess-board.js';
   import { createLevelPicker, practiceSeed } from '../scripts/ui/level-picker.js';
+  import { levelUp } from '../scripts/ui/level-up.js';
 
   const MODE = 'guess';
   const t = useTranslations(document.documentElement.lang);
@@ -33,11 +34,15 @@ const t = useTranslations(locale);
 
   const board = createGuessBoard(root.querySelector('[data-guess-board]')!, t, {
     onSolved() {
-      const unlocked = recordSolved(MODE, picker.level);
+      const result = recordSolved(MODE, picker.level);
       picker.refresh();
-      if (unlocked) board.say(`${root.querySelector('[data-feedback]')!.textContent} ★ ${t('level.unlocked', { level: t(`levels.${unlocked}`) })}`, 'good');
-      nextButton.hidden = false;
-      nextButton.focus({ preventScroll: true });
+      const showNext = () => {
+        nextButton.hidden = false;
+        nextButton.focus({ preventScroll: true });
+      };
+      // level completed: celebrate, then straight on to the next level (no "next" button in between)
+      if (result.completed) levelUp(t, result, picker).then(moved => moved || showNext());
+      else showNext();
     },
   });
   const picker = createLevelPicker(root.querySelector('[data-level-picker]')!, MODE, t, () => newPuzzle());

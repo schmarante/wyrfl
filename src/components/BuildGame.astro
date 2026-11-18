@@ -66,6 +66,7 @@ const iconButton = 'press grid h-12 w-12 shrink-0 place-items-center rounded-ful
   import { renderViewGrid } from '../scripts/ui/view-grid.js';
   import { createLevelPicker, practiceSeed } from '../scripts/ui/level-picker.js';
   import { onSolveShortcut } from '../scripts/ui/debug-solve.js';
+  import { levelUp } from '../scripts/ui/level-up.js';
 
   type Structure = ReturnType<typeof generateStructure>;
   type Column = { x: number; z: number };
@@ -208,14 +209,18 @@ const iconButton = 'press grid h-12 w-12 shrink-0 place-items-center rounded-ful
       say(t('build.almost'));
       return;
     }
-    if (!solved) {
-      solved = true;
-      const unlocked = recordSolved(MODE, picker.level);
-      picker.refresh();
-      say(`${t('build.success')} ${t('build.successNote')}` + (unlocked ? ` ★ ${t('level.unlocked', { level: t(`levels.${unlocked}`) })}` : ''), 'good');
-    }
-    nextButton.hidden = false;
-    nextButton.focus({ preventScroll: true });
+    const showNext = () => {
+      nextButton.hidden = false;
+      nextButton.focus({ preventScroll: true });
+    };
+    if (solved) return showNext();
+    solved = true;
+    const result = recordSolved(MODE, picker.level);
+    picker.refresh();
+    say(`${t('build.success')} ${t('build.successNote')}`, 'good');
+    // level completed: celebrate, then straight on to the next level
+    if (result.completed) levelUp(t, result, picker).then(moved => moved || showNext());
+    else showNext();
   });
   nextButton.addEventListener('click', () => newPuzzle());
 

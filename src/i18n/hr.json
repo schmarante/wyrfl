@@ -76,8 +76,9 @@
     "label": "Težina",
     "solved": "Riješeno: {count}",
     "toUnlock": "još {count} do razine „{level}“",
-    "locked": "Riješi {count} zadatka na razini „{level}“ da otključaš ovu razinu.",
-    "unlocked": "Otključano: „{level}“!"
+    "locked": "Riješi {count} zadataka na razini „{level}“ da otključaš ovu razinu.",
+    "next": "Dalje na razinu „{level}“",
+    "allDone": "Sve razine riješene!"
   },
   "game": {
     "next": "Sljedeći zadatak",
@@ -196,6 +197,14 @@
     "classic": "Klasično",
     "colors": "Šareno",
     "pixel": "Pikseli",
-    "gifts": "Pokloni"
+    "gifts": "Pokloni",
+    "newStyle": "Novi stil kockica!",
+    "unlock": {
+      "colors": "Riješi razinu „Lagano“ u igrama Pogodi pogled i Sagradi.",
+      "pixel": "Pobijedi u dvoboju.",
+      "gifts": "Stiže za Svetog Nikolu i Božić.",
+      "eyes": "Riješi razinu „Srednje“ u igrama Pogodi pogled i Sagradi."
+    },
+    "eyes": "Okice"
   }
 }

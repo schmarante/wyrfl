@@ -3,6 +3,7 @@
 // - classic: the Wyrfl blue
 // - colors:  seven bright colors, picked per cube position (stays the same while building around it)
 // - pixel:   original pixel-art blocks drawn in code – grass on top of a column, earth below, stone at the bottom
+// - eyes:    'googly eyes' – warm colors, big eyes looking around, rosy cheeks; now and then a cube blinks (own design)
 // - gifts:   six wrapping papers with a ribbon cross
 import * as THREE from 'three';
 import { createRng } from './rng.js';
@@ -137,6 +138,85 @@ function giftSkin() {
   };
 }
 
+// ---- googly eyes ---------------------------------------------------------------------------------
+
+const EYE_COLORS = ['#ffcf3f', '#ff8a65', '#5fd3a8', '#b69cff'];
+const GAZES = [[-3, 1], [0, 2], [3, 1], [0, -2]];   // where the pupils look
+
+function drawFace(ctx, s, bg, gaze) {
+  const grad = ctx.createLinearGradient(0, 0, s, s);   // soft, a bit lighter top left
+  grad.addColorStop(0, 'rgba(255,255,255,0.25)');
+  grad.addColorStop(1, 'rgba(0,0,0,0.06)');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, s, s);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, s, s);
+  if (!gaze && gaze !== null) return;   // top / bottom: no face
+  // cheeks + small smile
+  ctx.fillStyle = 'rgba(255,105,135,0.45)';
+  for (const x of [15, 49]) { ctx.beginPath(); ctx.ellipse(x, 44, 6, 3.5, 0, 0, Math.PI * 2); ctx.fill(); }
+  ctx.strokeStyle = '#3b2412';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.arc(32, 42, 5, 0.15 * Math.PI, 0.85 * Math.PI);
+  ctx.stroke();
+  for (const x of [22, 42]) {
+    if (gaze === null) {   // closed, happy: ∩
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(x, 30, 6, 1.1 * Math.PI, 1.9 * Math.PI);
+      ctx.stroke();
+      continue;
+    }
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(x, 27, 9, 0, Math.PI * 2); ctx.fill();
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = 'rgba(59,36,18,0.35)';
+    ctx.stroke();
+    ctx.fillStyle = '#2a1a0c';
+    ctx.beginPath(); ctx.arc(x + gaze[0], 27 + gaze[1], 4.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(x + gaze[0] - 1.5, 25.5 + gaze[1], 1.4, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
+function eyesSkin() {
+  const textures = [];
+  const tex = (bg, gaze) => {
+    const t = canvasTexture(64, (ctx, s) => drawFace(ctx, s, bg, gaze));
+    textures.push(t);
+    return lambert({ map: t });
+  };
+  const plain = EYE_COLORS.map(bg => tex(bg, undefined));
+  const closed = EYE_COLORS.map(bg => tex(bg, null));
+  const open = EYE_COLORS.map(bg => GAZES.map(g => tex(bg, g)));
+  // per color + gaze one face set (+x, -x, +y, -y, +z, -z), the closed twin for blinking
+  const sets = new Map();
+  const closedOf = new Map();
+  EYE_COLORS.forEach((_, c) => GAZES.forEach((__, g) => {
+    const face = open[c][g];
+    const set = [face, face, plain[c], plain[c], face, face];
+    sets.set(`${c}:${g}`, set);
+    closedOf.set(set, [closed[c], closed[c], plain[c], plain[c], closed[c], closed[c]]);
+  }));
+  const edge = edges(0x3b2412, 0.35);
+  return {
+    material: (x, y, z) => {
+      const h = cellHash(x, y, z);
+      return sets.get(`${h % EYE_COLORS.length}:${(h >> 3) % GAZES.length}`);
+    },
+    /** the same cube with closed eyes (the scene blinks a few cubes now and then) */
+    blink: base => closedOf.get(base),
+    edge,
+    dispose() {
+      [...plain, ...closed, ...open.flat()].forEach(m => m.dispose());
+      textures.forEach(t => t.dispose());
+      edge.dispose();
+    },
+  };
+}
+
 // ---- solid colors ----------------------------------------------------------------------------------
 
 function colorSkin() {
@@ -159,5 +239,5 @@ function classicSkin() {
 }
 
 export function createSkin(name) {
-  return { colors: colorSkin, pixel: pixelSkin, gifts: giftSkin }[name]?.() ?? classicSkin();
+  return { colors: colorSkin, pixel: pixelSkin, eyes: eyesSkin, gifts: giftSkin }[name]?.() ?? classicSkin();
 }

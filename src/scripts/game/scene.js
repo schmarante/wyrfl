@@ -615,6 +615,31 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   };
   window.addEventListener('wyrfl-theme', onTheme);
 
+  // styles with eyes blink: now and then one or two cubes close their eyes for a moment (one extra frame each,
+  // no frame loop; nothing happens while the page is hidden)
+  let blinkTimer = 0;
+  function startBlinking() {
+    clearInterval(blinkTimer);
+    if (!skin.blink || reducedMotion()) return;
+    blinkTimer = setInterval(() => {
+      if (document.hidden || !cubeMap.size) return;
+      const all = [...cubeMap.values()].filter(m => !m.userData.fading);
+      for (let i = 0; i < Math.min(all.length, 1 + Math.floor(Math.random() * 2)); i++) {
+        const mesh = all[Math.floor(Math.random() * all.length)];
+        const base = mesh.userData.base;
+        const shut = skin.blink?.(base);
+        if (!shut) continue;
+        mesh.material = shut;
+        setTimeout(() => {
+          if (!mesh.userData.fading && mesh.userData.base === base) mesh.material = base;
+          render();
+        }, 160);
+      }
+      render();
+    }, 900);
+  }
+  startBlinking();
+
   // another cube style: swap the materials of all cubes (running animations finish first)
   const onSkin = e => {
     finishTweens();
@@ -628,6 +653,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     old.dispose();
     refreshLighting();
     render();
+    startBlinking();
   };
   window.addEventListener('wyrfl-skin', onSkin);
 
@@ -695,6 +721,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       resize.disconnect();
       window.removeEventListener('wyrfl-theme', onTheme);
       window.removeEventListener('wyrfl-skin', onSkin);
+      clearInterval(blinkTimer);
       canvas.removeEventListener('pointerdown', onDown);
       canvas.removeEventListener('pointermove', onMove);
       canvas.removeEventListener('pointerup', onUp);

@@ -73,13 +73,17 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
               <span data-skin-current class="flex"><Fragment set:html={SKIN_PREVIEWS.classic} /></span>
               <Fragment set:html={ICONS.chevron} />
             </summary>
-            <ul class="absolute right-0 z-40 mt-1 min-w-44 overflow-hidden rounded-2xl border-2 border-line bg-surface py-1 shadow-lg" role="menu">
+            <ul class="absolute right-0 z-40 mt-1 w-64 overflow-hidden rounded-2xl border-2 border-line bg-surface py-1 shadow-lg" role="menu">
               {SKINS.map(name => (
                 <li>
                   <button type="button" role="menuitemradio" aria-checked="false" data-skin={name}
-                          class="flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm hover:bg-line aria-checked:font-bold">
-                    <Fragment set:html={SKIN_PREVIEWS[name]} />
-                    <span class="flex-1">{t(`skins.${name}`)}</span>
+                          class="flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm hover:bg-line aria-checked:font-bold disabled:cursor-not-allowed disabled:hover:bg-transparent">
+                    <span data-skin-preview class="flex"><Fragment set:html={SKIN_PREVIEWS[name]} /></span>
+                    <span class="flex flex-1 flex-col">
+                      <span>{t(`skins.${name}`)}</span>
+                      {name !== 'classic' && <span data-skin-hint hidden class="text-xs font-normal text-muted">{t(`skins.unlock.${name}`)}</span>}
+                    </span>
+                    <span data-skin-lock hidden class="text-muted"><Fragment set:html={ICONS.lock} /></span>
                     <span data-skin-check hidden class="text-front" aria-hidden="true">✓</span>
                   </button>
                 </li>
@@ -103,7 +107,7 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
     </div>
 
     <script>
-      import { currentSkin, setSkin } from '../scripts/game/skin-pref.js';
+      import { currentSkin, setSkin, skinUnlocked } from '../scripts/game/skin-pref.js';
 
       // light/dark toggle – stored on this device only; the 3D scenes listen to 'wyrfl-theme'
       const root = document.documentElement;
@@ -144,22 +148,31 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
 
       // cube style menu
       const skinMenu = document.querySelector<HTMLDetailsElement>('[data-skin-menu]')!;
-      const syncSkin = (name: string) => {
+      // locked styles: dimmed, lock icon + how to unlock them; re-checked whenever the menu opens or the style changes
+      const syncSkin = () => {
+        const name = currentSkin();
         for (const item of skinMenu.querySelectorAll<HTMLButtonElement>('[data-skin]')) {
+          const unlocked = skinUnlocked(item.dataset.skin!);
           const active = item.dataset.skin === name;
+          item.disabled = !unlocked;
           item.setAttribute('aria-checked', String(active));
           item.querySelector<HTMLElement>('[data-skin-check]')!.hidden = !active;
+          item.querySelector<HTMLElement>('[data-skin-lock]')!.hidden = unlocked;
+          const hint = item.querySelector<HTMLElement>('[data-skin-hint]');
+          if (hint) hint.hidden = unlocked;
+          item.querySelector('[data-skin-preview]')!.classList.toggle('opacity-40', !unlocked);
           if (active) skinMenu.querySelector('[data-skin-current]')!.innerHTML = item.querySelector('svg')!.outerHTML;
         }
       };
       skinMenu.querySelectorAll<HTMLButtonElement>('[data-skin]').forEach(item =>
         item.addEventListener('click', () => {
           setSkin(item.dataset.skin!);
-          syncSkin(item.dataset.skin!);
           skinMenu.open = false;
         }),
       );
-      syncSkin(currentSkin());
+      skinMenu.addEventListener('toggle', () => skinMenu.open && syncSkin());
+      window.addEventListener('wyrfl-skin', syncSkin);
+      syncSkin();
     </script>
   </body>
 </html>

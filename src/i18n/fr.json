@@ -72,7 +72,8 @@
     "solved": "Résolues : {count}",
     "toUnlock": "encore {count} pour « {level} »",
     "locked": "Résous {count} énigmes en « {level} » pour débloquer ce niveau.",
-    "unlocked": "Débloqué : « {level} » !"
+    "next": "On continue en « {level} »",
+    "allDone": "Tous les niveaux réussis !"
   },
   "game": {
     "next": "Énigme suivante",
@@ -196,6 +197,14 @@
     "classic": "Classique",
     "colors": "Coloré",
     "pixel": "Pixel",
-    "gifts": "Cadeaux"
+    "gifts": "Cadeaux",
+    "newStyle": "Nouveau style de cubes !",
+    "unlock": {
+      "colors": "Réussis « Facile » dans Devine la vue et dans Construis-le.",
+      "pixel": "Gagne un duel.",
+      "gifts": "Arrive à la Saint-Nicolas et à Noël.",
+      "eyes": "Réussis « Moyen » dans Devine la vue et dans Construis-le."
+    },
+    "eyes": "Yeux rigolos"
   }
 }

@@ -5,8 +5,9 @@ import { DIFFICULTIES } from './structure.js';
 
 const STORAGE_KEY = 'wyrfl:v1';
 export const LEVELS = Object.keys(DIFFICULTIES);
-// puzzles to solve on a level before the next one opens
-export const UNLOCK_AFTER = 3;
+export const MODES = ['guess', 'build'];
+// puzzles to solve on a level to complete it – the next level opens then
+export const UNLOCK_AFTER = 5;
 
 function load() {
   try {
@@ -28,21 +29,30 @@ export function solvedCount(mode, level) {
   return load().solved?.[mode]?.[level] ?? 0;
 }
 
-export function isUnlocked(mode, level) {
-  const i = LEVELS.indexOf(level);
-  return i <= 0 || solvedCount(mode, LEVELS[i - 1]) >= UNLOCK_AFTER;
+/** a level counts as completed once UNLOCK_AFTER puzzles are solved on it */
+export function levelDone(mode, level) {
+  return solvedCount(mode, level) >= UNLOCK_AFTER;
 }
 
-/** Counts a solved puzzle. Returns the level that just got unlocked by it (or null). */
+export function isUnlocked(mode, level) {
+  const i = LEVELS.indexOf(level);
+  return i <= 0 || levelDone(mode, LEVELS[i - 1]);
+}
+
+/**
+ * Counts a solved puzzle.
+ * @returns {{ completed: string | null, unlocked: string | null }}  completed: the level that was just completed by this
+ *          puzzle (exactly the UNLOCK_AFTER-th), unlocked: the level that opened because of it (null after the last level)
+ */
 export function recordSolved(mode, level) {
-  const next = LEVELS[LEVELS.indexOf(level) + 1];
-  const wasLocked = next && !isUnlocked(mode, next);
   const data = load();
   data.solved ??= {};
   data.solved[mode] ??= {};
-  data.solved[mode][level] = (data.solved[mode][level] ?? 0) + 1;
+  const count = (data.solved[mode][level] ?? 0) + 1;
+  data.solved[mode][level] = count;
   save(data);
-  return wasLocked && isUnlocked(mode, next) ? next : null;
+  if (count !== UNLOCK_AFTER) return { completed: null, unlocked: null };
+  return { completed: level, unlocked: LEVELS[LEVELS.indexOf(level) + 1] ?? null };
 }
 
 export function lastLevel(mode) {
@@ -53,5 +63,29 @@ export function lastLevel(mode) {
 export function setLastLevel(mode, level) {
   const data = load();
   data.level = { ...data.level, [mode]: level };
+  save(data);
+}
+
+// ---- duel ------------------------------------------------------------------------------------
+
+export function duelWins() {
+  return load().duelWins ?? 0;
+}
+
+export function recordDuelWin() {
+  const data = load();
+  data.duelWins = (data.duelWins ?? 0) + 1;
+  save(data);
+}
+
+// ---- cube styles already celebrated (so an unlock is shown only once) --------------------------------------
+
+export function seenSkins() {
+  return load().skinsSeen ?? [];
+}
+
+export function markSkinsSeen(names) {
+  const data = load();
+  data.skinsSeen = [...new Set([...(data.skinsSeen ?? []), ...names])];
   save(data);
 }

@@ -72,7 +72,8 @@
     "solved": "Solved: {count}",
     "toUnlock": "{count} more to unlock “{level}”",
     "locked": "Solve {count} puzzles in “{level}” to open this one.",
-    "unlocked": "Unlocked: “{level}”!"
+    "next": "On to “{level}”",
+    "allDone": "All levels done!"
   },
   "game": {
     "next": "Next puzzle",
@@ -196,6 +197,14 @@
     "classic": "Classic",
     "colors": "Colorful",
     "pixel": "Pixel",
-    "gifts": "Gifts"
+    "gifts": "Gifts",
+    "newStyle": "New cube style!",
+    "unlock": {
+      "colors": "Complete “Easy” in Guess the view and in Build it.",
+      "pixel": "Win a duel.",
+      "gifts": "Comes on St. Nicholas’ Day and at Christmas.",
+      "eyes": "Complete “Medium” in Guess the view and in Build it."
+    },
+    "eyes": "Googly eyes"
   }
 }

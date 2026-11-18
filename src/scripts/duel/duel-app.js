@@ -11,7 +11,8 @@
 import { rtcSupported, createOffer, answerOffer, messenger } from './rtc.js';
 import { compareResults } from './score.js';
 import { createGuessPuzzle } from '../game/guess.js';
-import { LEVELS } from '../game/progress.js';
+import { LEVELS, recordDuelWin } from '../game/progress.js';
+import { celebrateNewSkins } from '../ui/celebrate.js';
 import { createGuessBoard } from '../ui/guess-board.js';
 import { renderQr, startScanner } from '../ui/qr.js';
 import { renderLevelBadge } from '../ui/level-picker.js';
@@ -338,6 +339,10 @@ export function startDuelApp(root, t) {
       .map(row => `<tr class="border-t border-line"><td class="p-2">${row.round + 1}</td><td class="p-2">${cell(row.mine, row.faster === 'mine')}</td><td class="p-2">${cell(row.theirs, row.faster === 'theirs')}</td></tr>`)
       .join('');
     show('results');
+    if (r.winner === 'mine') {
+      recordDuelWin();
+      setTimeout(() => celebrateNewSkins(t), 900);   // first win: new cube style
+    }
   }
 
   // ---- rematch / end -------------------------------------------------------------------------

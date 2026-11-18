@@ -72,7 +72,8 @@
     "solved": "Gelöst: {count}",
     "toUnlock": "noch {count} bis „{level}“",
     "locked": "Löse {count} Rätsel in „{level}“, dann geht’s hier weiter.",
-    "unlocked": "Neu freigeschaltet: „{level}“!"
+    "next": "Weiter mit „{level}“",
+    "allDone": "Alle Stufen geschafft!"
   },
   "game": {
     "next": "Nächstes Rätsel",
@@ -196,6 +197,14 @@
     "classic": "Klassisch",
     "colors": "Bunt",
     "pixel": "Pixel",
-    "gifts": "Geschenke"
+    "gifts": "Geschenke",
+    "newStyle": "Neuer Würfel-Stil!",
+    "unlock": {
+      "colors": "Schaffe „Leicht“ beim Raten und beim Nachbauen.",
+      "pixel": "Gewinne ein Duell.",
+      "gifts": "Kommt an Nikolaus und Weihnachten.",
+      "eyes": "Schaffe „Mittel“ beim Raten und beim Nachbauen."
+    },
+    "eyes": "Kulleraugen"
   }
 }

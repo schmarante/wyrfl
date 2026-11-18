@@ -76,8 +76,9 @@
     "label": "Poziom trudności",
     "solved": "Rozwiązane: {count}",
     "toUnlock": "jeszcze {count} do poziomu „{level}”",
-    "locked": "Rozwiąż {count} zagadki na poziomie „{level}”, żeby odblokować ten poziom.",
-    "unlocked": "Odblokowano: „{level}”!"
+    "locked": "Rozwiąż {count} zagadek na poziomie „{level}”, żeby odblokować ten poziom.",
+    "next": "Dalej na poziomie „{level}”",
+    "allDone": "Wszystkie poziomy ukończone!"
   },
   "game": {
     "next": "Następna zagadka",
@@ -196,6 +197,14 @@
     "classic": "Klasyczny",
     "colors": "Kolorowy",
     "pixel": "Piksele",
-    "gifts": "Prezenty"
+    "gifts": "Prezenty",
+    "newStyle": "Nowy styl klocków!",
+    "unlock": {
+      "colors": "Ukończ poziom „Łatwy” w trybach Zgadnij widok i Zbuduj.",
+      "pixel": "Wygraj pojedynek.",
+      "gifts": "Przychodzi na Mikołajki i Boże Narodzenie.",
+      "eyes": "Ukończ poziom „Średni” w trybach Zgadnij widok i Zbuduj."
+    },
+    "eyes": "Oczka"
   }
 }

@@ -76,8 +76,9 @@
     "label": "Obtížnost",
     "solved": "Vyřešeno: {count}",
     "toUnlock": "ještě {count} do úrovně „{level}“",
-    "locked": "Vyřeš {count} hádanky na úrovni „{level}“ a odemkni tuhle úroveň.",
-    "unlocked": "Odemčeno: „{level}“!"
+    "locked": "Vyřeš {count} hádanek na úrovni „{level}“ a odemkni tuhle úroveň.",
+    "next": "Pokračujeme úrovní „{level}“",
+    "allDone": "Všechny úrovně zvládnuté!"
   },
   "game": {
     "next": "Další hádanka",
@@ -196,6 +197,14 @@
     "classic": "Klasický",
     "colors": "Barevný",
     "pixel": "Pixely",
-    "gifts": "Dárky"
+    "gifts": "Dárky",
+    "newStyle": "Nový styl kostek!",
+    "unlock": {
+      "colors": "Zvládni úroveň „Lehká“ v hrách Uhodni pohled a Postav to.",
+      "pixel": "Vyhraj souboj.",
+      "gifts": "Přichází na Mikuláše a o Vánocích.",
+      "eyes": "Zvládni úroveň „Střední“ v hrách Uhodni pohled a Postav to."
+    },
+    "eyes": "Očička"
   }
 }
