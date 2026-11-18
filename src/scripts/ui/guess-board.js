@@ -4,6 +4,7 @@
 
 import { computeView, diffView } from '../game/structure.js';
 import { renderViewGrid } from './view-grid.js';
+import { onSolveShortcut } from './debug-solve.js';
 
 /**
  * @param {HTMLElement} root  element with [data-guess-board]
@@ -137,6 +138,12 @@ export function createGuessBoard(root, t, { onSolved } = {}) {
   isoButton.addEventListener('click', () => {
     scene?.lookFrom('iso');
     isoButton.hidden = true;
+  });
+
+  // TEMPORARY: "L" picks the right answer on development hosts (debug-solve.js)
+  onSolveShortcut(() => {
+    if (!puzzle || state.solved || state.locked) return;
+    choose(puzzle.answer, optionsEl.querySelectorAll('button')[puzzle.answer]);
   });
 
   return {

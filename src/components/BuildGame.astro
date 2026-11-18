@@ -65,6 +65,7 @@ const iconButton = 'press grid h-12 w-12 shrink-0 place-items-center rounded-ful
   import { recordSolved } from '../scripts/game/progress.js';
   import { renderViewGrid } from '../scripts/ui/view-grid.js';
   import { createLevelPicker, practiceSeed } from '../scripts/ui/level-picker.js';
+  import { onSolveShortcut } from '../scripts/ui/debug-solve.js';
 
   type Structure = ReturnType<typeof generateStructure>;
   type Column = { x: number; z: number };
@@ -236,6 +237,14 @@ const iconButton = 'press grid h-12 w-12 shrink-0 place-items-center rounded-ful
   });
   canvas.addEventListener('focus', () => scene?.highlight(cursor));
   canvas.addEventListener('blur', () => scene?.highlight(null));
+
+  // TEMPORARY: "L" builds the solution and checks it on development hosts (debug-solve.js)
+  onSolveShortcut(() => {
+    history.push(built.heights.map(row => [...row]));
+    built.heights = target.heights.map(row => [...row]);
+    update();
+    $('[data-check]').click();
+  });
 
   newPuzzle();
   loadScene()
