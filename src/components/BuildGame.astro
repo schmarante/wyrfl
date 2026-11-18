@@ -16,13 +16,13 @@ const iconButton = 'press grid h-12 w-12 shrink-0 place-items-center rounded-ful
 <section id="build" class="rounded-3xl border border-line bg-surface p-3 sm:p-5 land:grid land:grid-cols-[minmax(0,1fr)_22rem] land:grid-rows-[auto_1fr] land:gap-x-5">
   <h1 class="sr-only">{t('modes.build.title')}</h1>
 
-  <ul class="grid grid-cols-3 gap-2 sm:gap-3 land:col-start-2 land:row-start-1" aria-label={t('build.plans')}>
+  <ul class="grid grid-cols-3 gap-2 sm:gap-3 land:col-start-2 land:row-start-1 land:grid-cols-1 land:gap-2 land:[--plan:clamp(3.5rem,calc((100dvh-25rem)/3),8.5rem)]" aria-label={t('build.plans')}>
     {VIEWS.map(view => (
       <li>
         <button type="button" data-plan={view} aria-pressed="false"
-                class="press relative flex h-full w-full flex-col items-center gap-1.5 rounded-2xl border-2 border-line bg-bg/60 p-2 hover:border-cube aria-pressed:bg-cube/20">
-          <span data-grid class="grid w-full max-w-24 gap-0.5" aria-hidden="true"></span>
-          <span class:list={['text-xs font-semibold sm:text-sm', view === 'front' ? 'text-front' : 'text-muted']}>{t(`views.${view}`)}</span>
+                class="press relative flex h-full w-full flex-col items-center gap-1.5 rounded-2xl border-2 border-line bg-bg/60 p-2 hover:border-cube aria-pressed:bg-cube/20 land:flex-row land:gap-4 land:px-3">
+          <span data-grid class="grid w-full max-w-24 gap-0.5 land:w-[var(--plan)] land:max-w-none land:shrink-0" aria-hidden="true"></span>
+          <span class:list={['text-xs font-semibold sm:text-sm land:text-base', view === 'front' ? 'text-front' : 'text-muted']}>{t(`views.${view}`)}</span>
           <span data-status class="sr-only"></span>
           <span data-badge hidden aria-hidden="true"></span>
         </button>
@@ -50,7 +50,7 @@ const iconButton = 'press grid h-12 w-12 shrink-0 place-items-center rounded-ful
     </button>
   </div>
 
-  <p data-feedback class="mt-3 min-h-6 px-1 text-base font-semibold" aria-live="polite"></p>
+  <p data-feedback class="mt-3 min-h-6 px-1 text-base font-semibold land:text-sm" aria-live="polite"></p>
 
   <button type="button" data-next hidden
           class="press mt-2 min-h-12 w-full rounded-full bg-front px-6 text-lg font-bold text-bg hover:brightness-110">
