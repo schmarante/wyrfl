@@ -19,16 +19,14 @@ import { renderLevelBadge } from '../ui/level-picker.js';
 import { AVATARS, avatarImg } from './avatars.js';
 import { localePath, DEFAULT_LOCALE } from '../../i18n/index.js';
 import { setLiveLocale } from '../ui/live-locale.js';
+import { secureGet, secureSet } from '../game/store.js';
 
 const AVATAR_KEY = 'wyrfl:duel-avatar';
 const ROUNDS = [3, 5, 10];
 const NEXT_DELAY = 1300;   // ms to look at the revealed answer before the next puzzle
 
 const randomSeed = () => Array.from(crypto.getRandomValues(new Uint32Array(2)), n => n.toString(36)).join('');
-const storage = {
-  get: key => { try { return localStorage.getItem(key) ?? ''; } catch { return ''; } },
-  set: (key, value) => { try { localStorage.setItem(key, value); } catch { /* not kept */ } },
-};
+const storage = { get: key => secureGet(key) ?? '', set: secureSet };   // scrambled + signed like the progress
 
 export function startDuelApp(root, t) {
   const $ = sel => root.querySelector(sel);

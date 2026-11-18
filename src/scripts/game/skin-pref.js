@@ -9,29 +9,24 @@
 // - city:    unlocked by completing "hardcore" in both game modes
 // - gifts:   comes by itself on St. Nicholas' Day (Dec 6) and at Christmas (Dec 24–26) – active automatically on those
 //            days unless the player picked another style that day
-// The choice is stored on this device only.
+// The choice is stored on this device only (scrambled + signed, store.js).
 
 import { dailyDate } from './rng.js';
-import { levelDone, duelWins, MODES, seenSkins, markSkinsSeen, DEBUG_ALL_KEY } from './progress.js';
+import { levelDone, duelWins, MODES, seenSkins, markSkinsSeen, debugUnlockAll } from './progress.js';
+import { secureGet, secureSet } from './store.js';
 
 export const SKINS = ['classic', 'colors', 'pixel', 'eyes', 'galaxy', 'city', 'gifts'];
 const KEY = 'wyrfl:skin';
 const DAY_KEY = 'wyrfl:skin-day';
 
-const read = key => {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-};
+const read = secureGet;
 
 const GIFT_DAYS = ['12-06', '12-24', '12-25', '12-26'];
 export const isGiftDay = (date = dailyDate()) => GIFT_DAYS.includes(date.slice(5));
 
 /** how a style is unlocked (key for the hint text: skins.unlock.<name>) */
 export function skinUnlocked(name, date = dailyDate()) {
-  if (SKINS.includes(name) && read(DEBUG_ALL_KEY) === '1') return true;   // TEMPORARY test aid (key "P")
+  if (SKINS.includes(name) && debugUnlockAll()) return true;   // test aid (key "P", debug builds only)
   switch (name) {
     case 'classic':
       return true;
@@ -61,12 +56,8 @@ export function currentSkin(date = dailyDate()) {
 /** Stores the skin and tells every 3D scene on the page (window event 'wyrfl-skin'). */
 export function setSkin(name) {
   if (!SKINS.includes(name) || !skinUnlocked(name)) return;
-  try {
-    localStorage.setItem(KEY, name);
-    localStorage.setItem(DAY_KEY, dailyDate());
-  } catch {
-    /* not stored – still applied on this page */
-  }
+  secureSet(KEY, name);   // not stored (blocked storage) → still applied on this page
+  secureSet(DAY_KEY, dailyDate());
   window.dispatchEvent(new CustomEvent('wyrfl-skin', { detail: name }));
 }
 
