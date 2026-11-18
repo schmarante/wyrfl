@@ -468,6 +468,12 @@ export function startDuelApp(root, t) {
     $('[data-host-only]').hidden = !isHost();
     $('[data-guest-only]').hidden = isHost();
     $('[data-guest-only]').textContent = `${t('duel.hostChooses', { name: nameOf(HOST_ID) })} (${settingsText(settings)})`;
+    // character picker: mine checked, the ones others have disabled
+    const taken = new Set(players.filter(p => p.id !== myId && !p.left && p.avatar).map(p => p.avatar));
+    root.querySelectorAll('[data-lobby-avatar]').forEach(b => {
+      b.setAttribute('aria-checked', String(b.dataset.lobbyAvatar === myAvatar));
+      b.disabled = taken.has(b.dataset.lobbyAvatar);
+    });
     const add = $('[data-add-player]');
     add.hidden = !isHost() || present.length >= MAX_PLAYERS;
     add.textContent = `${t('duel.addPlayer')} (${present.length}/${MAX_PLAYERS})`;
@@ -493,6 +499,23 @@ export function startDuelApp(root, t) {
     }),
   );
   $('[data-start]').addEventListener('click', () => hostStart());
+
+  // change the character in the lobby: the host decides (a free one), everybody gets the new roster
+  root.querySelectorAll('[data-lobby-avatar]').forEach(b =>
+    b.addEventListener('click', () => {
+      const wanted = b.dataset.lobbyAvatar;
+      if (b.disabled || wanted === myAvatar) return;
+      myAvatar = wanted;
+      storage.set(AVATAR_KEY, myAvatar);
+      syncAvatars();
+      if (isHost()) {
+        playerOf(HOST_ID).avatar = freeAvatar(wanted, HOST_ID);
+        myAvatar = playerOf(HOST_ID).avatar;
+        sendRoster();
+      } else hostLink?.send({ t: 'hello', avatar: myAvatar });
+      showLobby();
+    }),
+  );
   $('[data-add-player]').addEventListener('click', () => isHost() && openPairing());
   $('[data-back-lobby]').addEventListener('click', () => {
     closeScanner();

@@ -85,6 +85,17 @@ const debug = import.meta.env.PUBLIC_DEBUG === 'true';
   <div data-screen="lobby" hidden class={card}>
     <div data-versus class="flex items-center justify-center gap-4 py-2"></div>
     <h1 data-connected class="text-center text-xl font-bold"></h1>
+    {/* everybody can still change their character here (whoever joined by link skipped the start screen);
+        characters someone else has are disabled */}
+    <p class="mt-4 text-sm font-semibold" id="duel-lobby-avatar-label" data-i18n="duel.pickAvatar">{t('duel.pickAvatar')}</p>
+    <div data-lobby-avatars class="mt-2 grid grid-cols-8 gap-1" role="radiogroup" aria-labelledby="duel-lobby-avatar-label">
+      {AVATARS.map(id => (
+        <button type="button" role="radio" aria-checked="false" data-lobby-avatar={id} aria-label={t(`avatars.${id}`)} data-i18n-aria={`avatars.${id}`} title={t(`avatars.${id}`)} data-i18n-title={`avatars.${id}`}
+                class="press grid aspect-square place-items-center rounded-xl border-2 border-transparent bg-bg/60 p-1 hover:border-line aria-checked:border-cube aria-checked:bg-cube/15 disabled:cursor-not-allowed disabled:opacity-25">
+          <img src={avatarUrl(id)} alt="" width="32" height="32" class="h-full w-full" draggable="false" />
+        </button>
+      ))}
+    </div>
     <div data-host-only class="mt-4 flex flex-col gap-4">
       <div>
         <p class="mb-2 text-sm font-semibold" data-i18n="duel.level">{t('duel.level')}</p>
