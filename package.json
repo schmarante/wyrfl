@@ -1,0 +1,24 @@
+{
+  "name": "wyrfl",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Wyrfl – ein Würfelgebäude-Rätsel zum Trainieren des räumlichen Denkens",
+  "scripts": {
+    "dev": "astro dev",
+    "prebuild": "node scripts/sync-readme.mjs",
+    "build": "astro build",
+    "preview": "astro preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.5",
+    "astro": "^7.4.12",
+    "tailwindcss": "^4.3.5",
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "vitest": "^5.1.1"
+  }
+}

@@ -1,3 +1,5 @@
 CLAUDE.md
 tests
 dist/
+node_modules/
+.astro/

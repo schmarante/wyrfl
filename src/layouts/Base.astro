@@ -1,0 +1,53 @@
+---
+import '../styles/global.css';
+import { useTranslations, localePath } from '../i18n/index.js';
+
+interface Props {
+  locale: 'de' | 'en';
+  page: '' | 'about/';
+  title?: string;
+}
+const { locale, page, title } = Astro.props;
+const t = useTranslations(locale);
+const other = locale === 'de' ? 'en' : 'de';
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#12151c" />
+    <meta name="referrer" content="no-referrer" />
+    <title>{title ? `${title} · Wyrfl` : t('meta.title')}</title>
+    <meta name="description" content={t('meta.description')} />
+    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`} />
+    <link rel="alternate" hreflang="de" href={localePath('de', page)} />
+    <link rel="alternate" hreflang="en" href={localePath('en', page)} />
+  </head>
+  <body class="min-h-dvh bg-bg text-text antialiased">
+    <div class="mx-auto flex min-h-dvh max-w-3xl flex-col px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <header class="flex items-center justify-between py-4">
+        <a href={localePath(locale)} class="flex items-center gap-2 text-2xl font-extrabold tracking-tight">
+          <img src={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`} alt="" width="32" height="32" />
+          Wyrfl
+        </a>
+        <a href={localePath(other, page)} hreflang={other} lang={other}
+           class="press rounded-full border border-line px-4 py-2 text-sm text-muted hover:text-text">
+          {t('nav.language')}
+        </a>
+      </header>
+
+      <main class="flex-1">
+        <slot />
+      </main>
+
+      <footer class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 py-6 text-sm text-muted">
+        <a href={localePath(locale)} class="hover:text-text">{t('nav.home')}</a>
+        <a href={localePath(locale, 'about/')} class="hover:text-text">{t('nav.about')}</a>
+        <span>MIT</span>
+      </footer>
+    </div>
+  </body>
+</html>

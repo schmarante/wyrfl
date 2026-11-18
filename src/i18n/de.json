@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "title": "Wyrfl – Würfelrätsel für dein räumliches Denken",
+    "description": "Wyrfl ist ein kostenloses Würfelgebäude-Rätsel: Erkenne Ansichten von oben, vorne und der Seite und baue Gebäude nach. Ohne Anmeldung, ohne Werbung."
+  },
+  "home": {
+    "tagline": "Trainiere dein räumliches Denken – mit Würfelgebäuden.",
+    "dailyTitle": "Wyrfl #{number} von heute",
+    "cubes": "{count} Würfel",
+    "dragHint": "Wische über das Gebäude, um es zu drehen. Der gelbe Rand ist vorne.",
+    "resetView": "Zurückdrehen",
+    "viewsTitle": "So sieht das Gebäude aus …",
+    "modesTitle": "Spielarten",
+    "comingSoon": "kommt bald",
+    "noWebgl": "Dein Browser kann leider keine 3D-Grafik anzeigen."
+  },
+  "views": {
+    "top": "von oben",
+    "front": "von vorne",
+    "side": "von rechts"
+  },
+  "modes": {
+    "guess": { "title": "Ansichten raten", "text": "Welches Bild zeigt das Gebäude von vorne? Finde das richtige von sechs." },
+    "build": { "title": "Nachbauen", "text": "Du siehst drei Baupläne – stell die Würfel so hin, dass alles passt." },
+    "timeAttack": { "title": "Zeit-Rennen", "text": "So viele Rätsel wie möglich – gegen die Uhr. Nur wenn du Lust drauf hast." }
+  },
+  "nav": {
+    "about": "Über Wyrfl",
+    "home": "Zum Spiel",
+    "language": "English"
+  },
+  "about": {
+    "title": "Über Wyrfl",
+    "intro": "Wyrfl ist ein Rätselspiel für Kinder und Jugendliche (und alle anderen), mit dem du dein räumliches Vorstellungsvermögen trainierst: Du übersetzt zwischen Würfelgebäuden in 3D und ihren Ansichten von oben, vorne und der Seite.",
+    "privacy": "Wyrfl braucht keine Anmeldung, zeigt keine Werbung und sammelt keine Daten. Dein Spielstand bleibt nur auf deinem Gerät.",
+    "license": "Wyrfl ist freie Software unter der MIT-Lizenz – Schulen, Lehrkräfte und alle anderen dürfen es nutzen, kopieren und anpassen.",
+    "openSource": "Wyrfl ist mit tollen Open-Source-Projekten gebaut. Danke an alle, die daran mitarbeiten!",
+    "runtime": "Im Spiel",
+    "build": "Zum Bauen",
+    "project": "Projekt",
+    "usedFor": "Wofür",
+    "licenseCol": "Lizenz",
+    "libs": {
+      "three": "3D-Darstellung der Würfelgebäude",
+      "astro": "Erzeugt die Seiten als statisches HTML",
+      "tailwindcss": "Gestaltung (CSS)",
+      "vitest": "Automatische Tests der Spiellogik"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+---
+import { useTranslations } from '../i18n/index.js';
+import { RUNTIME, BUILD } from '../data/credits.js';
+
+interface Props {
+  locale: 'de' | 'en';
+}
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const groups = [
+  { title: t('about.runtime'), items: RUNTIME },
+  { title: t('about.build'), items: BUILD },
+];
+---
+
+<article class="flex flex-col gap-4 leading-relaxed">
+  <h1 class="text-2xl font-bold">{t('about.title')}</h1>
+  <p>{t('about.intro')}</p>
+  <p>{t('about.privacy')}</p>
+  <p>{t('about.license')}</p>
+  <p class="text-muted">{t('about.openSource')}</p>
+
+  {groups.map(group => (
+    <section>
+      <h2 class="mb-2 mt-2 font-semibold">{group.title}</h2>
+      <div class="overflow-x-auto rounded-2xl border border-line">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-surface text-muted">
+            <tr><th class="p-3">{t('about.project')}</th><th class="p-3">{t('about.usedFor')}</th><th class="p-3">{t('about.licenseCol')}</th></tr>
+          </thead>
+          <tbody>
+            {group.items.map(item => (
+              <tr class="border-t border-line">
+                <td class="p-3"><a href={item.url} class="text-cube underline-offset-2 hover:underline">{item.name}</a></td>
+                <td class="p-3">{t(`about.libs.${item.id}`)}</td>
+                <td class="p-3 whitespace-nowrap">{item.license}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  ))}
+</article>

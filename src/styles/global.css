@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+/* Dark mode is the default; colors come from these tokens. System fonts only – no external font requests. */
+@theme {
+  --color-bg: #12151c;
+  --color-surface: #1c212c;
+  --color-line: #2c3343;
+  --color-text: #eef1f7;
+  --color-muted: #a3acc0;
+  --color-cube: #4f8cff;
+  --color-front: #ffc53d;
+  --font-sans: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+html {
+  color-scheme: dark;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-text-size-adjust: 100%;
+}
+
+/* satisfying click feedback – but calm for people who asked for less motion */
+.press {
+  transition: transform 120ms ease, background-color 160ms ease;
+}
+.press:active {
+  transform: scale(0.96);
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-front);
+  outline-offset: 2px;
+}

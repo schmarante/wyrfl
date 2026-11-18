@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "title": "Wyrfl – cube puzzles for your spatial thinking",
+    "description": "Wyrfl is a free cube-building puzzle: recognise views from the top, front and side, and rebuild structures. No sign-up, no ads."
+  },
+  "home": {
+    "tagline": "Train your spatial thinking – with cube buildings.",
+    "dailyTitle": "Today's Wyrfl #{number}",
+    "cubes": "{count} cubes",
+    "dragHint": "Swipe across the building to turn it. The yellow edge is the front.",
+    "resetView": "Turn back",
+    "viewsTitle": "This is what the building looks like …",
+    "modesTitle": "Game modes",
+    "comingSoon": "coming soon",
+    "noWebgl": "Sorry, your browser can't show 3D graphics."
+  },
+  "views": {
+    "top": "from the top",
+    "front": "from the front",
+    "side": "from the right"
+  },
+  "modes": {
+    "guess": { "title": "Guess the view", "text": "Which picture shows the building from the front? Find the right one out of six." },
+    "build": { "title": "Build it", "text": "You get three blueprints – place the cubes so everything fits." },
+    "timeAttack": { "title": "Time Attack", "text": "As many puzzles as you can – against the clock. Only if you're in the mood." }
+  },
+  "nav": {
+    "about": "About Wyrfl",
+    "home": "Play",
+    "language": "Deutsch"
+  },
+  "about": {
+    "title": "About Wyrfl",
+    "intro": "Wyrfl is a puzzle game for kids and teens (and everyone else) that trains your spatial thinking: you translate between 3D cube buildings and their views from the top, front and side.",
+    "privacy": "Wyrfl needs no sign-up, shows no ads and collects no data. Your progress stays on your device only.",
+    "license": "Wyrfl is free software under the MIT license – schools, teachers and everyone else may use, copy and adapt it.",
+    "openSource": "Wyrfl is built on great open-source projects. Thanks to everyone who contributes to them!",
+    "runtime": "In the game",
+    "build": "For building",
+    "project": "Project",
+    "usedFor": "Used for",
+    "licenseCol": "License",
+    "libs": {
+      "three": "3D rendering of the cube buildings",
+      "astro": "Generates the pages as static HTML",
+      "tailwindcss": "Styling (CSS)",
+      "vitest": "Automated tests of the game logic"
+    }
+  }
+}
