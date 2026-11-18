@@ -1,10 +1,9 @@
-// TEMPORARY test aids (remove before launch), only on development hosts – never on the published site:
+// Test aids, switched on by the build variable PUBLIC_DEBUG=true (.env locally, a repository variable in GitHub
+// Actions) – off when it is unset:
 // - key "L" solves the current puzzle (next puzzle, unlocking, duel results …)
 // - key "P" unlocks everything (all levels in both modes, a duel win, every cube style) and reloads the page
 
-const DEV_HOST = /(^localhost$|^127\.0\.0\.1$|\.local$)/;
-
-export const debugEnabled = () => import.meta.env.DEV || DEV_HOST.test(location.hostname);
+export const debugEnabled = () => import.meta.env.PUBLIC_DEBUG === 'true';
 
 function onKey(letter, action) {
   if (!debugEnabled()) return;

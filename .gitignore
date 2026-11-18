@@ -3,3 +3,4 @@ tests
 dist/
 node_modules/
 .astro/
+.env

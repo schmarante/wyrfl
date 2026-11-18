@@ -50,12 +50,14 @@ jobs:
       # project page lives in a sub directory (/wyrfl/): base path and public URL come from the Pages settings
       # (base_path "/wyrfl", base_url "https://schmarante.github.io/wyrfl") – astro.config.mjs reads both.
       # Repository variable SITE_URL (Settings → Secrets and variables → Actions → Variables) overrides the URL,
-      # e.g. for a custom domain. The temporary test keys (L/P) stay off there – they only work on dev hosts.
+      # e.g. for a custom domain.
+      # Test keys L/P (see .env.example): repository variable PUBLIC_DEBUG=true switches them on – unset = off.
       - name: Build
         run: npm run build
         env:
           BASE_PATH: ${{ steps.pages.outputs.base_path }}/
           SITE_URL: ${{ vars.SITE_URL || format('{0}/', steps.pages.outputs.base_url) }}
+          PUBLIC_DEBUG: ${{ vars.PUBLIC_DEBUG || 'false' }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
