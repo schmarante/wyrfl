@@ -4,6 +4,9 @@
 
 export const RUNTIME = [
   { id: 'three', name: 'three.js', url: 'https://threejs.org', license: 'MIT' },
+  { id: 'qrcode-generator', name: 'QR Code Generator', url: 'https://github.com/kazuhikoarase/qrcode-generator', license: 'MIT' },
+  { id: 'qr-scanner', name: 'QR Scanner', url: 'https://github.com/nimiq/qr-scanner', license: 'MIT' },
+  { id: 'jsqr', name: 'jsQR', url: 'https://github.com/cozmo/jsQR', license: 'Apache-2.0' },
 ];
 
 export const BUILD = [

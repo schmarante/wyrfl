@@ -8,8 +8,8 @@ interface Props {
 }
 const { locale } = Astro.props;
 const t = useTranslations(locale);
-const modes = ['guess', 'build', 'timeAttack'];
-const playable: Record<string, string> = { guess: 'guess/', build: 'build/' };
+const modes = ['guess', 'build', 'duel'];
+const playable: Record<string, string> = { guess: 'guess/', build: 'build/', duel: 'duel/' };
 ---
 
 <section class="flex flex-col gap-6">

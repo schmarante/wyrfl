@@ -28,9 +28,9 @@
       "title": "Nachbauen",
       "text": "Du siehst drei Baupläne – stell die Würfel so hin, dass alles passt."
     },
-    "timeAttack": {
-      "title": "Zeit-Rennen",
-      "text": "So viele Rätsel wie möglich – gegen die Uhr. Nur wenn du Lust drauf hast."
+    "duel": {
+      "title": "Duell",
+      "text": "Zu zweit im selben WLAN: Wer erkennt die Ansichten schneller? Verbinden per QR-Code."
     }
   },
   "nav": {
@@ -38,7 +38,8 @@
     "home": "Zum Spiel",
     "language": "English",
     "guess": "Ansichten raten",
-    "build": "Nachbauen"
+    "build": "Nachbauen",
+    "duel": "Duell"
   },
   "about": {
     "title": "Über Wyrfl",
@@ -55,7 +56,10 @@
       "three": "3D-Darstellung der Würfelgebäude",
       "astro": "Erzeugt die Seiten als statisches HTML",
       "tailwindcss": "Gestaltung (CSS)",
-      "vitest": "Automatische Tests der Spiellogik"
+      "vitest": "Automatische Tests der Spiellogik",
+      "qrcode-generator": "QR-Code für die Duell-Verbindung",
+      "qr-scanner": "QR-Code mit der Kamera lesen",
+      "jsqr": "QR-Erkennung (in qr-scanner enthalten)"
     }
   },
   "levels": {
@@ -115,5 +119,65 @@
     "successNote": "Übrigens: Oft gibt es mehrere richtige Lösungen.",
     "almost": "Fast! Die gestrichelten Kästchen passen noch nicht.",
     "empty": "Stell zuerst ein paar Würfel auf die Platte."
+  },
+  "duel": {
+    "intro": "Spielt zu zweit – jede:r an einem eigenen Gerät im selben WLAN. Ihr bekommt dieselben Rätsel. Wer ist schneller und genauer?",
+    "privacy": "Eure Geräte verbinden sich direkt miteinander. Nichts verlässt euer WLAN, es gibt keinen Server und keine Anmeldung.",
+    "nameLabel": "Dein Name (freiwillig)",
+    "namePlaceholder": "z. B. Lea",
+    "host": "Duell starten",
+    "join": "Code scannen",
+    "unsupported": "Dieser Browser kann leider keine direkte Verbindung aufbauen. Probier es mit einem aktuellen Chrome, Edge, Firefox oder Safari.",
+    "colorHost": "Blau",
+    "colorGuest": "Gelb",
+    "preparing": "Code wird vorbereitet …",
+    "step1": "1. Scanne diesen Code mit dem anderen Gerät – einfach mit der Kamera-App.",
+    "step2": "2. Dann zeigt das andere Gerät einen Code. Scanne ihn hier:",
+    "scanAnswer": "Antwort-Code scannen",
+    "answerTitle": "Fast geschafft!",
+    "answerText": "Zeig diesen Code dem ersten Gerät. Dort auf „Antwort-Code scannen“ tippen.",
+    "waiting": "Warte auf die Verbindung …",
+    "connecting": "Verbinde …",
+    "noCamera": "Ohne Kamera",
+    "copyLink": "Link kopieren",
+    "copyCode": "Code kopieren",
+    "copied": "Kopiert!",
+    "pasteLabel": "Code vom anderen Gerät einfügen",
+    "connect": "Verbinden",
+    "scanTitle": "Halte die Kamera auf den Code",
+    "cancel": "Abbrechen",
+    "cameraError": "Die Kamera lässt sich nicht öffnen. Erlaube den Zugriff oder nutze „Ohne Kamera“.",
+    "wrongCode": "Das ist kein passender Wyrfl-Code. Versuch es noch mal.",
+    "failed": "Die Verbindung hat nicht geklappt. Seid ihr im selben WLAN? Manche Schul- oder Gast-WLANs erlauben keine direkten Verbindungen.",
+    "connected": "Verbunden mit {name}!",
+    "level": "Schwierigkeit",
+    "rounds": "Rätsel",
+    "start": "Los geht’s!",
+    "hostChooses": "{name} wählt gerade aus. Gleich geht’s los …",
+    "get_ready": "Macht euch bereit!",
+    "round": "Rätsel {n} von {total}",
+    "opponentProgress": "{name}: {done} von {total}",
+    "waitFor": "Fertig! Warte auf {name} …",
+    "won": "Gewonnen!",
+    "lost": "{name} hat diesmal gewonnen.",
+    "lostClose": "Knapp! {name} hat diesmal gewonnen.",
+    "tie": "Unentschieden – ihr seid gleich gut!",
+    "points": "{points} Punkte",
+    "you": "Du",
+    "roundCol": "Rätsel",
+    "faster": "schneller",
+    "rules": "Punkte: 3 für den ersten Versuch, 2 für den zweiten, sonst 1. Tipp kostet 1. Wer schneller ist, bekommt 1 Blitz-Punkt.",
+    "hl": {
+      "allFirstTry": "Jedes Rätsel beim ersten Versuch gelöst!",
+      "firstTry": "{count}× beim ersten Versuch richtig",
+      "faster": "{count}× schneller gewesen",
+      "fastest": "Schnellstes Rätsel: {seconds} s"
+    },
+    "rematch": "Revanche!",
+    "rematchAsked": "{name} will eine Revanche!",
+    "rematchWait": "Warte auf {name} …",
+    "end": "Beenden",
+    "disconnected": "Die Verbindung zu {name} ist weg.",
+    "newDuel": "Neues Duell"
   }
 }

@@ -28,9 +28,9 @@
       "title": "Build it",
       "text": "You get three blueprints – place the cubes so everything fits."
     },
-    "timeAttack": {
-      "title": "Time Attack",
-      "text": "As many puzzles as you can – against the clock. Only if you're in the mood."
+    "duel": {
+      "title": "Duel",
+      "text": "Two players in the same Wi-Fi: who spots the views faster? Connect with a QR code."
     }
   },
   "nav": {
@@ -38,7 +38,8 @@
     "home": "Play",
     "language": "Deutsch",
     "guess": "Guess the view",
-    "build": "Build it"
+    "build": "Build it",
+    "duel": "Duel"
   },
   "about": {
     "title": "About Wyrfl",
@@ -55,7 +56,10 @@
       "three": "3D rendering of the cube buildings",
       "astro": "Generates the pages as static HTML",
       "tailwindcss": "Styling (CSS)",
-      "vitest": "Automated tests of the game logic"
+      "vitest": "Automated tests of the game logic",
+      "qrcode-generator": "QR code for the duel connection",
+      "qr-scanner": "Reading the QR code with the camera",
+      "jsqr": "QR detection (included in qr-scanner)"
     }
   },
   "levels": {
@@ -115,5 +119,65 @@
     "successNote": "By the way: there is often more than one right answer.",
     "almost": "Almost! The dashed squares don’t match yet.",
     "empty": "Put a few cubes on the board first."
+  },
+  "duel": {
+    "intro": "Play as two – each on your own device in the same Wi-Fi. You get the same puzzles. Who is faster and more accurate?",
+    "privacy": "Your devices connect directly to each other. Nothing leaves your Wi-Fi – no server, no sign-up.",
+    "nameLabel": "Your name (optional)",
+    "namePlaceholder": "e.g. Sam",
+    "host": "Start a duel",
+    "join": "Scan a code",
+    "unsupported": "Sorry, this browser can’t make a direct connection. Try a current Chrome, Edge, Firefox or Safari.",
+    "colorHost": "Blue",
+    "colorGuest": "Yellow",
+    "preparing": "Preparing the code …",
+    "step1": "1. Scan this code with the other device – just use the camera app.",
+    "step2": "2. The other device then shows a code. Scan it here:",
+    "scanAnswer": "Scan answer code",
+    "answerTitle": "Almost there!",
+    "answerText": "Show this code to the first device and tap “Scan answer code” there.",
+    "waiting": "Waiting for the connection …",
+    "connecting": "Connecting …",
+    "noCamera": "Without a camera",
+    "copyLink": "Copy link",
+    "copyCode": "Copy code",
+    "copied": "Copied!",
+    "pasteLabel": "Paste the code from the other device",
+    "connect": "Connect",
+    "scanTitle": "Point the camera at the code",
+    "cancel": "Cancel",
+    "cameraError": "The camera can’t be opened. Allow access or use “Without a camera”.",
+    "wrongCode": "That’s not a matching Wyrfl code. Try again.",
+    "failed": "The connection didn’t work. Are you in the same Wi-Fi? Some school or guest networks don’t allow direct connections.",
+    "connected": "Connected to {name}!",
+    "level": "Difficulty",
+    "rounds": "Puzzles",
+    "start": "Let’s go!",
+    "hostChooses": "{name} is choosing the settings. Starting soon …",
+    "get_ready": "Get ready!",
+    "round": "Puzzle {n} of {total}",
+    "opponentProgress": "{name}: {done} of {total}",
+    "waitFor": "Done! Waiting for {name} …",
+    "won": "You won!",
+    "lost": "{name} won this time.",
+    "lostClose": "So close! {name} won this time.",
+    "tie": "It’s a tie – you’re equally good!",
+    "points": "{points} points",
+    "you": "You",
+    "roundCol": "Puzzle",
+    "faster": "faster",
+    "rules": "Points: 3 for the first try, 2 for the second, otherwise 1. A hint costs 1. The faster player gets 1 lightning point.",
+    "hl": {
+      "allFirstTry": "Every puzzle right on the first try!",
+      "firstTry": "{count}× right on the first try",
+      "faster": "{count}× faster",
+      "fastest": "Fastest puzzle: {seconds} s"
+    },
+    "rematch": "Rematch!",
+    "rematchAsked": "{name} wants a rematch!",
+    "rematchWait": "Waiting for {name} …",
+    "end": "Finish",
+    "disconnected": "The connection to {name} is gone.",
+    "newDuel": "New duel"
   }
 }

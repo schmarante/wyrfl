@@ -7,7 +7,7 @@ Wyrfl is a free puzzle game for kids and teens (and everyone else). Players tran
 - **Guess the view** – which of six pictures shows the building from the front?
 - **Build it** – three blueprints are given, place the cubes so every view fits.
 - **Daily Wyrfl** – one new puzzle every day, the same for everyone, with a spoiler-free emoji result to share.
-- **Time Attack** – quickfire practice against the clock (the only timed mode).
+- **Duel** – two players, two devices, same Wi-Fi: paired by QR code, connected directly (WebRTC, no server), same puzzles – who is faster and more accurate?
 
 No sign-up, no ads, no tracking – progress stays in the browser (`localStorage`). Languages: German and English.
 
@@ -39,6 +39,9 @@ Wyrfl is built on great open-source projects. Thanks to everyone who contributes
 | Project | Used for | License |
 |---|---|---|
 | [three.js](https://threejs.org) | 3D rendering of the cube buildings | MIT |
+| [QR Code Generator](https://github.com/kazuhikoarase/qrcode-generator) | QR code for the duel connection | MIT |
+| [QR Scanner](https://github.com/nimiq/qr-scanner) | Reading the QR code with the camera | MIT |
+| [jsQR](https://github.com/cozmo/jsQR) | QR detection (included in qr-scanner) | Apache-2.0 |
 
 ### For building
 

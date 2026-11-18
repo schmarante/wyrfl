@@ -1,0 +1,39 @@
+---
+// Playing field of the View Guesser (3D building, question, six options, feedback) – used by GuessGame and DuelGame.
+// Logic: src/scripts/ui/guess-board.js
+import { useTranslations } from '../i18n/index.js';
+import Icon from './Icon.astro';
+
+interface Props {
+  locale: 'de' | 'en';
+}
+const t = useTranslations(Astro.props.locale);
+---
+
+<div data-guess-board>
+  <h1 data-question class="text-xl font-bold">&nbsp;</h1>
+  <p data-side-note hidden class="mt-1 text-sm text-muted">{t('guess.sideNote')}</p>
+
+  <div class="relative mt-3 aspect-square w-full sm:aspect-[4/3]">
+    <canvas data-canvas class="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing" role="img"
+            aria-label={t('home.dragHint')}></canvas>
+    <p data-loading class="absolute inset-0 grid place-items-center text-muted">{t('game.loading')}</p>
+  </div>
+
+  <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+    <p class="text-sm text-muted">{t('home.dragHint')}</p>
+    <div class="flex gap-2">
+      <button type="button" data-iso hidden class="press min-h-11 rounded-full bg-line px-4 text-sm font-semibold hover:bg-cube/40">
+        {t('guess.backToIso')}
+      </button>
+      <button type="button" data-hint disabled
+              class="press inline-flex min-h-11 items-center gap-1.5 rounded-full bg-line px-4 text-sm font-semibold hover:bg-cube/40 disabled:cursor-not-allowed disabled:opacity-40">
+        <Icon name="bulb" /> {t('guess.hint')}
+      </button>
+    </div>
+  </div>
+
+  <ul data-options class="mt-4 grid grid-cols-3 gap-2 sm:gap-3"></ul>
+
+  <p data-feedback class="mt-4 min-h-12 px-1 text-base font-semibold" aria-live="polite"></p>
+</div>
