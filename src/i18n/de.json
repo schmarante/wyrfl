@@ -53,7 +53,8 @@
       "qrcode-generator": "QR-Code für die Duell-Verbindung",
       "qr-scanner": "QR-Code mit der Kamera lesen",
       "jsqr": "QR-Erkennung (in qr-scanner enthalten)",
-      "fluent-emoji": "Spielfiguren im Duell (Tiere, Obst und Gemüse)"
+      "fluent-emoji": "Spielfiguren im Duell (Tiere, Obst und Gemüse)",
+      "flag-icons": "Flaggen im Sprachmenü"
     },
     "assets": "Grafiken",
     "author": "Autor",

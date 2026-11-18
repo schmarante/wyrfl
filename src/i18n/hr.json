@@ -58,7 +58,8 @@
       "qrcode-generator": "QR kod za povezivanje u dvoboju",
       "qr-scanner": "Čitanje QR koda kamerom",
       "jsqr": "Prepoznavanje QR koda (dio qr-scannera)",
-      "fluent-emoji": "Likovi u dvoboju (životinje, voće i povrće)"
+      "fluent-emoji": "Likovi u dvoboju (životinje, voće i povrće)",
+      "flag-icons": "Zastave u izborniku jezika"
     },
     "assets": "Grafika",
     "author": "Autor",

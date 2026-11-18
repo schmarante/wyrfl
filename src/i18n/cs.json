@@ -58,7 +58,8 @@
       "qrcode-generator": "QR kód pro spojení v souboji",
       "qr-scanner": "Čtení QR kódu kamerou",
       "jsqr": "Rozpoznávání QR kódů (součást qr-scanner)",
-      "fluent-emoji": "Postavičky v souboji (zvířata, ovoce a zelenina)"
+      "fluent-emoji": "Postavičky v souboji (zvířata, ovoce a zelenina)",
+      "flag-icons": "Vlajky v nabídce jazyků"
     },
     "assets": "Grafika",
     "author": "Autor",

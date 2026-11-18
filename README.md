@@ -48,6 +48,7 @@ Wyrfl is built on great open-source projects. Thanks to everyone who contributes
 | Project | Used for | License |
 |---|---|---|
 | [Fluent Emoji (Microsoft)](https://github.com/microsoft/fluentui-emoji) | Duel characters (animals, fruit and vegetables) | MIT |
+| [flag-icons](https://github.com/lipis/flag-icons) | Flags in the language menu | MIT |
 
 ### For building
 

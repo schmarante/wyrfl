@@ -58,7 +58,8 @@
       "qrcode-generator": "Kod QR do połączenia w pojedynku",
       "qr-scanner": "Odczyt kodu QR kamerą",
       "jsqr": "Rozpoznawanie kodów QR (część qr-scanner)",
-      "fluent-emoji": "Postacie w pojedynku (zwierzęta, owoce i warzywa)"
+      "fluent-emoji": "Postacie w pojedynku (zwierzęta, owoce i warzywa)",
+      "flag-icons": "Flagi w menu języków"
     },
     "assets": "Grafiki",
     "author": "Autor",

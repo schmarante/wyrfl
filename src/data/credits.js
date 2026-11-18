@@ -17,6 +17,7 @@ export const RUNTIME = [
 
 export const ASSETS = [
   { id: 'fluent-emoji', name: 'Fluent Emoji (Microsoft)', url: 'https://github.com/microsoft/fluentui-emoji', license: 'MIT' },
+  { id: 'flag-icons', name: 'flag-icons', url: 'https://github.com/lipis/flag-icons', license: 'MIT' },
 ];
 
 export const BUILD = [

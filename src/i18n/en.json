@@ -53,7 +53,8 @@
       "qrcode-generator": "QR code for the duel connection",
       "qr-scanner": "Reading the QR code with the camera",
       "jsqr": "QR detection (included in qr-scanner)",
-      "fluent-emoji": "Duel characters (animals, fruit and vegetables)"
+      "fluent-emoji": "Duel characters (animals, fruit and vegetables)",
+      "flag-icons": "Flags in the language menu"
     },
     "assets": "Graphics",
     "author": "Author",

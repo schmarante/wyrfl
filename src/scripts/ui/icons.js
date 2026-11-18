@@ -1,4 +1,11 @@
 // Small inline SVG icons (currentColor) – no emoji, so they look the same on every device and need no icon font.
+import flagDe from 'flag-icons/flags/1x1/de.svg?url';
+import flagGb from 'flag-icons/flags/1x1/gb.svg?url';
+import flagFr from 'flag-icons/flags/1x1/fr.svg?url';
+import flagEs from 'flag-icons/flags/1x1/es.svg?url';
+import flagHr from 'flag-icons/flags/1x1/hr.svg?url';
+import flagPl from 'flag-icons/flags/1x1/pl.svg?url';
+import flagCz from 'flag-icons/flags/1x1/cz.svg?url';
 const svg = (body, size = 18, extra = '') =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="inline-block shrink-0"${extra}>${body}</svg>`;
 
@@ -26,41 +33,17 @@ export const ICONS = {
   duel: svg('<circle cx="7" cy="8" r="3"/><circle cx="17" cy="8" r="3"/><path d="M2 20c0-3 2.2-5 5-5s5 2 5 5M12 20c0-3 2.2-5 5-5s5 2 5 5"/>', 30),
 };
 
-// language flags (public-domain designs, simplified), round: the 3:2 flag is cropped to its centre (slice) – same
-// 22 px as the header icons
-const flag = body => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20" width="22" height="22" preserveAspectRatio="xMidYMid slice" aria-hidden="true" class="block shrink-0 rounded-full ring-1 ring-black/15">${body}</svg>`;
-const stripesH = (...colors) => colors.map((c, i) => `<rect y="${(20 / colors.length) * i}" width="30" height="${20 / colors.length + 0.05}" fill="${c}"/>`).join('');
-const stripesV = (...colors) => colors.map((c, i) => `<rect x="${(30 / colors.length) * i}" width="${30 / colors.length + 0.05}" height="20" fill="${c}"/>`).join('');
-// Croatian coat of arms, simplified: chequy shield (red top left) clipped to its shape – straight top, rounded
-// bottom, reaching from the red into the blue stripe – and a crown of five small shields above it
-const hrShield = (() => {
-  const cell = 1.4;
-  const x0 = 15 - 2.5 * cell;
-  const x1 = x0 + 5 * cell;
-  const y0 = 6.2;   // crown in the red stripe, shield from the white into the blue one
-  const shield = `M${x0} ${y0}H${x1}V${y0 + 4.7}C${x1} ${y0 + 6.6} 17 ${y0 + 7.9} 15 ${y0 + 7.9}S${x0} ${y0 + 6.6} ${x0} ${y0 + 4.7}Z`;
-  let cells = '';
-  for (let r = 0; r < 6; r++) for (let c = 0; c < 5; c++) if ((r + c) % 2 === 0) cells += `<rect x="${x0 + c * cell}" y="${y0 + r * cell}" width="${cell}" height="${cell}" fill="#FF0000"/>`;
-  const w = cell - 0.2;
-  const crown = [0.5, 0.15, 0, 0.15, 0.5]
-    .map((drop, i) => {
-      const x = x0 + i * cell + 0.1;
-      const y = y0 - 1.75 + drop;
-      return `<path d="M${x} ${y}h${w}v0.75c0 0.55-${w * 0.25} 0.85-${w / 2} 0.85s-${w / 2}-0.3-${w / 2}-0.85Z" fill="${i % 2 ? '#171796' : '#0093DD'}" stroke="#fff" stroke-width="0.14"/>`;
-    })
-    .join('');
-  return `<clipPath id="flag-hr-shield"><path d="${shield}"/></clipPath>${crown}<path d="${shield}" fill="#fff"/>`
-    + `<g clip-path="url(#flag-hr-shield)">${cells}</g><path d="${shield}" fill="none" stroke="#FF0000" stroke-width="0.25"/>`;
-})();
-
+// language flags: flag-icons (MIT, github.com/lipis/flag-icons), square versions cropped round – same 22 px as the
+// header icons. Bundled by Vite: the small ones inline, the big ones (coats of arms) as files – no external request.
+const flag = src => `<img src="${src}" alt="" width="22" height="22" class="block shrink-0 rounded-full ring-1 ring-black/15" draggable="false" />`;
 export const FLAGS = {
-  de: flag(stripesH('#000', '#DD0000', '#FFCE00')),
-  en: flag('<clipPath id="flag-uk-t"><path d="M15,10h15v10zv10h-15zh-15v-10zv-10h15z"/></clipPath><path d="M0,0v20h30v-20z" fill="#012169"/><path d="M0,0 30,20M30,0 0,20" stroke="#fff" stroke-width="4"/><path d="M0,0 30,20M30,0 0,20" clip-path="url(#flag-uk-t)" stroke="#C8102E" stroke-width="2.6"/><path d="M15,0v20M0,10h30" stroke="#fff" stroke-width="6.6"/><path d="M15,0v20M0,10h30" stroke="#C8102E" stroke-width="4"/>'),
-  fr: flag(stripesV('#002395', '#fff', '#ED2939')),
-  es: flag('<rect width="30" height="20" fill="#AA151B"/><rect y="5" width="30" height="10" fill="#F1BF00"/>'),
-  hr: flag(stripesH('#FF0000', '#fff', '#171796') + hrShield),
-  pl: flag(stripesH('#fff', '#DC143C')),
-  cs: flag('<rect width="30" height="10" fill="#fff"/><rect y="10" width="30" height="10" fill="#D7141A"/><path d="M0 0 15 10 0 20Z" fill="#11457E"/>'),
+  de: flag(flagDe),
+  en: flag(flagGb),
+  fr: flag(flagFr),
+  es: flag(flagEs),
+  hr: flag(flagHr),
+  pl: flag(flagPl),
+  cs: flag(flagCz),
 };
 
 // cube style previews (header menu): an iso cube in the colors of each style

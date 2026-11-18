@@ -53,7 +53,8 @@
       "qrcode-generator": "Código QR para la conexión del duelo",
       "qr-scanner": "Leer el código QR con la cámara",
       "jsqr": "Detección de QR (incluido en qr-scanner)",
-      "fluent-emoji": "Personajes del duelo (animales, frutas y verduras)"
+      "fluent-emoji": "Personajes del duelo (animales, frutas y verduras)",
+      "flag-icons": "Banderas del menú de idiomas"
     },
     "assets": "Gráficos",
     "author": "Autor",
