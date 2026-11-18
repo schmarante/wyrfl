@@ -1,6 +1,6 @@
 ---
-// Start page: hero (claim + turntable with buildings that assemble themselves, changing sizes) and the game modes –
-// side by side from tablet landscape / desktop on, below each other on phones.
+// Start page: hero (turntable with buildings that assemble themselves, changing sizes) and – beside it from tablet
+// landscape / desktop on, below it on phones – the claim with the game modes underneath.
 import { useTranslations, localePath } from '../i18n/index.js';
 import Icon from './Icon.astro';
 
@@ -20,12 +20,14 @@ const side = 'lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] land:grid-cols-[minm
 <div class={`mt-1 grid gap-3 lg:gap-4 ${side}`}>
   <section id="hero" class="relative overflow-hidden rounded-3xl border border-line bg-surface aspect-[6/5] sm:aspect-[16/10] lg:aspect-auto lg:min-h-[30rem] land:aspect-auto land:h-[calc(100dvh-5.5rem)]">
     <canvas data-hero class="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing" aria-hidden="true"></canvas>
-    <h1 class="pointer-events-none absolute inset-x-4 top-3 text-2xl font-extrabold leading-tight sm:top-5 sm:text-3xl lg:inset-x-6 lg:text-4xl">
-      {t('home.claim')}
-    </h1>
   </section>
 
-  <ul class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 lg:content-center land:grid-cols-1 land:content-center">
+  <!-- claim + game modes: right of the hero (tablet landscape / desktop), below it on phones -->
+  <div class="flex flex-col gap-3 lg:justify-center land:justify-center">
+  <h1 class="px-1 text-2xl font-extrabold leading-tight sm:text-3xl lg:mb-2 lg:text-4xl land:mb-2">
+    {t('home.claim')}
+  </h1>
+  <ul class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 land:grid-cols-1">
     {modes.map(mode => (
       <li>
         <a href={localePath(locale, mode.path)}
@@ -39,6 +41,7 @@ const side = 'lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] land:grid-cols-[minm
       </li>
     ))}
   </ul>
+  </div>
 </div>
 
 <script>
