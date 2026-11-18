@@ -1,0 +1,28 @@
+---
+// Every page in every language except German, under its translated slug (/fr/deviner/ …) – and the old English slugs
+// of those languages (/fr/guess/ …), which redirect.
+import Base from '../../../layouts/Base.astro';
+import Redirect from '../../../components/Redirect.astro';
+import GuessGame from '../../../components/GuessGame.astro';
+import BuildGame from '../../../components/BuildGame.astro';
+import DuelGame from '../../../components/DuelGame.astro';
+import About from '../../../components/About.astro';
+import { useTranslations, localePath, otherLocalePagePaths } from '../../../i18n/index.js';
+
+export const getStaticPaths = otherLocalePagePaths;
+const { lang } = Astro.params;
+const { page, redirect } = Astro.props as { page: 'guess' | 'build' | 'duel' | 'about'; redirect?: boolean };
+const t = useTranslations(lang);
+const titles = { guess: 'modes.guess.title', build: 'modes.build.title', duel: 'modes.duel.title', about: 'about.title' };
+---
+
+{redirect ? (
+  <Redirect to={localePath(lang, page)} />
+) : (
+  <Base locale={lang} page={page} title={t(titles[page])}>
+    {page === 'guess' && <GuessGame locale={lang} />}
+    {page === 'build' && <BuildGame locale={lang} />}
+    {page === 'duel' && <DuelGame locale={lang} />}
+    {page === 'about' && <About locale={lang} />}
+  </Base>
+)}

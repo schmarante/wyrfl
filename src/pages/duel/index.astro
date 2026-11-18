@@ -1,9 +1,7 @@
 ---
-import Base from '../../layouts/Base.astro';
-import DuelGame from '../../components/DuelGame.astro';
-import { useTranslations } from '../../i18n/index.js';
+// old address (before translated slugs) → the German page
+import Redirect from '../../components/Redirect.astro';
+import { localePath } from '../../i18n/index.js';
 ---
 
-<Base locale="de" page="duel/" title={useTranslations('de')('modes.duel.title')}>
-  <DuelGame locale="de" />
-</Base>
+<Redirect to={localePath('de', 'duel')} />

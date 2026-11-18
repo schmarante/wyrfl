@@ -1,9 +1,7 @@
 ---
-import Base from '../../layouts/Base.astro';
-import BuildGame from '../../components/BuildGame.astro';
-import { useTranslations } from '../../i18n/index.js';
+// old address (before translated slugs) → the German page
+import Redirect from '../../components/Redirect.astro';
+import { localePath } from '../../i18n/index.js';
 ---
 
-<Base locale="de" page="build/" title={useTranslations('de')('modes.build.title')}>
-  <BuildGame locale="de" />
-</Base>
+<Redirect to={localePath('de', 'build')} />

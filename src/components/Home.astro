@@ -10,9 +10,9 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 const modes = [
-  { id: 'guess', path: 'guess/', icon: 'eye', tint: 'bg-cube/15 text-cube' },
-  { id: 'build', path: 'build/', icon: 'build', tint: 'bg-front/20 text-front' },
-  { id: 'duel', path: 'duel/', icon: 'duel', tint: 'bg-cube/15 text-cube' },
+  { id: 'guess', icon: 'eye', tint: 'bg-cube/15 text-cube' },
+  { id: 'build', icon: 'build', tint: 'bg-front/20 text-front' },
+  { id: 'duel', icon: 'duel', tint: 'bg-cube/15 text-cube' },
 ] as const;
 const side = 'lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] land:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]';
 ---
@@ -30,7 +30,7 @@ const side = 'lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] land:grid-cols-[minm
   <ul class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 land:grid-cols-1">
     {modes.map(mode => (
       <li>
-        <a href={localePath(locale, mode.path)}
+        <a href={localePath(locale, mode.id)}
            class="press flex h-full items-center gap-4 rounded-3xl border-2 border-line bg-surface p-4 hover:border-cube sm:flex-col sm:items-start lg:flex-row lg:items-center land:flex-row land:items-center lg:p-5">
           <span class:list={['grid h-14 w-14 shrink-0 place-items-center rounded-2xl', mode.tint]}><Icon name={mode.icon} /></span>
           <span class="flex flex-col gap-1">

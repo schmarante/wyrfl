@@ -1,0 +1,9 @@
+---
+import Base from '../../layouts/Base.astro';
+import DuelGame from '../../components/DuelGame.astro';
+import { useTranslations } from '../../i18n/index.js';
+---
+
+<Base locale="de" page="duel" title={useTranslations('de')('modes.duel.title')}>
+  <DuelGame locale="de" />
+</Base>

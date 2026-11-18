@@ -115,7 +115,7 @@ export function startDuelApp(root, t) {
       return show('start');
     }
     // language-neutral link (no /en/ …): every guest opens it in their own language
-    const url = `${location.origin}${localePath(DEFAULT_LOCALE, 'duel/')}#join=${pairing.code}`;
+    const url = `${location.origin}${localePath(DEFAULT_LOCALE, 'duel')}#join=${pairing.code}`;
     await renderQr($('[data-offer-qr]'), url);
     $('[data-scan-answer]').disabled = false;
     debugCopy('[data-copy-link]', url);

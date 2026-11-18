@@ -7,7 +7,7 @@ import Icon from '../components/Icon.astro';
 
 interface Props {
   locale: string;
-  page: '' | 'about/' | 'guess/' | 'build/' | 'duel/';
+  page: '' | 'guess' | 'build' | 'duel' | 'about';   // page id – the URL slug is translated (SLUGS)
   title?: string;
 }
 const { locale, page, title } = Astro.props;
@@ -40,7 +40,7 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
          browser languages in order > German. The language lives in the URL here (/en/, /fr/ …): ?lang= works on every
          page, the rest only on German (unprefixed) pages – a shared /en/… link always opens in English.
          Runs before the first paint. -->
-    <script is:inline define:vars={{ codes: LANGUAGES.map(l => l.code), fallback: DEFAULT_LOCALE, current: locale, page, base }}>
+    <script is:inline define:vars={{ codes: LANGUAGES.map(l => l.code), fallback: DEFAULT_LOCALE, current: locale, paths: Object.fromEntries(LANGUAGES.map(l => [l.code, localePath(l.code, page)])) }}>
       try {
         const match = value => {
           const code = String(value || '').trim().toLowerCase().split(/[-_;]/)[0];
@@ -56,7 +56,7 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
         if (wanted !== current) {
           params.delete('lang');
           const search = params.toString() ? `?${params}` : '';
-          location.replace(`${base}${wanted === fallback ? '' : `/${wanted}`}/${page}${search}${location.hash}`);
+          location.replace(`${paths[wanted]}${search}${location.hash}`);   // translated slug of this page
         }
       } catch {}
     </script>
@@ -126,8 +126,8 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
             <span class="theme-dark-icon flex"><Icon name="sun" /></span>
             <span class="theme-light-icon flex" hidden><Icon name="moon" /></span>
           </button>
-          <a href={localePath(locale, 'about/')} data-locale-href="about/" class={iconButton} aria-label={t('nav.about')} data-i18n-aria="nav.about" title={t('nav.about')} data-i18n-title="nav.about"
-             aria-current={page === 'about/' ? 'page' : undefined}>
+          <a href={localePath(locale, 'about')} data-locale-href="about" class={iconButton} aria-label={t('nav.about')} data-i18n-aria="nav.about" title={t('nav.about')} data-i18n-title="nav.about"
+             aria-current={page === 'about' ? 'page' : undefined}>
             <Icon name="info" />
           </a>
         </nav>

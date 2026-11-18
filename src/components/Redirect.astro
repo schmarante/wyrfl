@@ -1,0 +1,23 @@
+---
+// Old address → new address (translated slugs). Keeps ?query and #hash – a duel join link (#join=…) still works.
+// Minimal page: script for an instant replace, meta refresh + link as fallback, not indexed.
+interface Props {
+  to: string;
+}
+const { to } = Astro.props;
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={to} />
+    <script is:inline define:vars={{ to }}>location.replace(to + location.search + location.hash);</script>
+    <meta http-equiv="refresh" content={`0; url=${to}`} />
+    <title>Wyrfl</title>
+  </head>
+  <body>
+    <a href={to}>Wyrfl</a>
+  </body>
+</html>
