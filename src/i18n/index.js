@@ -38,8 +38,11 @@ export const SLUGS = {
 /** t('duel.round', { n: 2, total: 5 }) → text with {placeholders} filled in; falls back to German. */
 export function useTranslations(locale = DEFAULT_LOCALE) {
   const lookup = (dict, key) => key.split('.').reduce((node, part) => node?.[part], dict);
+  const plural = new Intl.PluralRules(locale);
   return (key, params = {}) => {
-    const text = lookup(LOCALES[locale], key) ?? lookup(LOCALES[DEFAULT_LOCALE], key) ?? key;
+    let text = lookup(LOCALES[locale], key) ?? lookup(LOCALES[DEFAULT_LOCALE], key) ?? key;
+    // plural forms: { one, few, many, other } picked by params.count (Polish/Czech/Croatian need more than two)
+    if (text && typeof text === 'object' && 'other' in text && typeof params.count === 'number') text = text[plural.select(params.count)] ?? text.other;
     return typeof text === 'string' ? text.replace(/\{(\w+)\}/g, (m, name) => params[name] ?? m) : text;
   };
 }

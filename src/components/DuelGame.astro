@@ -45,12 +45,14 @@ const debug = import.meta.env.PUBLIC_DEBUG === 'true';
 
   {/* host: show offer, scan answer */}
   <div data-screen="host" hidden class={card}>
-    <h1 class="text-xl font-bold" data-i18n="duel.host">{t('duel.host')}</h1>
+    <h1 data-host-title class="text-xl font-bold">{t('duel.host')}</h1>
     <p class="mt-3" data-i18n="duel.step1">{t('duel.step1')}</p>
     <div data-offer-qr class={`${qrBox} mt-3 grid place-items-center text-muted`} data-i18n="duel.preparing">{t('duel.preparing')}</div>
     <p class="mt-5" data-i18n="duel.step2">{t('duel.step2')}</p>
     <button type="button" data-scan-answer disabled class={`${primary} mt-3 w-full`} data-i18n="duel.scanAnswer">{t('duel.scanAnswer')}</button>
     <p data-host-status class="mt-3 min-h-6 text-sm font-semibold" aria-live="polite"></p>
+    {/* adding a 3rd / 4th player: back without pairing */}
+    <button type="button" data-back-lobby hidden class={`${secondary} w-full`} data-i18n="duel.backToLobby">{t('duel.backToLobby')}</button>
     {debug && (
       <div class="mt-4 flex flex-col gap-2 rounded-xl border-2 border-dashed border-front/60 p-3 text-sm">
         <p class="font-semibold text-front">Debug: ohne Kamera koppeln</p>
@@ -101,6 +103,7 @@ const debug = import.meta.env.PUBLIC_DEBUG === 'true';
           ))}
         </div>
       </div>
+      <button type="button" data-add-player class={`${secondary} min-h-12 text-base`}></button>
       <button type="button" data-start class={primary} data-i18n="duel.start">{t('duel.start')}</button>
     </div>
     <p data-guest-only class="mt-4 text-muted"></p>
@@ -119,12 +122,10 @@ const debug = import.meta.env.PUBLIC_DEBUG === 'true';
   <div data-screen="play" hidden class="rounded-3xl border-2 border-line bg-surface p-3 sm:p-5">
     <div class="mb-2 flex items-center justify-between gap-2 text-sm">
       <span data-round class="font-semibold"></span>
-      <span data-opponent class="inline-flex items-center gap-1.5 rounded-full bg-line py-1 pl-1 pr-3 text-muted"></span>
+      <span data-opponents class="flex flex-wrap justify-end gap-1.5"></span>
     </div>
-    <div class="mb-3 flex gap-1" aria-hidden="true">
-      <div data-my-bar class="h-1.5 flex-1 overflow-hidden rounded-full bg-line"><div class="h-full w-0 bg-cube transition-all"></div></div>
-      <div data-their-bar class="h-1.5 flex-1 overflow-hidden rounded-full bg-line"><div class="h-full w-0 bg-front transition-all"></div></div>
-    </div>
+    {/* progress bars: mine first, then the others (built by duel-app.js) */}
+    <div data-bars class="mb-3 flex gap-1" aria-hidden="true"></div>
     <GuessBoard locale={locale}>
       <p data-wait hidden class="mt-2 text-center font-semibold text-muted" aria-live="polite"></p>
     </GuessBoard>
@@ -133,14 +134,11 @@ const debug = import.meta.env.PUBLIC_DEBUG === 'true';
   {/* results */}
   <div data-screen="results" hidden class={card}>
     <h1 data-result-title class="pop text-2xl font-extrabold"></h1>
-    <div class="mt-4 grid grid-cols-2 gap-3 text-center">
-      <div class="flex flex-col items-center gap-1 rounded-2xl bg-cube/15 p-3"><span data-me-avatar></span><p data-me-name class="text-sm text-muted"></p><p data-me-points class="text-2xl font-bold"></p></div>
-      <div class="flex flex-col items-center gap-1 rounded-2xl bg-front/15 p-3"><span data-them-avatar></span><p data-them-name class="text-sm text-muted"></p><p data-them-points class="text-2xl font-bold"></p></div>
-    </div>
+    <div data-scores class="mt-4 grid gap-3 text-center"></div>
     <ul data-highlights class="mt-4 flex flex-col gap-1 text-sm"></ul>
     <div class="mt-4 overflow-x-auto rounded-2xl border-2 border-line">
       <table class="w-full text-left text-sm">
-        <thead class="bg-bg/60 text-muted"><tr><th class="p-2" data-i18n="duel.roundCol">{t('duel.roundCol')}</th><th data-th-me class="p-2"></th><th data-th-them class="p-2"></th></tr></thead>
+        <thead class="bg-bg/60 text-muted"><tr data-thead></tr></thead>
         <tbody data-rows></tbody>
       </table>
     </div>

@@ -24,7 +24,7 @@
     },
     "duel": {
       "title": "Duell",
-      "text": "Zu zweit im selben WLAN: Wer erkennt die Ansichten schneller? Verbinden per QR-Code."
+      "text": "Zu zweit bis zu viert im selben WLAN: Wer erkennt die Ansichten am schnellsten? Verbinden per QR-Code."
     },
     "title": "Spielarten"
   },
@@ -119,7 +119,7 @@
     "removeHint": "Wegnehmen – geht auch mit Rechtsklick oder lange drücken"
   },
   "duel": {
-    "intro": "Spielt zu zweit – jede:r an einem eigenen Gerät im selben WLAN. Ihr bekommt dieselben Rätsel. Wer ist schneller und genauer?",
+    "intro": "Spielt zu zweit, zu dritt oder zu viert – jede:r an einem eigenen Gerät im selben WLAN. Ihr bekommt dieselben Rätsel. Wer ist am schnellsten und genauesten?",
     "privacy": "Eure Geräte verbinden sich direkt miteinander. Nichts verlässt euer WLAN, es gibt keinen Server und keine Anmeldung.",
     "host": "Duell starten",
     "join": "Code scannen",
@@ -145,32 +145,41 @@
     "get_ready": "Macht euch bereit!",
     "round": "Rätsel {n} von {total}",
     "opponentProgress": "{name}: {done} von {total}",
-    "waitFor": "Fertig! Warte auf {name} …",
+    "waitFor": "Fertig! Noch am Spielen: {name}",
     "won": "Gewonnen!",
     "lost": "{name} hat diesmal gewonnen.",
     "lostClose": "Knapp! {name} hat diesmal gewonnen.",
     "tie": "Unentschieden – ihr seid gleich gut!",
-    "points": "{points} Punkte",
+    "sharedWin": "Gewonnen – ihr teilt euch Platz 1!",
+    "lostMany": "Diesmal ganz vorne: {names}",
+    "points": {
+      "one": "{points} Punkt",
+      "few": "{points} Punkte",
+      "many": "{points} Punkte",
+      "other": "{points} Punkte"
+    },
     "you": "Du",
     "roundCol": "Rätsel",
-    "faster": "schneller",
+    "faster": "am schnellsten",
     "firstTry": "1. Versuch",
     "secondTry": "2. Versuch",
     "laterTry": "später gelöst",
     "hintUsed": "Tipp",
     "notSolved": "nicht gelöst",
     "scoringTitle": "So gibt’s Punkte",
-    "rules": "Punkte: 3 für den ersten Versuch, 2 für den zweiten, sonst 1. Tipp kostet 1. Wer schneller ist, bekommt 1 Blitz-Punkt.",
+    "rules": "Punkte: 3 für den ersten Versuch, 2 für den zweiten, sonst 1. Tipp kostet 1. Wer ein Rätsel am schnellsten löst, bekommt 1 Blitz-Punkt.",
     "hl": {
       "allFirstTry": "Jedes Rätsel beim ersten Versuch gelöst!",
       "firstTry": "{count}× beim ersten Versuch richtig",
-      "faster": "{count}× schneller gewesen",
+      "faster": "{count}× am schnellsten gewesen",
       "fastest": "Schnellstes Rätsel: {seconds} s"
     },
     "rematch": "Revanche!",
-    "rematchAsked": "{name} will eine Revanche!",
-    "rematchWait": "Warte auf {name} …",
+    "rematchAsked": "Revanche gewünscht: {name}",
+    "rematchWait": "Warte noch auf: {name}",
     "end": "Beenden",
+    "addPlayer": "Weitere Person dazuholen",
+    "backToLobby": "Zurück zur Lobby",
     "disconnected": "Die Verbindung zu {name} ist weg.",
     "leaveTitle": "Duell verlassen?",
     "leaveText": "Die Verbindung zu {name} wird getrennt.",

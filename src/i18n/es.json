@@ -24,7 +24,7 @@
     },
     "duel": {
       "title": "Duelo",
-      "text": "Dos jugadores en el mismo wifi: ¿quién reconoce las vistas más rápido? Conexión con código QR."
+      "text": "De dos a cuatro en el mismo wifi: ¿quién reconoce las vistas más rápido? Conexión con código QR."
     },
     "title": "Modos de juego"
   },
@@ -119,7 +119,7 @@
     "removeHint": "Quitar: también con clic derecho o manteniendo pulsado"
   },
   "duel": {
-    "intro": "Jugad de dos en dos, cada uno en su dispositivo y en el mismo wifi. Recibís los mismos acertijos. ¿Quién es más rápido y más preciso?",
+    "intro": "Jugad de dos, tres o cuatro, cada uno en su dispositivo y en el mismo wifi. Recibís los mismos acertijos. ¿Quién es más rápido y más preciso?",
     "privacy": "Vuestros dispositivos se conectan directamente. Nada sale de vuestro wifi: sin servidor y sin registro.",
     "host": "Empezar un duelo",
     "join": "Escanear un código",
@@ -145,32 +145,41 @@
     "get_ready": "¡Preparados!",
     "round": "Acertijo {n} de {total}",
     "opponentProgress": "{name}: {done} de {total}",
-    "waitFor": "¡Listo! {name} todavía está jugando …",
+    "waitFor": "¡Listo! Aún jugando: {name}",
     "won": "¡Has ganado!",
     "lost": "Esta vez ganó {name}.",
     "lostClose": "¡Por poco! Esta vez ganó {name}.",
     "tie": "¡Empate! Sois igual de buenos.",
-    "points": "{points} puntos",
+    "sharedWin": "¡Has ganado! Compartís el primer puesto.",
+    "lostMany": "Esta vez delante: {names}",
+    "points": {
+      "one": "{points} punto",
+      "few": "{points} puntos",
+      "many": "{points} puntos",
+      "other": "{points} puntos"
+    },
     "you": "Tú",
     "roundCol": "Acertijo",
-    "faster": "más rápido",
+    "faster": "el más rápido",
     "firstTry": "1.er intento",
     "secondTry": "2.º intento",
     "laterTry": "resuelto más tarde",
     "hintUsed": "pista",
     "notSolved": "sin resolver",
     "scoringTitle": "Así se ganan puntos",
-    "rules": "Puntos: 3 al primer intento, 2 al segundo y si no, 1. Una pista cuesta 1. El más rápido gana 1 punto rayo.",
+    "rules": "Puntos: 3 al primer intento, 2 al segundo y si no, 1. Una pista cuesta 1. Quien resuelva un acertijo más rápido gana 1 punto rayo.",
     "hl": {
       "allFirstTry": "¡Todos los acertijos bien al primer intento!",
       "firstTry": "{count}× bien al primer intento",
-      "faster": "{count}× más rápido",
+      "faster": "{count}× el más rápido",
       "fastest": "Acertijo más rápido: {seconds} s"
     },
     "rematch": "¡Revancha!",
-    "rematchAsked": "¡{name} quiere la revancha!",
-    "rematchWait": "Esperando a que {name} acepte …",
+    "rematchAsked": "Piden la revancha: {name}",
+    "rematchWait": "Aún esperando a: {name}",
     "end": "Terminar",
+    "addPlayer": "Añadir otra persona",
+    "backToLobby": "Volver a la sala",
     "disconnected": "Se ha perdido la conexión con {name}.",
     "leaveTitle": "¿Salir del duelo?",
     "leaveText": "Se cortará la conexión con {name}.",

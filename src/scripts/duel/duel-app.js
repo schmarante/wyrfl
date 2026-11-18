@@ -1,15 +1,19 @@
-// Duel mode UI (markup: src/components/DuelGame.astro).
+// Duel mode UI (markup: src/components/DuelGame.astro) – 2 to 4 players.
 //
 // Flow: start → host shows offer QR (link …/duel/#join=<code>) → guest opens it, shows answer QR → host scans it →
-// channel open → lobby (host picks level + number of puzzles) → countdown → both solve the same View Guesser puzzles
-// (seeded) at their own pace, progress goes live to the other side → results → rematch (when both want one).
+// channel open → lobby (host picks level + number of puzzles, can add another player: a new offer QR, up to 4) →
+// countdown → everybody solves the same View Guesser puzzles (seeded) at their own pace, progress goes live to the
+// others → results → rematch (when everybody still there wants one).
 //
-// Messages: { t: 'hello', avatar } · { t: 'setup', level, rounds } · { t: 'start', seed, level, rounds }
-//           { t: 'solved', round, tries, hint, ms } · { t: 'again' }
+// Star network: every guest is connected to the host only; the host relays. Player ids: host 'h', guests 'g1' …
+// Messages guest → host: { t: 'hello', avatar } · { t: 'solved', round, tries, hint, ms } · { t: 'again' }
+// Messages host → guest: { t: 'roster', you, players: [{ id, avatar, left }] } · { t: 'setup', level, rounds }
+//                        { t: 'start', seed, level, rounds, ids } · { t: 'solved', id, round, tries, hint, ms }
+//                        { t: 'again', id }
 // Times are measured on each device (puzzle shown → solved), so network delay never matters.
 
 import { rtcSupported, createOffer, answerOffer, messenger } from './rtc.js';
-import { compareResults, POINTS } from './score.js';
+import { scoreGame, POINTS } from './score.js';
 import { createGuessPuzzle } from '../game/guess.js';
 import { LEVELS, recordDuelWin } from '../game/progress.js';
 import { celebrateNewSkins } from '../ui/celebrate.js';
@@ -26,10 +30,13 @@ import { secureGet, secureSet } from '../game/store.js';
 
 const AVATAR_KEY = 'wyrfl:duel-avatar';
 const ROUNDS = [3, 5, 10];
+const MAX_PLAYERS = 4;
+const HOST_ID = 'h';
 const NEXT_DELAY = 1300;   // ms to look at the revealed answer before the next puzzle
 
 const randomSeed = () => Array.from(crypto.getRandomValues(new Uint32Array(2)), n => n.toString(36)).join('');
 const storage = { get: key => secureGet(key) ?? '', set: secureSet };   // scrambled + signed like the progress
+const validId = id => typeof id === 'string' && /^(h|g\d{1,2})$/.test(id);
 
 export function startDuelApp(root, t) {
   const $ = sel => root.querySelector(sel);
@@ -37,15 +44,19 @@ export function startDuelApp(root, t) {
   const bannerEl = $('[data-banner]');
   const scanner = { el: $('[data-scanner]'), video: $('[data-video]'), status: $('[data-scan-status]'), handle: null };
 
-  let role = null;        // 'host' | 'guest'
-  let pairing = null;     // offer/answer from rtc.js
-  let link = null;        // messenger on the open channel
+  let role = null;          // 'host' | 'guest'
+  let pairing = null;       // host: the open offer for the next guest · guest: own answer
   let accepting = false;
+  let hostLink = null;      // guest: messenger to the host
+  const peers = new Map();  // host: guest id → messenger
+  const connections = new Map();   // host: guest id → its peer connection (closed when the guest goes)
+  let nextGuest = 1;
+  let myId = null;
+  let players = [];         // [{ id, avatar, left }] – host first; `left`: dropped out of a running game
   let myAvatar = AVATARS.includes(storage.get(AVATAR_KEY)) ? storage.get(AVATAR_KEY) : AVATARS[crypto.getRandomValues(new Uint8Array(1))[0] % AVATARS.length];
-  let theirAvatar = null;
   let settings = { level: LEVELS[0], rounds: 5 };
-  let game = null;        // { seed, level, rounds, round, mine: [], theirs: [] }
-  let again = { me: false, them: false };
+  let game = null;          // { seed, level, rounds, round, ids, results: { id: [] }, finished }
+  let again = new Set();    // ids that want a rematch
   let current = 'start';
 
   const board = createGuessBoard($('[data-screen="play"] [data-guess-board]'), t, { onSolved });
@@ -61,10 +72,27 @@ export function startDuelApp(root, t) {
     bannerEl.textContent = text;
     bannerEl.hidden = !text;
   }
+  const isHost = () => role === 'host';
+  const isConnected = () => (isHost() ? peers.size > 0 : Boolean(hostLink));
+  const playerOf = id => players.find(p => p.id === id);
+  const avatarOf = id => (id === myId ? myAvatar : playerOf(id)?.avatar);
+  const nameOf = id => (avatarOf(id) ? t(`avatars.${avatarOf(id)}`) : '…');
+  const namesOf = ids => ids.map(nameOf).join(', ');
+  /** the others that are still here */
+  const others = () => players.filter(p => p.id !== myId && !p.left).map(p => p.id);
+  const otherNames = () => namesOf(others()) || '…';
   const myName = () => t(`avatars.${myAvatar}`);
-  const otherName = () => (theirAvatar ? t(`avatars.${theirAvatar}`) : '…');
+  const face = (id, size) =>
+    avatarOf(id) ? avatarImg(avatarOf(id), size) : `<span class="grid shrink-0 place-items-center text-muted" style="width:${size}px;height:${size}px">?</span>`;
   // "Puzzles: 5" instead of "5 Puzzles" – Slavic languages need another plural form after 5 than after 2–4
   const settingsText = s => `${t(`levels.${s.level}`)} · ${t('duel.rounds')}: ${s.rounds}`;
+
+  function broadcast(msg, except = null) {
+    for (const [id, link] of peers) if (id !== except) link.send(msg);
+  }
+  function sendRoster() {
+    for (const [id, link] of peers) link.send({ t: 'roster', you: id, players });
+  }
 
   /** test aid (PUBLIC_DEBUG=true): copy button for the join link / answer code – the elements exist only then */
   function debugCopy(selector, text) {
@@ -104,19 +132,42 @@ export function startDuelApp(root, t) {
 
   // ---- pairing -------------------------------------------------------------------------------
 
-  async function host() {
+  /** Host: start a duel – the first guest is paired next. */
+  function host() {
     role = 'host';
+    myId = HOST_ID;
+    players = [{ id: HOST_ID, avatar: myAvatar, left: false }];
     setLiveLocale(true);
     banner('');
+    openPairing();
+  }
+
+  /** Host: show a fresh offer QR for the next guest (first one, or a 3rd / 4th player from the lobby). */
+  async function openPairing() {
+    pairing?.close();
+    pairing = null;
+    accepting = false;
     show('host');
+    $('[data-host-title]').textContent = t(peers.size ? 'duel.addPlayer' : 'duel.host');
+    $('[data-back-lobby]').hidden = !peers.size;
+    $('[data-host-status]').textContent = '';
+    $('[data-offer-qr]').textContent = t('duel.preparing');
+    $('[data-scan-answer]').disabled = true;
+    const copyLink = root.querySelector('[data-copy-link]');   // test aid: not the previous guest's link
+    if (copyLink) copyLink.disabled = true;
+    const paste = root.querySelector('[data-paste]');
+    if (paste) paste.value = '';
+    let offer;
     try {
-      pairing = await createOffer();
+      offer = await createOffer();
     } catch {
       banner(t('duel.unsupported'));
-      return show('start');
+      return peers.size ? showLobby() : reset();
     }
+    if (!isHost() || current !== 'host' || pairing) return offer.close();   // left this screen meanwhile
+    pairing = offer;
     // language-neutral link (no /en/ …): every guest opens it in their own language
-    const url = `${location.origin}${localePath(DEFAULT_LOCALE, 'duel')}#join=${pairing.code}`;
+    const url = `${location.origin}${localePath(DEFAULT_LOCALE, 'duel')}#join=${offer.code}`;
     await renderQr($('[data-offer-qr]'), url);
     $('[data-scan-answer]').disabled = false;
     debugCopy('[data-copy-link]', url);
@@ -124,13 +175,16 @@ export function startDuelApp(root, t) {
 
   async function acceptAnswer(code) {
     if (accepting || !pairing) return;
+    const offer = pairing;
     const status = $('[data-host-status]');
     accepting = true;
     status.textContent = t('duel.connecting');
     try {
-      const channel = await pairing.accept(code);
+      const channel = await offer.accept(code);
+      pairing = null;   // in use now – must not be closed
+      accepting = false;
       closeScanner();
-      connected(channel);
+      addGuest(channel, offer);
     } catch (err) {
       accepting = false;
       if (err.message === 'invalid code') {
@@ -141,7 +195,11 @@ export function startDuelApp(root, t) {
         closeScanner();
         status.textContent = '';
         banner(t('duel.failed'));
-        reset();
+        if (peers.size) {
+          pairing?.close();
+          pairing = null;
+          showLobby();
+        } else reset();
       }
     }
   }
@@ -159,56 +217,133 @@ export function startDuelApp(root, t) {
     }
     await renderQr($('[data-answer-qr]'), pairing.code);
     debugCopy('[data-copy-code]', pairing.code);
-    pairing.channel.then(connected, () => {
-      banner(t('duel.failed'));
-      reset();
-    });
+    const mine = pairing;
+    mine.channel.then(
+      channel => pairing === mine && hostConnected(channel),
+      () => {
+        if (pairing !== mine) return;
+        banner(t('duel.failed'));
+        reset();
+      },
+    );
   }
 
   function reset() {
     setLiveLocale(false);
-    link?.close();
+    for (const link of peers.values()) link.close();
+    for (const offer of connections.values()) offer.close();
+    peers.clear();
+    connections.clear();
+    hostLink?.close();
     pairing?.close();
-    link = pairing = game = null;
-    role = null;
+    hostLink = pairing = game = null;
+    role = myId = null;
+    players = [];
+    nextGuest = 1;
     accepting = false;
-    theirAvatar = null;
+    again = new Set();
     $('[data-scan-answer]').disabled = true;
     $('[data-offer-qr]').textContent = t('duel.preparing');
     $('[data-answer-qr]').textContent = t('duel.connecting');
     show('start');
   }
 
-  // ---- connected -----------------------------------------------------------------------------
-
   // while connected, leaving the page (logo, info …) asks first – it would drop the connection
   guardLeaving({
-    active: () => Boolean(link),
-    texts: () => ({ title: t('duel.leaveTitle'), text: t('duel.leaveText', { name: otherName() }), stay: t('duel.stay'), leave: t('duel.leave') }),
+    active: isConnected,
+    texts: () => ({ title: t('duel.leaveTitle'), text: t('duel.leaveText', { name: otherNames() }), stay: t('duel.stay'), leave: t('duel.leave') }),
   });
 
-  function connected(channel) {
-    link = messenger(channel);
-    link.onmessage = onMessage;
-    link.onclose = onClose;
-    link.send({ t: 'hello', avatar: myAvatar });
+  // ---- host: guests --------------------------------------------------------------------------
+
+  function addGuest(channel, offer) {
+    const id = `g${nextGuest++}`;
+    const link = messenger(channel);
+    peers.set(id, link);
+    connections.set(id, offer);
+    players.push({ id, avatar: null, left: false });   // the avatar comes with 'hello'
+    link.onmessage = msg => onGuestMessage(id, msg);
+    link.onclose = () => onGuestClose(id);
+    link.send({ t: 'setup', ...settings });
+    sendRoster();
     banner('');
     showLobby();
   }
 
-  function showLobby() {
-    $('[data-connected]').textContent = t('duel.connected', { name: otherName() });
-    $('[data-versus]').innerHTML = `${avatarImg(myAvatar, 72)}<span class="text-lg font-bold text-muted">vs</span>${theirAvatar ? avatarImg(theirAvatar, 72) : '<span class="grid h-[72px] w-[72px] place-items-center text-3xl text-muted">?</span>'}`;
-    $('[data-host-only]').hidden = role !== 'host';
-    $('[data-guest-only]').hidden = role !== 'guest';
-    $('[data-guest-only]').textContent = `${t('duel.hostChooses', { name: otherName() })} (${settingsText(settings)})`;
-    if (role === 'host') link.send({ t: 'setup', ...settings });
-    show('lobby');
+  /** a character nobody else has (two players with the same fox would be confusing) */
+  function freeAvatar(wanted, id) {
+    const taken = new Set(players.filter(p => p.id !== id && p.avatar).map(p => p.avatar));
+    if (AVATARS.includes(wanted) && !taken.has(wanted)) return wanted;
+    return AVATARS.find(a => !taken.has(a));
   }
 
-  function onClose() {
-    const name = otherName();
-    link = null;
+  function onGuestMessage(id, msg) {
+    const player = playerOf(id);
+    if (!player) return;
+    switch (msg?.t) {
+      case 'hello':
+        player.avatar = freeAvatar(msg.avatar, id);
+        sendRoster();
+        if (current === 'lobby') showLobby();
+        if (game) updateProgress();
+        break;
+      case 'solved': {
+        const result = solvedResult(msg);
+        if (!game || !game.ids.includes(id) || !result) return;
+        game.results[id][msg.round] = result;
+        broadcast({ t: 'solved', id, round: msg.round, ...result }, id);
+        updateProgress();
+        checkDone();
+        break;
+      }
+      case 'again':
+        again.add(id);
+        broadcast({ t: 'again', id }, id);
+        rematchStatus();
+        maybeRematch();
+        break;
+    }
+  }
+
+  function onGuestClose(id) {
+    if (!peers.has(id)) return;
+    const name = nameOf(id);
+    peers.delete(id);
+    connections.get(id)?.close();
+    connections.delete(id);
+    const player = playerOf(id);
+    if (game && game.ids.includes(id)) player.left = true;   // keeps their points in this game
+    else players = players.filter(p => p.id !== id);
+    again.delete(id);
+    sendRoster();
+    if (!peers.size && current !== 'host') {
+      if (current === 'results') {
+        $('[data-rematch]').disabled = true;
+        $('[data-rematch-status]').textContent = t('duel.disconnected', { name });
+        return;
+      }
+      banner(t('duel.disconnected', { name }));
+      return reset();
+    }
+    banner(t('duel.disconnected', { name }));
+    afterRosterChange();
+    maybeRematch();
+  }
+
+  // ---- guest: the host -----------------------------------------------------------------------
+
+  function hostConnected(channel) {
+    hostLink = messenger(channel);
+    hostLink.onmessage = onHostMessage;
+    hostLink.onclose = onHostClose;
+    hostLink.send({ t: 'hello', avatar: myAvatar });
+    banner('');
+    showLobby();
+  }
+
+  function onHostClose() {
+    const name = nameOf(HOST_ID);
+    hostLink = null;
     if (current === 'results') {
       $('[data-rematch]').disabled = true;
       $('[data-rematch-status]').textContent = t('duel.disconnected', { name });
@@ -218,39 +353,85 @@ export function startDuelApp(root, t) {
     reset();
   }
 
-  function onMessage(msg) {
+  function onHostMessage(msg) {
     switch (msg?.t) {
-      case 'hello':
-        theirAvatar = AVATARS.includes(msg.avatar) ? msg.avatar : AVATARS[0];
-        if (current === 'lobby') showLobby();
+      case 'roster': {
+        if (!validId(msg.you) || !Array.isArray(msg.players) || msg.players.length > MAX_PLAYERS) return;
+        players = msg.players
+          .filter(p => validId(p?.id))
+          .map(p => ({ id: p.id, avatar: AVATARS.includes(p.avatar) ? p.avatar : null, left: Boolean(p.left) }));
+        myId = msg.you;
+        const assigned = playerOf(myId)?.avatar;
+        if (assigned) myAvatar = assigned;   // the host may have given another character (mine was taken)
+        afterRosterChange();
         break;
+      }
       case 'setup':
-        if (role === 'guest' && LEVELS.includes(msg.level) && ROUNDS.includes(msg.rounds)) {
+        if (LEVELS.includes(msg.level) && ROUNDS.includes(msg.rounds)) {
           settings = { level: msg.level, rounds: msg.rounds };
           if (current === 'lobby') showLobby();
         }
         break;
       case 'start':
-        if (role === 'guest' && LEVELS.includes(msg.level) && ROUNDS.includes(msg.rounds) && typeof msg.seed === 'string') {
-          startGame({ seed: msg.seed.slice(0, 32), level: msg.level, rounds: msg.rounds });
+        if (LEVELS.includes(msg.level) && ROUNDS.includes(msg.rounds) && typeof msg.seed === 'string'
+            && Array.isArray(msg.ids) && msg.ids.length <= MAX_PLAYERS && msg.ids.every(validId) && msg.ids.includes(myId)) {
+          startGame({ seed: msg.seed.slice(0, 32), level: msg.level, rounds: msg.rounds, ids: msg.ids });
         }
         break;
-      case 'solved':
-        if (game && Number.isInteger(msg.round) && msg.round >= 0 && msg.round < game.rounds) {
-          game.theirs[msg.round] = { tries: Math.max(1, +msg.tries || 1), hint: Boolean(msg.hint), ms: Math.max(0, +msg.ms || 0) };
-          updateProgress();
-          checkDone();
-        }
+      case 'solved': {
+        const result = solvedResult(msg);
+        if (!game || !game.ids.includes(msg.id) || msg.id === myId || !result) return;
+        game.results[msg.id][msg.round] = result;
+        updateProgress();
+        checkDone();
         break;
+      }
       case 'again':
-        again.them = true;
-        $('[data-rematch-status]').textContent = t('duel.rematchAsked', { name: otherName() });
-        maybeRematch();
+        if (validId(msg.id)) {
+          again.add(msg.id);
+          rematchStatus();
+        }
         break;
     }
   }
 
-  // ---- lobby (host) --------------------------------------------------------------------------
+  /** a checked result from a message, or null */
+  function solvedResult(msg) {
+    if (!game || !Number.isInteger(msg.round) || msg.round < 0 || msg.round >= game.rounds) return null;
+    return { tries: Math.max(1, Math.floor(+msg.tries) || 1), hint: Boolean(msg.hint), ms: Math.max(0, +msg.ms || 0) };
+  }
+
+  /** somebody joined, left or got a character: refresh what is on screen */
+  function afterRosterChange() {
+    if (current === 'lobby') showLobby();
+    if (game) {
+      updateProgress();
+      checkDone();
+      if (current === 'results') {
+        renderResults();
+        rematchStatus();
+      }
+    }
+  }
+
+  // ---- lobby ---------------------------------------------------------------------------------
+
+  function showLobby() {
+    const present = players.filter(p => !p.left).map(p => p.id);
+    const size = present.length > 2 ? 52 : 72;
+    $('[data-versus]').innerHTML = present.length === 2
+      ? `${face(myId, size)}<span class="text-lg font-bold text-muted">vs</span>${face(others()[0], size)}`
+      : [myId, ...present.filter(id => id !== myId)].map(id => face(id, size)).join('');
+    $('[data-connected]').textContent = t('duel.connected', { name: otherNames() });
+    $('[data-host-only]').hidden = !isHost();
+    $('[data-guest-only]').hidden = isHost();
+    $('[data-guest-only]').textContent = `${t('duel.hostChooses', { name: nameOf(HOST_ID) })} (${settingsText(settings)})`;
+    const add = $('[data-add-player]');
+    add.hidden = !isHost() || present.length >= MAX_PLAYERS;
+    add.textContent = `${t('duel.addPlayer')} (${present.length}/${MAX_PLAYERS})`;
+    if (isHost()) broadcast({ t: 'setup', ...settings });
+    show('lobby');
+  }
 
   function pick(groupSel, attr, value) {
     root.querySelectorAll(`${groupSel} button`).forEach(b => b.setAttribute('aria-pressed', String(b.dataset[attr] === String(value))));
@@ -259,32 +440,47 @@ export function startDuelApp(root, t) {
     b.addEventListener('click', () => {
       settings.level = b.dataset.level;
       pick('[data-duel-levels]', 'level', settings.level);
-      link?.send({ t: 'setup', ...settings });
+      broadcast({ t: 'setup', ...settings });
     }),
   );
   root.querySelectorAll('[data-rounds]').forEach(b =>
     b.addEventListener('click', () => {
       settings.rounds = +b.dataset.rounds;
       pick('[data-duel-rounds]', 'rounds', settings.rounds);
-      link?.send({ t: 'setup', ...settings });
+      broadcast({ t: 'setup', ...settings });
     }),
   );
   $('[data-start]').addEventListener('click', () => hostStart());
+  $('[data-add-player]').addEventListener('click', () => isHost() && openPairing());
+  $('[data-back-lobby]').addEventListener('click', () => {
+    closeScanner();
+    pairing?.close();
+    pairing = null;
+    if (peers.size) showLobby();
+    else reset();
+  });
 
   function hostStart() {
-    const msg = { t: 'start', seed: randomSeed(), ...settings };
-    link?.send(msg);
+    players = players.filter(p => !p.left && (p.id === HOST_ID || peers.has(p.id)));   // who dropped out stays out
+    if (players.length < 2) return;
+    sendRoster();
+    const msg = { t: 'start', seed: randomSeed(), ...settings, ids: players.map(p => p.id) };
+    broadcast(msg);
     startGame(msg);
   }
 
   // ---- the game ------------------------------------------------------------------------------
 
-  function startGame({ seed, level, rounds }) {
-    game = { seed, level, rounds, round: -1, mine: [], theirs: [], finished: false };
-    again = { me: false, them: false };
+  function startGame({ seed, level, rounds, ids }) {
+    game = { seed, level, rounds, ids, round: -1, results: Object.fromEntries(ids.map(id => [id, []])), finished: false };
+    again = new Set();
     $('[data-rematch]').disabled = false;
     $('[data-rematch-status]').textContent = '';
     $('[data-wait]').hidden = true;
+    // one progress bar per player, mine first
+    $('[data-bars]').innerHTML = [myId, ...ids.filter(id => id !== myId)]
+      .map(id => `<div data-bar="${id}" class="h-1.5 flex-1 overflow-hidden rounded-full bg-line"><div class="h-full w-0 ${id === myId ? 'bg-cube' : 'bg-front'} transition-all"></div></div>`)
+      .join('');
     show('countdown');
     const count = $('[data-count]');
     let n = 3;
@@ -315,8 +511,9 @@ export function startDuelApp(root, t) {
   function onSolved(result) {
     if (!game) return;
     const round = game.round;
-    game.mine[round] = result;
-    link?.send({ t: 'solved', round, ...result });
+    game.results[myId][round] = result;
+    if (isHost()) broadcast({ t: 'solved', id: myId, round, ...result });
+    else hostLink?.send({ t: 'solved', round, ...result });
     updateProgress();
     setTimeout(() => {
       if (!game || game.round !== round) return;
@@ -326,70 +523,105 @@ export function startDuelApp(root, t) {
     }, NEXT_DELAY);
   }
 
-  const done = list => list.filter(Boolean).length;
+  const done = id => game.results[id].filter(Boolean).length;
 
   function updateProgress() {
     if (!game) return;
-    $('[data-opponent]').innerHTML = `${theirAvatar ? avatarImg(theirAvatar, 24) : ''}<span>${done(game.theirs)}/${game.rounds}</span>`;
-    $('[data-opponent]').title = t('duel.opponentProgress', { name: otherName(), done: done(game.theirs), total: game.rounds });
-    $('[data-my-bar] div').style.width = `${(done(game.mine) / game.rounds) * 100}%`;
-    $('[data-their-bar] div').style.width = `${(done(game.theirs) / game.rounds) * 100}%`;
+    $('[data-opponents]').innerHTML = game.ids
+      .filter(id => id !== myId)
+      .map(id => {
+        const title = t('duel.opponentProgress', { name: nameOf(id), done: done(id), total: game.rounds });
+        const gone = playerOf(id)?.left ? ' opacity-40' : '';
+        return `<span class="inline-flex items-center gap-1.5 rounded-full bg-line py-1 pl-1 pr-3 text-muted${gone}" title="${title}">${face(id, 24)}<span>${done(id)}/${game.rounds}</span></span>`;
+      })
+      .join('');
+    for (const id of game.ids) {
+      const bar = root.querySelector(`[data-bar="${id}"] div`);
+      if (bar) bar.style.width = `${(done(id) / game.rounds) * 100}%`;
+    }
   }
 
-  /** Results once both are through – `game.finished` is set after my last answer was on screen for a moment. */
+  /** Results once everybody still here is through – `game.finished` is set after my last answer was on screen. */
   function checkDone() {
-    if (!game?.finished) return;
-    if (done(game.theirs) >= game.rounds) return showResults();
+    if (!game?.finished || current === 'results') return;
+    const pending = game.ids.filter(id => id !== myId && !playerOf(id)?.left && done(id) < game.rounds);
+    if (!pending.length) return showResults();
     board.lock();
     $('[data-wait]').hidden = false;
-    $('[data-wait]').textContent = t('duel.waitFor', { name: otherName() });
+    $('[data-wait]').textContent = t('duel.waitFor', { name: namesOf(pending) });
   }
 
+  let lastResult = null;
   function showResults() {
     renderResults();
     show('results');
-    if (lastResult.winner === 'mine') {
-      setTimeout(fireConfetti, 200);   // the winner's device: a short paper confetti burst
+    const { winners } = lastResult;
+    if (winners.includes(myId) && winners.length < game.ids.length) {
+      setTimeout(fireConfetti, 200);   // the winners' devices: a short paper confetti burst
       recordDuelWin();
       setTimeout(() => celebrateNewSkins(t), 900);   // first win: new cube style
     }
   }
 
-  let lastResult = null;
   function renderResults() {
-    const r = (lastResult = compareResults(game.mine, game.theirs, game.rounds));
-    const them = otherName();
-    $('[data-result-title]').textContent =
-      r.winner === 'mine' ? t('duel.won') : r.winner === 'tie' ? t('duel.tie')
-        : t(r.total.theirs - r.total.mine <= 3 ? 'duel.lostClose' : 'duel.lost', { name: them });
-    $('[data-me-name]').textContent = `${t('duel.you')} (${myName()})`;
-    $('[data-me-avatar]').innerHTML = avatarImg(myAvatar, 48);
-    $('[data-them-avatar]').innerHTML = theirAvatar ? avatarImg(theirAvatar, 48) : '';
-    $('[data-them-name]').textContent = them;
-    $('[data-me-points]').textContent = t('duel.points', { points: r.total.mine });
-    $('[data-them-points]').textContent = t('duel.points', { points: r.total.theirs });
-    $('[data-th-me]').textContent = t('duel.you');
-    $('[data-th-them]').textContent = them;
+    const r = (lastResult = scoreGame(game.results, game.rounds));
+    const everybody = r.winners.length === game.ids.length;
+    const top = r.winners[0];
+    $('[data-result-title]').textContent = everybody ? t('duel.tie')
+      : r.winners.includes(myId) ? t(r.winners.length > 1 ? 'duel.sharedWin' : 'duel.won')
+        : r.winners.length > 1 ? t('duel.lostMany', { names: namesOf(r.winners) })
+          : t(r.total[top] - r.total[myId] <= 3 ? 'duel.lostClose' : 'duel.lost', { name: nameOf(top) });
+
+    // one card per player, best first – mine tinted like my progress bar
+    const n = game.ids.length;
+    $('[data-scores]').className = `mt-4 grid gap-3 text-center ${n === 2 ? 'grid-cols-2' : n === 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'}`;
+    $('[data-scores]').innerHTML = r.ranking
+      .map(id => {
+        const mine = id === myId;
+        const crown = r.winners.includes(id) && !everybody ? `<span class="absolute right-2 top-2 text-star">${ICONS.star}</span>` : '';
+        return `<div class="relative flex flex-col items-center gap-1 rounded-2xl ${mine ? 'bg-cube/15' : 'bg-front/15'} p-3${playerOf(id)?.left ? ' opacity-60' : ''}">${crown}${face(id, n > 2 ? 40 : 48)}`
+          + `<p class="text-sm text-muted">${mine ? `${t('duel.you')} (${myName()})` : nameOf(id)}</p>`
+          + `<p class="${n > 2 ? 'text-xl' : 'text-2xl'} font-bold">${t('duel.points', { points: r.total[id], count: r.total[id] })}</p></div>`;
+      })
+      .join('');
+
     $('[data-highlights]').replaceChildren(
-      ...r.highlights.mine.map(h => {
+      ...r.highlights[myId].map(h => {
         const li = document.createElement('li');
         li.textContent = `★ ${t(`duel.hl.${h.key}`, { ...h, seconds: h.seconds?.toLocaleString(document.documentElement.lang) })}`;
         return li;
       }),
     );
-    // every cell: the points, below them where they come from (try, hint, faster)
+
+    // table: one column per player (same order as the cards); every cell shows where the points come from
+    // from 3 players on the table must fit a phone: names under the avatars, compact cells (details in the tooltip)
+    const compact = n > 2;
+    $('[data-thead]').innerHTML = `<th class="p-2">${t('duel.roundCol')}</th>`
+      + r.ranking.map(id => {
+        const label = id === myId ? t('duel.you') : nameOf(id);
+        return compact
+          ? `<th class="p-2 text-center" title="${label}"><span class="inline-flex flex-col items-center gap-0.5">${face(id, 24)}<span class="max-w-16 truncate text-xs">${label}</span></span></th>`
+          : `<th class="p-2"><span class="inline-flex items-center gap-1.5">${face(id, 20)}<span>${label}</span></span></th>`;
+      }).join('');
     const tryKey = tries => (tries === 1 ? 'duel.firstTry' : tries === 2 ? 'duel.secondTry' : 'duel.laterTry');
     const part = (label, value, cls = '') => `<span class="whitespace-nowrap ${cls}">${label} ${value}</span>`;
-    const cell = (result, points, faster) => {
-      const parts = result
-        ? [part(t(tryKey(result.tries)), `+${POINTS[Math.min(result.tries, POINTS.length) - 1]}`)]
-        : [part(t('duel.notSolved'), '0')];
-      if (result?.hint) parts.push(part(t('duel.hintUsed'), '−1'));
-      if (faster) parts.push(part(`${ICONS.bolt} ${t('duel.faster')}`, '+1', 'text-front'));
+    const cell = (result, points, fastest) => {
+      const words = result
+        ? [`${t(tryKey(result.tries))} +${POINTS[Math.min(result.tries, POINTS.length) - 1]}`]
+        : [`${t('duel.notSolved')} 0`];
+      if (result?.hint) words.push(`${t('duel.hintUsed')} −1`);
+      if (fastest) words.push(`${t('duel.faster')} +1`);
+      if (compact) {
+        const icons = `${fastest ? `<span class="text-front">${ICONS.bolt}</span>` : ''}${result?.hint ? `<span class="text-muted">${ICONS.bulb.replace('width="18" height="18"', 'width="13" height="13"')}</span>` : ''}`;
+        return `<span class="inline-flex items-center gap-1 font-bold" title="${words.join(' · ')}">${points}${icons}</span><span class="sr-only">${words.join(', ')}</span>`;
+      }
+      const parts = words.map((w, i) => part(i === words.length - 1 && fastest ? `${ICONS.bolt} ${w}` : w, '', fastest && i === words.length - 1 ? 'text-front' : ''));
       return `<span class="block font-bold">${points}</span><span class="block text-xs leading-snug text-muted">${parts.join(' · ')}</span>`;
     };
     $('[data-rows]').innerHTML = r.rows
-      .map(row => `<tr class="border-t border-line align-top"><td class="p-2">${row.round + 1}</td><td class="p-2">${cell(game.mine[row.round], row.mine, row.faster === 'mine')}</td><td class="p-2">${cell(game.theirs[row.round], row.theirs, row.faster === 'theirs')}</td></tr>`)
+      .map(row => `<tr class="border-t border-line align-top"><td class="p-2">${row.round + 1}</td>`
+        + r.ranking.map(id => `<td class="p-2${compact ? ' text-center' : ''}">${cell(game.results[id][row.round], row.points[id], row.fastest === id)}</td>`).join('')
+        + '</tr>')
       .join('');
 
     // footer: how points work
@@ -403,15 +635,29 @@ export function startDuelApp(root, t) {
 
   // ---- rematch / end -------------------------------------------------------------------------
 
+  /** everybody who is still connected */
+  const present = () => (isHost() ? [HOST_ID, ...peers.keys()] : players.filter(p => !p.left).map(p => p.id));
+
+  function rematchStatus() {
+    if (current !== 'results' || !isConnected()) return;
+    const waiting = present().filter(id => !again.has(id));
+    const asked = present().filter(id => id !== myId && again.has(id));
+    $('[data-rematch-status]').textContent = again.has(myId)
+      ? (waiting.length ? t('duel.rematchWait', { name: namesOf(waiting) }) : '')
+      : (asked.length ? t('duel.rematchAsked', { name: namesOf(asked) }) : '');
+  }
   function maybeRematch() {
-    if (role === 'host' && again.me && again.them) hostStart();
+    if (!isHost() || current !== 'results') return;
+    const ids = present();
+    if (ids.length >= 2 && ids.every(id => again.has(id))) hostStart();
   }
   $('[data-rematch]').addEventListener('click', () => {
-    if (!link) return;
-    again.me = true;
-    link.send({ t: 'again' });
+    if (!isConnected()) return;
+    again.add(myId);
+    if (isHost()) broadcast({ t: 'again', id: myId });
+    else hostLink.send({ t: 'again' });
     $('[data-rematch]').disabled = true;
-    if (!again.them) $('[data-rematch-status]').textContent = t('duel.rematchWait', { name: otherName() });
+    rematchStatus();
     maybeRematch();
   });
   $('[data-end]').addEventListener('click', () => {
@@ -423,6 +669,7 @@ export function startDuelApp(root, t) {
 
   window.addEventListener('wyrfl-locale', () => {
     document.title = `${t('modes.duel.title')} · Wyrfl`;
+    if (current === 'host') $('[data-host-title]').textContent = t(peers.size ? 'duel.addPlayer' : 'duel.host');
     if (current === 'lobby') showLobby();
     if (game) {
       if (game.round >= 0) {
@@ -431,8 +678,11 @@ export function startDuelApp(root, t) {
         board.relabel();
       }
       updateProgress();
-      if (!$('[data-wait]').hidden) $('[data-wait]').textContent = t('duel.waitFor', { name: otherName() });
-      if (current === 'results') renderResults();
+      if (!$('[data-wait]').hidden) checkDone();
+      if (current === 'results') {
+        renderResults();
+        rematchStatus();
+      }
     }
   });
 
@@ -479,7 +729,7 @@ export function startDuelApp(root, t) {
     history.replaceState(null, '', location.pathname + location.search);
     if (!rtcSupported()) return;
     closeScanner();
-    if (pairing || link || game) reset();
+    if (pairing || isConnected() || game) reset();
     guest(code);
   }
   addEventListener('hashchange', joinFromLink);

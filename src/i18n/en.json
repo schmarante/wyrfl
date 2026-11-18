@@ -24,7 +24,7 @@
     },
     "duel": {
       "title": "Duel",
-      "text": "Two players in the same Wi-Fi: who spots the views faster? Connect with a QR code."
+      "text": "Two to four players in the same Wi-Fi: who spots the views fastest? Connect with a QR code."
     },
     "title": "Game modes"
   },
@@ -119,7 +119,7 @@
     "removeHint": "Remove – also with a right click or a long press"
   },
   "duel": {
-    "intro": "Play as two – each on your own device in the same Wi-Fi. You get the same puzzles. Who is faster and more accurate?",
+    "intro": "Play with two, three or four – each on your own device in the same Wi-Fi. You all get the same puzzles. Who is fastest and most accurate?",
     "privacy": "Your devices connect directly to each other. Nothing leaves your Wi-Fi – no server, no sign-up.",
     "host": "Start a duel",
     "join": "Scan a code",
@@ -145,32 +145,41 @@
     "get_ready": "Get ready!",
     "round": "Puzzle {n} of {total}",
     "opponentProgress": "{name}: {done} of {total}",
-    "waitFor": "Done! Waiting for {name} …",
+    "waitFor": "Done! Still playing: {name}",
     "won": "You won!",
     "lost": "{name} won this time.",
     "lostClose": "So close! {name} won this time.",
     "tie": "It’s a tie – you’re equally good!",
-    "points": "{points} points",
+    "sharedWin": "You won – sharing first place!",
+    "lostMany": "In front this time: {names}",
+    "points": {
+      "one": "{points} point",
+      "few": "{points} points",
+      "many": "{points} points",
+      "other": "{points} points"
+    },
     "you": "You",
     "roundCol": "Puzzle",
-    "faster": "faster",
+    "faster": "fastest",
     "firstTry": "1st try",
     "secondTry": "2nd try",
     "laterTry": "solved later",
     "hintUsed": "hint",
     "notSolved": "not solved",
     "scoringTitle": "How points work",
-    "rules": "Points: 3 for the first try, 2 for the second, otherwise 1. A hint costs 1. The faster player gets 1 lightning point.",
+    "rules": "Points: 3 for the first try, 2 for the second, otherwise 1. A hint costs 1. Whoever solves a puzzle fastest gets 1 lightning point.",
     "hl": {
       "allFirstTry": "Every puzzle right on the first try!",
       "firstTry": "{count}× right on the first try",
-      "faster": "{count}× faster",
+      "faster": "{count}× the fastest",
       "fastest": "Fastest puzzle: {seconds} s"
     },
     "rematch": "Rematch!",
-    "rematchAsked": "{name} wants a rematch!",
-    "rematchWait": "Waiting for {name} …",
+    "rematchAsked": "Rematch wanted by: {name}",
+    "rematchWait": "Still waiting for: {name}",
     "end": "Finish",
+    "addPlayer": "Add another player",
+    "backToLobby": "Back to the lobby",
     "disconnected": "The connection to {name} is gone.",
     "leaveTitle": "Leave the duel?",
     "leaveText": "The connection to {name} will end.",

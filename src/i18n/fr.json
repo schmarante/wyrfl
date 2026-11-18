@@ -24,7 +24,7 @@
     },
     "duel": {
       "title": "Duel",
-      "text": "À deux dans le même Wi-Fi : qui reconnaît les vues le plus vite ? Connexion par QR code."
+      "text": "De deux à quatre dans le même Wi-Fi : qui reconnaît les vues le plus vite ? Connexion par QR code."
     },
     "title": "Modes de jeu"
   },
@@ -119,7 +119,7 @@
     "removeHint": "Enlever – marche aussi avec un clic droit ou un appui long"
   },
   "duel": {
-    "intro": "Jouez à deux – chacun sur son appareil, dans le même Wi-Fi. Vous recevez les mêmes énigmes. Qui sera le plus rapide et le plus précis ?",
+    "intro": "Jouez à deux, trois ou quatre – chacun sur son appareil, dans le même Wi-Fi. Vous recevez les mêmes énigmes. Qui sera le plus rapide et le plus précis ?",
     "privacy": "Vos appareils se connectent directement entre eux. Rien ne quitte votre Wi-Fi – pas de serveur, pas d’inscription.",
     "host": "Lancer un duel",
     "join": "Scanner un code",
@@ -145,32 +145,41 @@
     "get_ready": "Prêts ?",
     "round": "Énigme {n} sur {total}",
     "opponentProgress": "{name} : {done} sur {total}",
-    "waitFor": "Terminé ! {name} joue encore …",
+    "waitFor": "Terminé ! Encore en jeu : {name}",
     "won": "Gagné !",
     "lost": "{name} a gagné cette fois.",
     "lostClose": "De justesse ! {name} a gagné cette fois.",
     "tie": "Égalité – vous êtes aussi forts l’un que l’autre !",
-    "points": "{points} points",
+    "sharedWin": "Gagné – vous partagez la 1re place !",
+    "lostMany": "Devant cette fois : {names}",
+    "points": {
+      "one": "{points} point",
+      "few": "{points} points",
+      "many": "{points} points",
+      "other": "{points} points"
+    },
     "you": "Toi",
     "roundCol": "Énigme",
-    "faster": "plus rapide",
+    "faster": "le plus rapide",
     "firstTry": "1er essai",
     "secondTry": "2e essai",
     "laterTry": "trouvé plus tard",
     "hintUsed": "indice",
     "notSolved": "pas trouvé",
     "scoringTitle": "Comment on gagne des points",
-    "rules": "Points : 3 au premier essai, 2 au deuxième, sinon 1. Un indice coûte 1. Le plus rapide gagne 1 point éclair.",
+    "rules": "Points : 3 au premier essai, 2 au deuxième, sinon 1. Un indice coûte 1. Le plus rapide sur une énigme gagne 1 point éclair.",
     "hl": {
       "allFirstTry": "Toutes les énigmes réussies du premier coup !",
       "firstTry": "{count}× juste du premier coup",
-      "faster": "{count}× plus rapide",
+      "faster": "{count}× le plus rapide",
       "fastest": "Énigme la plus rapide : {seconds} s"
     },
     "rematch": "Revanche !",
-    "rematchAsked": "{name} veut une revanche !",
-    "rematchWait": "On attend que {name} accepte …",
+    "rematchAsked": "Revanche demandée : {name}",
+    "rematchWait": "On attend encore : {name}",
     "end": "Terminer",
+    "addPlayer": "Ajouter une personne",
+    "backToLobby": "Retour au salon",
     "disconnected": "La connexion avec {name} est perdue.",
     "leaveTitle": "Quitter le duel ?",
     "leaveText": "La connexion avec {name} sera coupée.",
