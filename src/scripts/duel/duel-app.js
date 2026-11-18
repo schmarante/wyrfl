@@ -26,6 +26,7 @@ import { localePath, DEFAULT_LOCALE } from '../../i18n/index.js';
 import { setLiveLocale } from '../ui/live-locale.js';
 import { guardLeaving } from '../ui/leave-guard.js';
 import { fireConfetti } from '../ui/confetti.js';
+import { showToast } from '../ui/toast.js';
 import { secureGet, secureSet } from '../game/store.js';
 
 const AVATAR_KEY = 'wyrfl:duel-avatar';
@@ -309,7 +310,7 @@ export function startDuelApp(root, t) {
 
   function onGuestClose(id) {
     if (!peers.has(id)) return;
-    const name = nameOf(id);
+    const avatar = avatarOf(id);
     peers.delete(id);
     connections.get(id)?.close();
     connections.delete(id);
@@ -318,16 +319,15 @@ export function startDuelApp(root, t) {
     else players = players.filter(p => p.id !== id);
     again.delete(id);
     sendRoster();
+    goneToast(avatar);
     if (!peers.size && current !== 'host') {
       if (current === 'results') {
         $('[data-rematch]').disabled = true;
-        $('[data-rematch-status]').textContent = t('duel.disconnected', { name });
+        $('[data-rematch-status]').textContent = '';
         return;
       }
-      banner(t('duel.disconnected', { name }));
       return reset();
     }
-    banner(t('duel.disconnected', { name }));
     afterRosterChange();
     maybeRematch();
   }
@@ -344,27 +344,36 @@ export function startDuelApp(root, t) {
   }
 
   function onHostClose() {
-    const name = nameOf(HOST_ID);
+    goneToast(avatarOf(HOST_ID));
     hostLink = null;
     if (current === 'results') {
       $('[data-rematch]').disabled = true;
-      $('[data-rematch-status]').textContent = t('duel.disconnected', { name });
+      $('[data-rematch-status]').textContent = '';
       return;
     }
-    banner(t('duel.disconnected', { name }));
     reset();
+  }
+
+  /** toast "the connection to <character> is gone" – the character's picture instead of its name */
+  function goneToast(avatar) {
+    const esc = text => text.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    const [before, after = ''] = t('duel.disconnected', { name: '\u0001' }).split('\u0001');
+    const pic = avatar ? `${avatarImg(avatar, 24)}<span class="sr-only">${esc(t(`avatars.${avatar}`))}</span>` : '…';
+    showToast(`${before.trim() ? `<span>${esc(before.trim())}</span>` : ''}${pic}${after.trim() ? `<span>${esc(after.trim())}</span>` : ''}`);
   }
 
   function onHostMessage(msg) {
     switch (msg?.t) {
       case 'roster': {
         if (!validId(msg.you) || !Array.isArray(msg.players) || msg.players.length > MAX_PLAYERS) return;
+        const before = players.filter(p => !p.left && p.id !== myId && p.id !== HOST_ID);
         players = msg.players
           .filter(p => validId(p?.id))
           .map(p => ({ id: p.id, avatar: AVATARS.includes(p.avatar) ? p.avatar : null, left: Boolean(p.left) }));
         myId = msg.you;
         const assigned = playerOf(myId)?.avatar;
         if (assigned) myAvatar = assigned;   // the host may have given another character (mine was taken)
+        for (const p of before) if (!playerOf(p.id) || playerOf(p.id).left) goneToast(p.avatar);   // another guest left
         afterRosterChange();
         break;
       }
