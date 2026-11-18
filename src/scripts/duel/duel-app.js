@@ -32,6 +32,8 @@ const AVATAR_KEY = 'wyrfl:duel-avatar';
 const ROUNDS = [3, 5, 10];
 const MAX_PLAYERS = 4;
 const HOST_ID = 'h';
+const RUNNER = 28;        // px – a character on the race track
+const RUNNER_GAP = 30;    // px between two characters on the same spot
 const NEXT_DELAY = 1300;   // ms to look at the revealed answer before the next puzzle
 
 const randomSeed = () => Array.from(crypto.getRandomValues(new Uint32Array(2)), n => n.toString(36)).join('');
@@ -477,10 +479,11 @@ export function startDuelApp(root, t) {
     $('[data-rematch]').disabled = false;
     $('[data-rematch-status]').textContent = '';
     $('[data-wait]').hidden = true;
-    // one progress bar per player, mine first
-    $('[data-bars]').innerHTML = [myId, ...ids.filter(id => id !== myId)]
-      .map(id => `<div data-bar="${id}" class="h-1.5 flex-1 overflow-hidden rounded-full bg-line"><div class="h-full w-0 ${id === myId ? 'bg-cube' : 'bg-front'} transition-all"></div></div>`)
-      .join('');
+    // race track: one runner per player (mine on top, with a ring)
+    root.querySelectorAll('[data-runner]').forEach(el => el.remove());
+    $('[data-track]').insertAdjacentHTML('beforeend', ids
+      .map(id => `<span data-runner="${id}" class="absolute top-1/2 -translate-y-1/2 rounded-full transition-[left,opacity] duration-500 ease-out motion-reduce:transition-none ${id === myId ? 'z-10 bg-surface ring-2 ring-cube' : ''}" style="left:0">${face(id, RUNNER)}</span>`)
+      .join(''));
     show('countdown');
     const count = $('[data-count]');
     let n = 3;
@@ -525,21 +528,39 @@ export function startDuelApp(root, t) {
 
   const done = id => game.results[id].filter(Boolean).length;
 
+  /**
+   * Race track: each runner at (solved / rounds) of the track. Runners on the same spot stand close together, centred
+   * on it; neighbours never overlap (pushed apart), and nobody leaves the track at either end.
+   */
   function updateProgress() {
     if (!game) return;
-    $('[data-opponents]').innerHTML = game.ids
-      .filter(id => id !== myId)
-      .map(id => {
-        const title = t('duel.opponentProgress', { name: nameOf(id), done: done(id), total: game.rounds });
-        const gone = playerOf(id)?.left ? ' opacity-40' : '';
-        return `<span class="inline-flex items-center gap-1.5 rounded-full bg-line py-1 pl-1 pr-3 text-muted${gone}" title="${title}">${face(id, 24)}<span>${done(id)}/${game.rounds}</span></span>`;
-      })
-      .join('');
-    for (const id of game.ids) {
-      const bar = root.querySelector(`[data-bar="${id}"] div`);
-      if (bar) bar.style.width = `${(done(id) / game.rounds) * 100}%`;
+    const track = $('[data-track]');
+    const free = track.clientWidth - RUNNER;
+    if (free <= 0) return;
+    const order = [...game.ids].sort((a, b) => done(a) - done(b) || (a === myId) - (b === myId));
+    const groups = new Map();
+    for (const id of order) groups.set(done(id), [...(groups.get(done(id)) ?? []), id]);
+    const left = new Map();
+    for (const [count, ids] of groups) {
+      const centre = (count / game.rounds) * free;
+      ids.forEach((id, i) => left.set(id, centre + (i - (ids.length - 1) / 2) * RUNNER_GAP));
     }
+    let prev = -Infinity;
+    for (const id of order) prev = left.set(id, Math.max(left.get(id), prev + RUNNER_GAP, 0)).get(id);
+    let next = Infinity;
+    for (const id of [...order].reverse()) next = left.set(id, Math.min(left.get(id), next - RUNNER_GAP, free)).get(id);
+    for (const id of game.ids) {
+      const el = track.querySelector(`[data-runner="${id}"]`);
+      if (!el) continue;
+      el.style.left = `${Math.max(0, left.get(id))}px`;
+      el.style.opacity = playerOf(id)?.left ? '0.35' : '1';
+      el.title = t('duel.opponentProgress', { name: id === myId ? t('duel.you') : nameOf(id), done: done(id), total: game.rounds });
+    }
+    $('[data-progress-sr]').textContent = game.ids
+      .map(id => t('duel.opponentProgress', { name: id === myId ? t('duel.you') : nameOf(id), done: done(id), total: game.rounds }))
+      .join(', ');
   }
+  new ResizeObserver(() => updateProgress()).observe($('[data-track]'));
 
   /** Results once everybody still here is through – `game.finished` is set after my last answer was on screen. */
   function checkDone() {

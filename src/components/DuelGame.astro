@@ -120,12 +120,12 @@ const debug = import.meta.env.PUBLIC_DEBUG === 'true';
 
   {/* play */}
   <div data-screen="play" hidden class="rounded-3xl border-2 border-line bg-surface p-3 sm:p-5">
-    <div class="mb-2 flex items-center justify-between gap-2 text-sm">
-      <span data-round class="font-semibold"></span>
-      <span data-opponents class="flex flex-wrap justify-end gap-1.5"></span>
+    <p data-round class="mb-1 text-sm font-semibold"></p>
+    {/* race track: every player's character runs from left to right with each solved puzzle (built by duel-app.js) */}
+    <div data-track class="relative mb-3 h-9" aria-hidden="true">
+      <div class="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-line"></div>
     </div>
-    {/* progress bars: mine first, then the others (built by duel-app.js) */}
-    <div data-bars class="mb-3 flex gap-1" aria-hidden="true"></div>
+    <p data-progress-sr class="sr-only"></p>
     <GuessBoard locale={locale}>
       <p data-wait hidden class="mt-2 text-center font-semibold text-muted" aria-live="polite"></p>
     </GuessBoard>
