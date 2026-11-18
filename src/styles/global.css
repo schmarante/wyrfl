@@ -12,7 +12,8 @@
   --color-text: #eef1f7;
   --color-muted: #a3acc0;
   --color-cube: #4f8cff;
-  --color-front: #ffc53d;
+  --color-front: #ffc53d;   /* accent: yellow in the dark theme, blue in the light one */
+  --color-star: #ffc53d;    /* difficulty stars – yellow in both themes */
   --font-sans: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -23,7 +24,8 @@
   --color-line: #d9dfe9;
   --color-text: #151b27;
   --color-muted: #5a6477;
-  color-scheme: light;   /* the yellow (--color-front) stays exactly the same as in the dark theme */
+  --color-front: #4f8cff;   /* light theme: the accent is the Wyrfl blue (stars stay yellow: --color-star) */
+  color-scheme: light;
 }
 
 html {

@@ -3,7 +3,7 @@
 import { LEVELS, UNLOCK_AFTER, isUnlocked, solvedCount, lastLevel, setLastLevel } from '../game/progress.js';
 import { ICONS } from './icons.js';
 
-const CHIP = 'pointer-events-auto inline-flex items-center gap-0 rounded-full bg-surface/85 py-1 pl-2 pr-2.5 text-front shadow-sm backdrop-blur';
+const CHIP = 'pointer-events-auto inline-flex items-center gap-0 rounded-full bg-surface/85 py-1 pl-2 pr-2.5 text-star shadow-sm backdrop-blur';
 
 function label(t, level, extra = '') {
   return `<span class="ml-1 text-xs font-semibold text-text">${t(`levels.${level}`)}</span>${extra}`;
