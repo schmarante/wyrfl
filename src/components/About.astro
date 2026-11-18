@@ -23,7 +23,7 @@ const groups = [
   <p>{t('about.license')}</p>
   <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
     <dt class="text-muted">{t('about.author')}</dt><dd>{ABOUT.author}</dd>
-    <dt class="text-muted">{t('about.email')}</dt><dd><a href={`mailto:${ABOUT.email}`} class="text-cube underline-offset-2 hover:underline">{ABOUT.email}</a></dd>
+    <dt class="text-muted">{t('about.email')}</dt><dd><a href={`mailto:${ABOUT.email}`} class="text-link underline-offset-2 hover:underline">{ABOUT.email}</a></dd>
     <dt class="text-muted">{t('about.version')}</dt><dd>{pkg.version}</dd>
   </dl>
   <p class="font-semibold"><Fragment set:html={t('about.madeWith').replace('{heart}', ICONS.heart)} /></p>
@@ -40,7 +40,7 @@ const groups = [
           <tbody>
             {group.items.map(item => (
               <tr class="border-t border-line">
-                <td class="p-3"><a href={item.url} class="text-cube underline-offset-2 hover:underline">{item.name}</a></td>
+                <td class="p-3"><a href={item.url} class="text-link underline-offset-2 hover:underline">{item.name}</a></td>
                 <td class="p-3">{t(`about.libs.${item.id}`)}</td>
                 <td class="p-3 whitespace-nowrap">{item.license}</td>
               </tr>

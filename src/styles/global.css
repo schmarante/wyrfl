@@ -16,6 +16,7 @@
   --color-front: #ffc53d;    /* accent: front, highlighted word, correct answer, badges */
   --color-star: #ffc53d;     /* difficulty stars */
   --color-on-cube: #ffffff;  /* text on --color-cube */
+  --color-link: #4f8cff;     /* text links – readable on the background (yellow text on white would not be) */
   /* logo + classic style icon: the three shaded faces of the brand cube (top, left, right) */
   --color-logo-top: #8fb4ff;
   --color-logo-left: #4f8cff;
@@ -34,6 +35,7 @@
   --color-cube: #ffc53d;
   --color-front: #4f8cff;
   --color-star: #4f8cff;
+  --color-link: #2f63c9;   /* links stay blue (darker, for contrast on white) – exception from the swap */
   --color-logo-top: #ffe08a;
   --color-logo-left: #ffc53d;
   --color-logo-right: #e0a516;
