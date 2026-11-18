@@ -203,9 +203,11 @@
       "pixel": "Gana un duelo.",
       "gifts": "Llega en San Nicolás y en Navidad.",
       "eyes": "Supera «Medio» en Adivina la vista y en Constrúyelo.",
-      "galaxy": "Supera «Difícil» en Adivina la vista y en Constrúyelo."
+      "galaxy": "Supera «Difícil» en Adivina la vista y en Constrúyelo.",
+      "city": "Supera «Experto» en Adivina la vista y en Constrúyelo."
     },
     "eyes": "Ojos saltones",
-    "galaxy": "Galaxia"
+    "galaxy": "Galaxia",
+    "city": "Rascacielos"
   }
 }

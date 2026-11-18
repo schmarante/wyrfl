@@ -203,9 +203,11 @@
       "pixel": "Win a duel.",
       "gifts": "Comes on St. Nicholas’ Day and at Christmas.",
       "eyes": "Complete “Medium” in Guess the view and in Build it.",
-      "galaxy": "Complete “Hard” in Guess the view and in Build it."
+      "galaxy": "Complete “Hard” in Guess the view and in Build it.",
+      "city": "Complete “Hardcore” in Guess the view and in Build it."
     },
     "eyes": "Googly eyes",
-    "galaxy": "Galaxy"
+    "galaxy": "Galaxy",
+    "city": "Skyscrapers"
   }
 }

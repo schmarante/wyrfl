@@ -203,9 +203,11 @@
       "pixel": "Gagne un duel.",
       "gifts": "Arrive à la Saint-Nicolas et à Noël.",
       "eyes": "Réussis « Moyen » dans Devine la vue et dans Construis-le.",
-      "galaxy": "Réussis « Difficile » dans Devine la vue et dans Construis-le."
+      "galaxy": "Réussis « Difficile » dans Devine la vue et dans Construis-le.",
+      "city": "Réussis « Expert » dans Devine la vue et dans Construis-le."
     },
     "eyes": "Yeux rigolos",
-    "galaxy": "Galaxie"
+    "galaxy": "Galaxie",
+    "city": "Gratte-ciel"
   }
 }

@@ -5,6 +5,7 @@
 // - pixel:   original pixel-art blocks drawn in code – grass on top of a column, earth below, stone at the bottom
 // - eyes:    'googly eyes' – only eyes (own design, drawn in the shader); they follow the pointer and blink now and then
 // - galaxy:  every cube a window into the same night sky (shader), glowing cyan outline
+// - city:    skyscrapers – one building per column, a floor per cube; windows glow at night (dark theme)
 // - gifts:   six wrapping papers with a ribbon cross
 import * as THREE from 'three';
 import { createRng } from './rng.js';
@@ -314,6 +315,101 @@ function galaxySkin() {
   };
 }
 
+// ---- skyscrapers ----------------------------------------------------------------------------------
+// Every column is one building (facade picked from its position: concrete, glass, brick, sandstone), every cube a floor
+// with rows of windows, a flat roof on top. Dark theme: some windows glow warm (emissive map); light theme: dark glass.
+
+const FACADES = [
+  { wall: '#9aa3ad', trim: '#7f8893', glass: '#2b3a52' },   // concrete
+  { wall: '#4f6d8f', trim: '#3d5878', glass: '#1d2b43' },   // glass tower
+  { wall: '#a5563f', trim: '#87442f', glass: '#272c37' },   // brick
+  { wall: '#c9b58b', trim: '#ad9a71', glass: '#2b3346' },   // sandstone
+];
+const WINDOW = { cols: 3, rows: 2, x0: 8, y0: 8, w: 12, h: 18, gx: 6, gy: 10 };
+const windowRects = () => {
+  const out = [];
+  for (let r = 0; r < WINDOW.rows; r++) for (let c = 0; c < WINDOW.cols; c++) {
+    out.push([WINDOW.x0 + c * (WINDOW.w + WINDOW.gx), WINDOW.y0 + r * (WINDOW.h + WINDOW.gy), WINDOW.w, WINDOW.h]);
+  }
+  return out;
+};
+const LIGHTS = ['#ffd27a', '#ffe3a3', '#ffbf5e', '#fff1c9'];
+
+function citySkin() {
+  const rng = createRng('wyrfl-city');
+  const textures = [];
+  const tex = draw => {
+    const t = canvasTexture(64, draw);
+    textures.push(t);
+    return t;
+  };
+  // facade per building type (the same for every floor)
+  const facadeMaps = FACADES.map(f => tex((ctx, s) => {
+    ctx.fillStyle = f.wall;
+    ctx.fillRect(0, 0, s, s);
+    ctx.fillStyle = f.trim;   // floor ledge
+    ctx.fillRect(0, s - 4, s, 4);
+    for (const [x, y, w, h] of windowRects()) {
+      ctx.fillStyle = f.trim;
+      ctx.fillRect(x - 1.5, y - 1.5, w + 3, h + 3);
+      const glass = ctx.createLinearGradient(x, y, x + w, y + h);   // a little reflection
+      glass.addColorStop(0, '#6f86a8');
+      glass.addColorStop(0.35, f.glass);
+      glass.addColorStop(1, f.glass);
+      ctx.fillStyle = glass;
+      ctx.fillRect(x, y, w, h);
+    }
+  }));
+  // lit windows (emissive): several random patterns, picked per floor
+  const lightMaps = Array.from({ length: 5 }, () => tex((ctx, s) => {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, s, s);
+    for (const [x, y, w, h] of windowRects()) {
+      if (rng() < 0.45) continue;
+      ctx.fillStyle = LIGHTS[rng.int(0, LIGHTS.length - 1)];
+      ctx.fillRect(x, y, w, h);
+    }
+  }));
+  const roof = lambert({
+    map: tex((ctx, s) => {
+      ctx.fillStyle = '#5d636d';
+      ctx.fillRect(0, 0, s, s);
+      ctx.fillStyle = '#767d88';   // parapet
+      ctx.fillRect(0, 0, s, 5); ctx.fillRect(0, s - 5, s, 5); ctx.fillRect(0, 0, 5, s); ctx.fillRect(s - 5, 0, 5, s);
+      ctx.fillStyle = '#8a919b';   // a small roof box
+      ctx.fillRect(38, 14, 14, 11);
+      ctx.fillStyle = '#4b5059';
+      ctx.fillRect(38, 25, 14, 3);
+    }),
+  });
+  const night = () => document.documentElement.dataset.theme !== 'light';
+  const sides = FACADES.map((_, f) => lightMaps.map(emissiveMap => lambert({ map: facadeMaps[f], emissiveMap, emissive: night() ? 0xffffff : 0x000000 })));
+  const sets = new Map();
+  const edge = edges(0x1b2230, 0.5);
+  return {
+    material: (x, y, z) => {
+      const f = cellHash(x, 0, z) % FACADES.length;       // one facade per column = one building
+      const l = (cellHash(x, y, z) >>> 4) % lightMaps.length;   // lights differ per floor
+      const key = `${f}:${l}`;
+      if (!sets.has(key)) {
+        const side = sides[f][l];
+        sets.set(key, [side, side, roof, roof, side, side]);
+      }
+      return sets.get(key);
+    },
+    /** light theme: windows are dark glass – dark theme: the lit ones glow */
+    onTheme() {
+      sides.flat().forEach(m => m.emissive.setHex(night() ? 0xffffff : 0x000000));
+    },
+    edge,
+    dispose() {
+      [...sides.flat(), roof].forEach(m => m.dispose());
+      textures.forEach(t => t.dispose());
+      edge.dispose();
+    },
+  };
+}
+
 // ---- solid colors ----------------------------------------------------------------------------------
 
 function colorSkin() {
@@ -336,5 +432,5 @@ function classicSkin() {
 }
 
 export function createSkin(name) {
-  return { colors: colorSkin, pixel: pixelSkin, eyes: eyesSkin, galaxy: galaxySkin, gifts: giftSkin }[name]?.() ?? classicSkin();
+  return { colors: colorSkin, pixel: pixelSkin, eyes: eyesSkin, galaxy: galaxySkin, city: citySkin, gifts: giftSkin }[name]?.() ?? classicSkin();
 }

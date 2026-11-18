@@ -203,9 +203,11 @@
       "pixel": "Wygraj pojedynek.",
       "gifts": "Przychodzi na Mikołajki i Boże Narodzenie.",
       "eyes": "Ukończ poziom „Średni” w trybach Zgadnij widok i Zbuduj.",
-      "galaxy": "Ukończ poziom „Trudny” w trybach Zgadnij widok i Zbuduj."
+      "galaxy": "Ukończ poziom „Trudny” w trybach Zgadnij widok i Zbuduj.",
+      "city": "Ukończ poziom „Mistrz” w trybach Zgadnij widok i Zbuduj."
     },
     "eyes": "Oczka",
-    "galaxy": "Galaktyka"
+    "galaxy": "Galaktyka",
+    "city": "Wieżowce"
   }
 }

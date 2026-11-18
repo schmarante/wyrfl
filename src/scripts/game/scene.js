@@ -681,6 +681,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
 
   const onTheme = () => {
     buildBase();
+    skin.onTheme?.();   // e.g. skyscraper windows glow only in the dark theme
     render();
   };
   window.addEventListener('wyrfl-theme', onTheme);
