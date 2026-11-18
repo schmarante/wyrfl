@@ -1,106 +1,32 @@
 ---
-// Start page: today's Wyrfl as a 3D preview with its three views, plus the upcoming game modes.
+// Start page: straight to the game modes.
 import { useTranslations, localePath } from '../i18n/index.js';
-import { VIEWS } from '../scripts/game/structure.js';
+import Icon from './Icon.astro';
 
 interface Props {
   locale: 'de' | 'en';
 }
 const { locale } = Astro.props;
 const t = useTranslations(locale);
-const modes = ['guess', 'build', 'duel'];
-const playable: Record<string, string> = { guess: 'guess/', build: 'build/', duel: 'duel/' };
+const modes = [
+  { id: 'guess', path: 'guess/', icon: 'eye', tint: 'bg-cube/15 text-cube' },
+  { id: 'build', path: 'build/', icon: 'build', tint: 'bg-front/20 text-front' },
+  { id: 'duel', path: 'duel/', icon: 'duel', tint: 'bg-cube/15 text-cube' },
+] as const;
 ---
 
-<section class="flex flex-col gap-6">
-  <p class="text-lg text-muted">{t('home.tagline')}</p>
-
-  <div id="daily" class="rounded-3xl border border-line bg-surface p-4 sm:p-6"
-       data-title={t('home.dailyTitle')} data-cubes={t('home.cubes')}>
-    <div class="flex flex-wrap items-baseline justify-between gap-2">
-      <h1 class="text-xl font-bold" data-daily-title>&nbsp;</h1>
-      <span class="text-sm text-muted" data-daily-cubes></span>
-    </div>
-
-    <div class="relative mt-4 aspect-square w-full sm:aspect-[4/3]">
-      <canvas data-daily-canvas class="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing"
-              aria-label={t('home.dragHint')} role="img"></canvas>
-      <p data-daily-nowebgl hidden class="absolute inset-0 grid place-items-center text-center text-muted">{t('home.noWebgl')}</p>
-    </div>
-
-    <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
-      <p class="text-sm text-muted">{t('home.dragHint')}</p>
-      <button type="button" data-daily-reset
-              class="press min-h-11 rounded-full bg-line px-5 text-sm font-semibold hover:bg-cube/40">
-        {t('home.resetView')}
-      </button>
-    </div>
-
-    <h2 class="mt-6 font-semibold">{t('home.viewsTitle')}</h2>
-    <ul class="mt-3 grid grid-cols-3 gap-3">
-      {VIEWS.map(view => (
-        <li class="flex flex-col items-center gap-2 rounded-2xl bg-bg/60 p-3">
-          <div data-view={view} class="grid w-full max-w-28 gap-0.5" aria-label={t(`views.${view}`)} role="img"></div>
-          <span class:list={['text-sm font-semibold', view === 'front' ? 'text-front' : 'text-muted']}>{t(`views.${view}`)}</span>
-        </li>
-      ))}
-    </ul>
-  </div>
-
-  <section>
-    <h2 class="mb-3 text-lg font-bold">{t('home.modesTitle')}</h2>
-    <ul class="grid gap-3 sm:grid-cols-3">
-      {modes.map(mode => {
-        const ready = mode in playable;
-        const Tag = ready ? 'a' : 'div';
-        return (
-          <li>
-            <Tag href={ready ? localePath(locale, playable[mode]) : undefined}
-                 class:list={['flex h-full flex-col gap-2 rounded-2xl border border-line bg-surface p-4',
-                              ready ? 'press hover:border-cube' : 'opacity-70']}>
-              <span class="font-bold">{t(`modes.${mode}.title`)}</span>
-              <span class="text-sm text-muted">{t(`modes.${mode}.text`)}</span>
-              <span class:list={['mt-auto self-start rounded-full px-3 py-1 text-xs',
-                                 ready ? 'bg-cube font-semibold text-white' : 'bg-line text-muted']}>
-                {ready ? `${t('game.play')} →` : t('home.comingSoon')}
-              </span>
-            </Tag>
-          </li>
-        );
-      })}
-    </ul>
-  </section>
-</section>
-
-<script>
-  import { dailyDate, puzzleNumber } from '../scripts/game/rng.js';
-  import { generateStructure, computeView, cubeCount, VIEWS } from '../scripts/game/structure.js';
-  import { renderViewGrid } from '../scripts/ui/view-grid.js';
-
-  const root = document.getElementById('daily')!;
-  const date = dailyDate();
-  const structure = generateStructure(`daily:${date}`, 'easy');
-
-  root.querySelector('[data-daily-title]')!.textContent = root.dataset.title!.replace('{number}', String(puzzleNumber(date)));
-  root.querySelector('[data-daily-cubes]')!.textContent = root.dataset.cubes!.replace('{count}', String(cubeCount(structure)));
-
-  // 2D views as small CSS grids
-  for (const view of VIEWS) {
-    renderViewGrid(root.querySelector<HTMLElement>(`[data-view="${view}"]`)!, computeView(structure, view), {
-      fill: view === 'front' ? 'front' : 'cube',
-    });
-  }
-
-  // 3D view – three.js is loaded only here
-  const canvas = root.querySelector<HTMLCanvasElement>('[data-daily-canvas]')!;
-  import('../scripts/game/scene.js')
-    .then(({ createCubeScene }) => {
-      const cubeScene = createCubeScene(canvas);
-      cubeScene.setStructure(structure);
-      root.querySelector('[data-daily-reset]')!.addEventListener('click', () => cubeScene.resetView());
-    })
-    .catch(() => {
-      canvas.hidden = true;
-      root.querySelector<HTMLElement>('[data-daily-nowebgl]')!.hidden = false;
-    });
-</script>
+<h1 class="sr-only">Wyrfl – {t('modes.title')}</h1>
+<ul class="mt-2 grid gap-3 sm:grid-cols-3">
+  {modes.map(mode => (
+    <li>
+      <a href={localePath(locale, mode.path)}
+         class="press flex h-full items-center gap-4 rounded-3xl border border-line bg-surface p-4 hover:border-cube sm:flex-col sm:items-start">
+        <span class:list={['grid h-14 w-14 shrink-0 place-items-center rounded-2xl', mode.tint]}><Icon name={mode.icon} /></span>
+        <span class="flex flex-col gap-1">
+          <span class="text-lg font-bold">{t(`modes.${mode.id}.title`)}</span>
+          <span class="text-sm text-muted">{t(`modes.${mode.id}.text`)}</span>
+        </span>
+      </a>
+    </li>
+  ))}
+</ul>

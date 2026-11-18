@@ -1,6 +1,6 @@
 ---
 import { useTranslations } from '../i18n/index.js';
-import { RUNTIME, BUILD } from '../data/credits.js';
+import { RUNTIME, ASSETS, BUILD } from '../data/credits.js';
 
 interface Props {
   locale: 'de' | 'en';
@@ -9,6 +9,7 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 const groups = [
   { title: t('about.runtime'), items: RUNTIME },
+  { title: t('about.assets'), items: ASSETS },
   { title: t('about.build'), items: BUILD },
 ];
 ---

@@ -9,6 +9,10 @@ export const RUNTIME = [
   { id: 'jsqr', name: 'jsQR', url: 'https://github.com/cozmo/jsQR', license: 'Apache-2.0' },
 ];
 
+export const ASSETS = [
+  { id: 'fluent-emoji', name: 'Fluent Emoji (Microsoft)', url: 'https://github.com/microsoft/fluentui-emoji', license: 'MIT' },
+];
+
 export const BUILD = [
   { id: 'astro', name: 'Astro', url: 'https://astro.build', license: 'MIT' },
   { id: 'tailwindcss', name: 'Tailwind CSS', url: 'https://tailwindcss.com', license: 'MIT' },

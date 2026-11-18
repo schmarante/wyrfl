@@ -1,7 +1,6 @@
 ---
-// Mode A – View Guesser (practice): level picker, endless puzzles, progress.
+// Mode A – View Guesser (practice): endless puzzles, difficulty stars in the 3D view, progress.
 import { useTranslations } from '../i18n/index.js';
-import LevelPicker from './LevelPicker.astro';
 import GuessBoard from './GuessBoard.astro';
 
 interface Props {
@@ -11,16 +10,12 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 ---
 
-<section id="guess" class="flex flex-col gap-4">
-  <LevelPicker locale={locale} />
-
-  <div class="rounded-3xl border border-line bg-surface p-4 sm:p-6">
-    <GuessBoard locale={locale} />
-    <button type="button" data-next hidden
-            class="press mt-2 min-h-12 w-full rounded-full bg-cube px-6 text-lg font-bold text-white hover:brightness-110">
-      {t('game.next')} →
-    </button>
-  </div>
+<section id="guess" class="rounded-3xl border border-line bg-surface p-3 sm:p-5">
+  <GuessBoard locale={locale} />
+  <button type="button" data-next hidden
+          class="press mt-2 min-h-12 w-full rounded-full bg-cube px-6 text-lg font-bold text-white hover:brightness-110">
+    {t('game.next')} →
+  </button>
 </section>
 
 <script>

@@ -4,14 +4,7 @@
     "description": "Wyrfl is a free cube-building puzzle: recognise views from the top, front and side, and rebuild structures. No sign-up, no ads."
   },
   "home": {
-    "tagline": "Train your spatial thinking – with cube buildings.",
-    "dailyTitle": "Today's Wyrfl #{number}",
-    "cubes": "{count} cubes",
     "dragHint": "Swipe across the building to turn it. The yellow edge is the front.",
-    "resetView": "Turn back",
-    "viewsTitle": "This is what the building looks like …",
-    "modesTitle": "Game modes",
-    "comingSoon": "coming soon",
     "noWebgl": "Sorry, your browser can't show 3D graphics."
   },
   "views": {
@@ -31,15 +24,12 @@
     "duel": {
       "title": "Duel",
       "text": "Two players in the same Wi-Fi: who spots the views faster? Connect with a QR code."
-    }
+    },
+    "title": "Game modes"
   },
   "nav": {
     "about": "About Wyrfl",
-    "home": "Play",
-    "language": "Deutsch",
-    "guess": "Guess the view",
-    "build": "Build it",
-    "duel": "Duel"
+    "theme": "Light / dark"
   },
   "about": {
     "title": "About Wyrfl",
@@ -59,8 +49,10 @@
       "vitest": "Automated tests of the game logic",
       "qrcode-generator": "QR code for the duel connection",
       "qr-scanner": "Reading the QR code with the camera",
-      "jsqr": "QR detection (included in qr-scanner)"
-    }
+      "jsqr": "QR detection (included in qr-scanner)",
+      "fluent-emoji": "Duel characters (animals, fruit and vegetables)"
+    },
+    "assets": "Graphics"
   },
   "levels": {
     "easy": "Easy",
@@ -83,7 +75,6 @@
   },
   "guess": {
     "question": "What does the building look like {view}?",
-    "sideNote": "“From the right” means: you stand at the front and walk around the building to the right.",
     "option": "Answer {n}",
     "correct": "Exactly! That’s how it looks {view}.",
     "tryAgain": "Not yet – give it another try!",
@@ -103,7 +94,6 @@
     }
   },
   "build": {
-    "intro": "Build a building that matches all three blueprints. Tap a blueprint to see your building from that direction.",
     "plans": "Blueprints",
     "add": "Build",
     "remove": "Remove",
@@ -111,25 +101,22 @@
     "clear": "Clear all",
     "check": "Check",
     "cubes": "{count} cubes",
-    "tapHint": "Tap a square or a cube. Swipe to turn the building.",
+    "tapHint": "Tap to build a cube, long press or right click to remove it. Swipe to turn the building.",
     "full": "Can’t go higher – at most {max} cubes on top of each other.",
     "ok": "matches",
     "notOk": "not yet",
     "success": "Great! Your building matches all three blueprints.",
     "successNote": "By the way: there is often more than one right answer.",
     "almost": "Almost! The dashed squares don’t match yet.",
-    "empty": "Put a few cubes on the board first."
+    "empty": "Put a few cubes on the board first.",
+    "removeHint": "Remove – also with a right click or a long press"
   },
   "duel": {
     "intro": "Play as two – each on your own device in the same Wi-Fi. You get the same puzzles. Who is faster and more accurate?",
     "privacy": "Your devices connect directly to each other. Nothing leaves your Wi-Fi – no server, no sign-up.",
-    "nameLabel": "Your name (optional)",
-    "namePlaceholder": "e.g. Sam",
     "host": "Start a duel",
     "join": "Scan a code",
     "unsupported": "Sorry, this browser can’t make a direct connection. Try a current Chrome, Edge, Firefox or Safari.",
-    "colorHost": "Blue",
-    "colorGuest": "Yellow",
     "preparing": "Preparing the code …",
     "step1": "1. Scan this code with the other device – just use the camera app.",
     "step2": "2. The other device then shows a code. Scan it here:",
@@ -178,6 +165,25 @@
     "rematchWait": "Waiting for {name} …",
     "end": "Finish",
     "disconnected": "The connection to {name} is gone.",
-    "newDuel": "New duel"
+    "newDuel": "New duel",
+    "pickAvatar": "Pick your character"
+  },
+  "avatars": {
+    "fox": "Fox",
+    "cat": "Cat",
+    "dog": "Dog",
+    "panda": "Panda",
+    "frog": "Frog",
+    "owl": "Owl",
+    "unicorn": "Unicorn",
+    "turtle": "Turtle",
+    "strawberry": "Strawberry",
+    "banana": "Banana",
+    "carrot": "Carrot",
+    "broccoli": "Broccoli",
+    "avocado": "Avocado",
+    "pineapple": "Pineapple",
+    "watermelon": "Melon",
+    "grapes": "Grapes"
   }
 }

@@ -4,14 +4,7 @@
     "description": "Wyrfl ist ein kostenloses Würfelgebäude-Rätsel: Erkenne Ansichten von oben, vorne und der Seite und baue Gebäude nach. Ohne Anmeldung, ohne Werbung."
   },
   "home": {
-    "tagline": "Trainiere dein räumliches Denken – mit Würfelgebäuden.",
-    "dailyTitle": "Wyrfl #{number} von heute",
-    "cubes": "{count} Würfel",
     "dragHint": "Wische über das Gebäude, um es zu drehen. Der gelbe Rand ist vorne.",
-    "resetView": "Zurückdrehen",
-    "viewsTitle": "So sieht das Gebäude aus …",
-    "modesTitle": "Spielarten",
-    "comingSoon": "kommt bald",
     "noWebgl": "Dein Browser kann leider keine 3D-Grafik anzeigen."
   },
   "views": {
@@ -31,15 +24,12 @@
     "duel": {
       "title": "Duell",
       "text": "Zu zweit im selben WLAN: Wer erkennt die Ansichten schneller? Verbinden per QR-Code."
-    }
+    },
+    "title": "Spielarten"
   },
   "nav": {
     "about": "Über Wyrfl",
-    "home": "Zum Spiel",
-    "language": "English",
-    "guess": "Ansichten raten",
-    "build": "Nachbauen",
-    "duel": "Duell"
+    "theme": "Hell / Dunkel"
   },
   "about": {
     "title": "Über Wyrfl",
@@ -59,8 +49,10 @@
       "vitest": "Automatische Tests der Spiellogik",
       "qrcode-generator": "QR-Code für die Duell-Verbindung",
       "qr-scanner": "QR-Code mit der Kamera lesen",
-      "jsqr": "QR-Erkennung (in qr-scanner enthalten)"
-    }
+      "jsqr": "QR-Erkennung (in qr-scanner enthalten)",
+      "fluent-emoji": "Spielfiguren im Duell (Tiere, Obst und Gemüse)"
+    },
+    "assets": "Grafiken"
   },
   "levels": {
     "easy": "Leicht",
@@ -83,7 +75,6 @@
   },
   "guess": {
     "question": "Wie sieht das Gebäude {view} aus?",
-    "sideNote": "„Von rechts“ heißt: Du stehst vorne und gehst nach rechts um das Gebäude herum.",
     "option": "Antwort {n}",
     "correct": "Genau! So sieht es {view} aus.",
     "tryAgain": "Noch nicht – probier’s noch mal!",
@@ -103,7 +94,6 @@
     }
   },
   "build": {
-    "intro": "Baue ein Gebäude, das zu allen drei Plänen passt. Tippe auf einen Plan, um dein Gebäude aus dieser Richtung zu sehen.",
     "plans": "Baupläne",
     "add": "Bauen",
     "remove": "Wegnehmen",
@@ -111,25 +101,22 @@
     "clear": "Alles weg",
     "check": "Prüfen",
     "cubes": "{count} Würfel",
-    "tapHint": "Tippe auf ein Feld oder einen Würfel. Wischen dreht das Gebäude.",
+    "tapHint": "Antippen baut einen Würfel, lange drücken oder Rechtsklick nimmt ihn weg. Wischen dreht das Gebäude.",
     "full": "Höher geht’s nicht – höchstens {max} Würfel übereinander.",
     "ok": "passt",
     "notOk": "noch nicht",
     "success": "Super! Dein Gebäude passt zu allen drei Plänen.",
     "successNote": "Übrigens: Oft gibt es mehrere richtige Lösungen.",
     "almost": "Fast! Die gestrichelten Kästchen passen noch nicht.",
-    "empty": "Stell zuerst ein paar Würfel auf die Platte."
+    "empty": "Stell zuerst ein paar Würfel auf die Platte.",
+    "removeHint": "Wegnehmen – geht auch mit Rechtsklick oder lange drücken"
   },
   "duel": {
     "intro": "Spielt zu zweit – jede:r an einem eigenen Gerät im selben WLAN. Ihr bekommt dieselben Rätsel. Wer ist schneller und genauer?",
     "privacy": "Eure Geräte verbinden sich direkt miteinander. Nichts verlässt euer WLAN, es gibt keinen Server und keine Anmeldung.",
-    "nameLabel": "Dein Name (freiwillig)",
-    "namePlaceholder": "z. B. Lea",
     "host": "Duell starten",
     "join": "Code scannen",
     "unsupported": "Dieser Browser kann leider keine direkte Verbindung aufbauen. Probier es mit einem aktuellen Chrome, Edge, Firefox oder Safari.",
-    "colorHost": "Blau",
-    "colorGuest": "Gelb",
     "preparing": "Code wird vorbereitet …",
     "step1": "1. Scanne diesen Code mit dem anderen Gerät – einfach mit der Kamera-App.",
     "step2": "2. Dann zeigt das andere Gerät einen Code. Scanne ihn hier:",
@@ -178,6 +165,25 @@
     "rematchWait": "Warte auf {name} …",
     "end": "Beenden",
     "disconnected": "Die Verbindung zu {name} ist weg.",
-    "newDuel": "Neues Duell"
+    "newDuel": "Neues Duell",
+    "pickAvatar": "Wähle deine Spielfigur"
+  },
+  "avatars": {
+    "fox": "Fuchs",
+    "cat": "Katze",
+    "dog": "Hund",
+    "panda": "Panda",
+    "frog": "Frosch",
+    "owl": "Eule",
+    "unicorn": "Einhorn",
+    "turtle": "Schildkröte",
+    "strawberry": "Erdbeere",
+    "banana": "Banane",
+    "carrot": "Karotte",
+    "broccoli": "Brokkoli",
+    "avocado": "Avocado",
+    "pineapple": "Ananas",
+    "watermelon": "Melone",
+    "grapes": "Traube"
   }
 }

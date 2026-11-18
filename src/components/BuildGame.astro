@@ -1,8 +1,8 @@
 ---
 // Mode B – Builder: three blueprints (top, front, side), build a matching building on the 3D board.
+// Tap / left click = current tool (build by default), right click or long press = remove.
 import { useTranslations } from '../i18n/index.js';
 import { VIEWS } from '../scripts/game/structure.js';
-import LevelPicker from './LevelPicker.astro';
 import Icon from './Icon.astro';
 
 interface Props {
@@ -10,63 +10,50 @@ interface Props {
 }
 const { locale } = Astro.props;
 const t = useTranslations(locale);
-const toolClass = 'press inline-flex items-center justify-center gap-1.5 min-h-11 flex-1 rounded-full px-4 text-sm font-semibold aria-pressed:bg-cube aria-pressed:text-white bg-line hover:bg-cube/40';
+const iconButton = 'press grid h-12 w-12 shrink-0 place-items-center rounded-full bg-line text-text hover:bg-cube/40 disabled:opacity-35 aria-pressed:bg-cube aria-pressed:text-white';
 ---
 
-<section id="build" class="flex flex-col gap-4">
-  <LevelPicker locale={locale} />
+<section id="build" class="rounded-3xl border border-line bg-surface p-3 sm:p-5">
+  <h1 class="sr-only">{t('modes.build.title')}</h1>
 
-  <div class="rounded-3xl border border-line bg-surface p-4 sm:p-6">
-    <h1 class="text-xl font-bold">{t('modes.build.title')}</h1>
-    <p class="mt-1 text-sm text-muted">{t('build.intro')}</p>
+  <ul class="grid grid-cols-3 gap-2 sm:gap-3" aria-label={t('build.plans')}>
+    {VIEWS.map(view => (
+      <li>
+        <button type="button" data-plan={view} aria-pressed="false"
+                class="press flex h-full w-full flex-col items-center gap-1.5 rounded-2xl border-2 border-line bg-bg/60 p-2 hover:border-cube aria-pressed:border-cube">
+          <span data-grid class="grid w-full max-w-24 gap-0.5" aria-hidden="true"></span>
+          <span class:list={['text-xs font-semibold sm:text-sm', view === 'front' ? 'text-front' : 'text-muted']}>{t(`views.${view}`)}</span>
+          <span data-status class="hidden text-xs"></span>
+        </button>
+      </li>
+    ))}
+  </ul>
 
-    <h2 class="sr-only">{t('build.plans')}</h2>
-    <ul class="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
-      {VIEWS.map(view => (
-        <li>
-          <button type="button" data-plan={view} aria-pressed="false"
-                  class="press flex h-full w-full flex-col items-center gap-2 rounded-2xl border-2 border-line bg-bg/60 p-2 sm:p-3 hover:border-cube aria-pressed:border-cube">
-            <span data-grid class="grid w-full max-w-28 gap-0.5" aria-hidden="true"></span>
-            <span class:list={['text-sm font-semibold', view === 'front' ? 'text-front' : 'text-muted']}>{t(`views.${view}`)}</span>
-            <span data-status class="min-h-5 text-xs"></span>
-          </button>
-        </li>
-      ))}
-    </ul>
+  <div class="relative mt-2 aspect-square w-full overflow-hidden rounded-2xl bg-bg/50 sm:aspect-[4/3]">
+    <canvas data-canvas tabindex="0" class="absolute inset-0 h-full w-full cursor-pointer" role="application"
+            aria-label={t('build.tapHint')}></canvas>
+    <p data-loading class="absolute inset-0 grid place-items-center text-muted">{t('game.loading')}</p>
+    <div class="pointer-events-none absolute left-2 top-2" data-level-picker></div>
+    <span data-count class="pointer-events-none absolute bottom-2 left-2 rounded-full bg-surface/85 px-3 py-1 text-sm text-muted backdrop-blur"></span>
+  </div>
 
-    <div class="relative mt-4 aspect-square w-full sm:aspect-[4/3]">
-      <canvas data-canvas tabindex="0" class="absolute inset-0 h-full w-full cursor-pointer rounded-2xl" role="application"
-              aria-label={t('build.tapHint')}></canvas>
-      <p data-loading class="absolute inset-0 grid place-items-center text-muted">{t('game.loading')}</p>
-      <span data-count class="pointer-events-none absolute left-2 top-2 rounded-full bg-bg/80 px-3 py-1 text-sm text-muted"></span>
-    </div>
-    <p class="mt-2 text-sm text-muted">{t('build.tapHint')}</p>
-
-    <div class="mt-3 flex flex-wrap gap-2">
-      <div class="flex flex-1 gap-2" role="group">
-        <button type="button" data-tool="add" aria-pressed="true" class={toolClass}><Icon name="plus" /> {t('build.add')}</button>
-        <button type="button" data-tool="remove" aria-pressed="false" class={toolClass}><Icon name="minus" /> {t('build.remove')}</button>
-      </div>
-      <div class="flex flex-1 gap-2">
-        <button type="button" data-undo disabled
-                class="press inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full bg-line px-4 text-sm font-semibold hover:bg-cube/40 disabled:opacity-40"><Icon name="undo" /> {t('build.undo')}</button>
-        <button type="button" data-clear disabled
-                class="press min-h-11 flex-1 rounded-full bg-line px-4 text-sm font-semibold hover:bg-cube/40 disabled:opacity-40">{t('build.clear')}</button>
-      </div>
-    </div>
-
+  <div class="mt-3 flex items-center gap-2">
+    <button type="button" data-tool="add" aria-pressed="true" class={iconButton} aria-label={t('build.add')} title={t('build.add')}><Icon name="plus" /></button>
+    <button type="button" data-tool="remove" aria-pressed="false" class={iconButton} aria-label={t('build.remove')} title={t('build.removeHint')}><Icon name="minus" /></button>
+    <button type="button" data-undo disabled class={iconButton} aria-label={t('build.undo')} title={t('build.undo')}><Icon name="undo" /></button>
+    <button type="button" data-clear disabled class={iconButton} aria-label={t('build.clear')} title={t('build.clear')}><Icon name="trash" /></button>
     <button type="button" data-check
-            class="press mt-4 min-h-12 w-full rounded-full bg-cube px-6 text-lg font-bold text-white hover:brightness-110">
+            class="press min-h-12 flex-1 rounded-full bg-cube px-4 text-lg font-bold text-white hover:brightness-110">
       {t('build.check')}
     </button>
-
-    <p data-feedback class="mt-4 min-h-12 px-1 text-base font-semibold" aria-live="polite"></p>
-
-    <button type="button" data-next hidden
-            class="press mt-2 min-h-12 w-full rounded-full bg-front px-6 text-lg font-bold text-bg hover:brightness-110">
-      {t('game.next')} →
-    </button>
   </div>
+
+  <p data-feedback class="mt-3 min-h-6 px-1 text-base font-semibold" aria-live="polite"></p>
+
+  <button type="button" data-next hidden
+          class="press mt-2 min-h-12 w-full rounded-full bg-front px-6 text-lg font-bold text-bg hover:brightness-110">
+    {t('game.next')} →
+  </button>
 </section>
 
 <script>
@@ -78,6 +65,7 @@ const toolClass = 'press inline-flex items-center justify-center gap-1.5 min-h-1
 
   type Structure = ReturnType<typeof generateStructure>;
   type Column = { x: number; z: number };
+  type Tool = 'add' | 'remove';
 
   const MODE = 'build';
   const t = useTranslations(document.documentElement.lang);
@@ -96,13 +84,13 @@ const toolClass = 'press inline-flex items-center justify-center gap-1.5 min-h-1
   let target: Structure;
   let built: Structure;
   let history: number[][][] = [];
-  let tool: 'add' | 'remove' = 'add';
+  let tool: Tool = 'add';
   let solved = false;
   let cursor: Column = { x: 0, z: 0 };
 
   async function loadScene() {
     const { createCubeScene } = await import('../scripts/game/scene.js');
-    return createCubeScene(canvas, { editable: true, onTap: change });
+    return createCubeScene(canvas, { editable: true, onTap: (column: Column, action: Tool) => change(column, action) });
   }
 
   const picker = createLevelPicker($('[data-level-picker]'), MODE, t, () => newPuzzle());
@@ -130,15 +118,15 @@ const toolClass = 'press inline-flex items-center justify-center gap-1.5 min-h-1
       });
       const status = button.querySelector<HTMLElement>('[data-status]')!;
       status.textContent = checked ? (ok ? `✓ ${t('build.ok')}` : `✗ ${t('build.notOk')}`) : '';
-      status.className = `min-h-5 text-xs ${ok ? 'text-front' : 'text-text'}`;
+      status.className = checked ? `text-xs ${ok ? 'text-front' : 'text-text'}` : 'hidden text-xs';
     }
   }
 
-  function update() {
+  function update(heightsOnly = false) {
     $('[data-count]').textContent = t('build.cubes', { count: cubeCount(built) });
     undoButton.disabled = history.length === 0;
     clearButton.disabled = cubeCount(built) === 0;
-    scene?.setHeights(built.heights);
+    if (!heightsOnly) scene?.setHeights(built.heights);
   }
 
   function newPuzzle() {
@@ -152,30 +140,30 @@ const toolClass = 'press inline-flex items-center justify-center gap-1.5 min-h-1
     say('');
     renderPlans();
     scene?.setStructure(built);
-    update();
+    update(true);
   }
 
-  /** Applies the current tool to a column (tap, click or keyboard). */
-  function change({ x, z }: Column) {
+  /** Applies a tool to a column (tap / left click = current tool, right click / long press = remove, keyboard). */
+  function change({ x, z }: Column, action: Tool = tool) {
     const h = built.heights[z][x];
-    if (tool === 'add' && h >= built.maxHeight) {
+    if (action === 'add' && h >= built.maxHeight) {
       say(t('build.full', { max: built.maxHeight }));
       return;
     }
-    if (tool === 'remove' && h === 0) return;
+    if (action === 'remove' && h === 0) return;
     history.push(built.heights.map(row => [...row]));
-    built.heights[z][x] = h + (tool === 'add' ? 1 : -1);
+    built.heights[z][x] = h + (action === 'add' ? 1 : -1);
     if (!solved) say('');
     renderPlans();   // an edit clears the check marks
     update();
   }
 
-  function setTool(next: 'add' | 'remove') {
+  function setTool(next: Tool) {
     tool = next;
     toolButtons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === next)));
     scene?.setTool(next);
   }
-  toolButtons.forEach(b => b.addEventListener('click', () => setTool(b.dataset.tool as 'add' | 'remove')));
+  toolButtons.forEach(b => b.addEventListener('click', () => setTool(b.dataset.tool as Tool)));
 
   undoButton.addEventListener('click', () => {
     const previous = history.pop();
@@ -215,14 +203,14 @@ const toolClass = 'press inline-flex items-center justify-center gap-1.5 min-h-1
       solved = true;
       const unlocked = recordSolved(MODE, picker.level);
       picker.refresh();
-      say(`${t('build.success')} ${t('build.successNote')}` + (unlocked ? ' ★ ' + t('level.unlocked', { level: t(`levels.${unlocked}`) }) : ''), 'good');
+      say(`${t('build.success')} ${t('build.successNote')}` + (unlocked ? ` ★ ${t('level.unlocked', { level: t(`levels.${unlocked}`) })}` : ''), 'good');
     }
     nextButton.hidden = false;
     nextButton.focus({ preventScroll: true });
   });
   nextButton.addEventListener('click', () => newPuzzle());
 
-  // keyboard: arrows move the preview cube, Enter/Space builds (or removes), +/- switch the tool
+  // keyboard: arrows move the preview cube, Enter/Space = current tool, Delete/Backspace = remove, +/- switch the tool
   canvas.addEventListener('keydown', e => {
     const moves: Record<string, [number, number]> = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
     if (e.key in moves) {
@@ -230,6 +218,8 @@ const toolClass = 'press inline-flex items-center justify-center gap-1.5 min-h-1
       cursor = { x: Math.min(target.size - 1, Math.max(0, cursor.x + dx)), z: Math.min(target.size - 1, Math.max(0, cursor.z + dz)) };
     } else if (e.key === 'Enter' || e.key === ' ') {
       change(cursor);
+    } else if (e.key === 'Delete' || e.key === 'Backspace') {
+      change(cursor, 'remove');
     } else if (e.key === '+' || e.key === '-') {
       setTool(e.key === '+' ? 'add' : 'remove');
     } else return;

@@ -12,6 +12,21 @@
   --font-sans: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
+/* light mode (toggle in the header, stored per device) – same tokens, light values */
+:root[data-theme="light"] {
+  --color-bg: #eef1f6;
+  --color-surface: #ffffff;
+  --color-line: #d9dfe9;
+  --color-text: #151b27;
+  --color-muted: #5a6477;
+  --color-front: #f2b300;
+  color-scheme: light;
+}
+/* yellow text is too light on white – darker amber for text, fills stay yellow */
+:root[data-theme="light"] .text-front {
+  color: #8a5800;
+}
+
 html {
   color-scheme: dark;
   background: var(--color-bg);
@@ -48,6 +63,13 @@ html {
 }
 .pop {
   animation: pop 320ms ease-out both;
+}
+
+/* 3D board: no text selection / callout on long press (long press removes a cube in the Builder) */
+canvas {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 :focus-visible {

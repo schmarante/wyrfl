@@ -3,6 +3,7 @@
 // Logic: src/scripts/duel/duel-app.js
 import { useTranslations } from '../i18n/index.js';
 import { LEVELS } from '../scripts/game/progress.js';
+import { AVATARS, avatarUrl } from '../scripts/duel/avatars.js';
 import GuessBoard from './GuessBoard.astro';
 
 interface Props {
@@ -24,9 +25,15 @@ const qrBox = 'mx-auto aspect-square w-full max-w-72 overflow-hidden rounded-2xl
     <h1 class="text-xl font-bold">{t('modes.duel.title')}</h1>
     <p class="mt-2">{t('duel.intro')}</p>
     <p class="mt-2 text-sm text-muted">{t('duel.privacy')}</p>
-    <label class="mt-4 block text-sm font-semibold" for="duel-name">{t('duel.nameLabel')}</label>
-    <input id="duel-name" data-name maxlength="16" autocomplete="off" placeholder={t('duel.namePlaceholder')}
-           class="mt-1 min-h-11 w-full rounded-xl border border-line bg-bg px-3 text-base" />
+    <p class="mt-4 text-sm font-semibold" id="duel-avatar-label">{t('duel.pickAvatar')}</p>
+    <div data-avatars class="mt-2 grid grid-cols-8 gap-1.5 max-sm:grid-cols-6" role="radiogroup" aria-labelledby="duel-avatar-label">
+      {AVATARS.map(id => (
+        <button type="button" role="radio" aria-checked="false" data-avatar={id} aria-label={t(`avatars.${id}`)} title={t(`avatars.${id}`)}
+                class="press grid aspect-square place-items-center rounded-2xl border-2 border-transparent bg-bg/60 p-1.5 hover:border-line aria-checked:border-cube aria-checked:bg-cube/15">
+          <img src={avatarUrl(id)} alt="" width="40" height="40" class="h-full w-full" draggable="false" />
+        </button>
+      ))}
+    </div>
     <p data-unsupported hidden class="mt-4 text-sm font-semibold text-front">{t('duel.unsupported')}</p>
     <div class="mt-5 grid gap-3 sm:grid-cols-2">
       <button type="button" data-host class={primary}>{t('duel.host')}</button>
@@ -67,7 +74,8 @@ const qrBox = 'mx-auto aspect-square w-full max-w-72 overflow-hidden rounded-2xl
 
   <!-- lobby -->
   <div data-screen="lobby" hidden class={card}>
-    <h1 data-connected class="text-xl font-bold"></h1>
+    <div data-versus class="flex items-center justify-center gap-4 py-2"></div>
+    <h1 data-connected class="text-center text-xl font-bold"></h1>
     <div data-host-only class="mt-4 flex flex-col gap-4">
       <div>
         <p class="mb-2 text-sm font-semibold">{t('duel.level')}</p>
@@ -104,10 +112,10 @@ const qrBox = 'mx-auto aspect-square w-full max-w-72 overflow-hidden rounded-2xl
   </div>
 
   <!-- play -->
-  <div data-screen="play" hidden class={card}>
-    <div class="mb-3 flex items-center justify-between gap-2 text-sm">
+  <div data-screen="play" hidden class="rounded-3xl border border-line bg-surface p-3 sm:p-5">
+    <div class="mb-2 flex items-center justify-between gap-2 text-sm">
       <span data-round class="font-semibold"></span>
-      <span data-opponent class="rounded-full bg-line px-3 py-1 text-muted"></span>
+      <span data-opponent class="inline-flex items-center gap-1.5 rounded-full bg-line py-1 pl-1 pr-3 text-muted"></span>
     </div>
     <div class="mb-3 flex gap-1" aria-hidden="true">
       <div data-my-bar class="h-1.5 flex-1 overflow-hidden rounded-full bg-line"><div class="h-full w-0 bg-cube transition-all"></div></div>
@@ -121,8 +129,8 @@ const qrBox = 'mx-auto aspect-square w-full max-w-72 overflow-hidden rounded-2xl
   <div data-screen="results" hidden class={card}>
     <h1 data-result-title class="pop text-2xl font-extrabold"></h1>
     <div class="mt-4 grid grid-cols-2 gap-3 text-center">
-      <div class="rounded-2xl bg-cube/15 p-3"><p data-me-name class="text-sm text-muted"></p><p data-me-points class="text-2xl font-bold"></p></div>
-      <div class="rounded-2xl bg-front/15 p-3"><p data-them-name class="text-sm text-muted"></p><p data-them-points class="text-2xl font-bold"></p></div>
+      <div class="flex flex-col items-center gap-1 rounded-2xl bg-cube/15 p-3"><span data-me-avatar></span><p data-me-name class="text-sm text-muted"></p><p data-me-points class="text-2xl font-bold"></p></div>
+      <div class="flex flex-col items-center gap-1 rounded-2xl bg-front/15 p-3"><span data-them-avatar></span><p data-them-name class="text-sm text-muted"></p><p data-them-points class="text-2xl font-bold"></p></div>
     </div>
     <ul data-highlights class="mt-4 flex flex-col gap-1 text-sm"></ul>
     <div class="mt-4 overflow-x-auto rounded-2xl border border-line">

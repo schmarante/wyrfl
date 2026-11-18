@@ -5,7 +5,7 @@ import en from './en.json';
 export const LOCALES = { de, en };
 export const DEFAULT_LOCALE = 'de';
 
-/** t('home.dailyTitle', { number: 3 }) → text with {placeholders} filled in; falls back to German. */
+/** t('duel.round', { n: 2, total: 5 }) → text with {placeholders} filled in; falls back to German. */
 export function useTranslations(locale = DEFAULT_LOCALE) {
   const lookup = (dict, key) => key.split('.').reduce((node, part) => node?.[part], dict);
   return (key, params = {}) => {

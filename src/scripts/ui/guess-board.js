@@ -24,9 +24,12 @@ export function createGuessBoard(root, t, { onSolved } = {}) {
 
   const sceneReady = import('../game/scene.js')
     .then(({ createCubeScene }) => {
-      scene = createCubeScene(canvas);
+      scene = createCubeScene(canvas, { marker: true });
       $('[data-loading]').hidden = true;
-      if (puzzle) scene.setStructure(puzzle.structure);
+      if (puzzle) {
+        scene.setStructure(puzzle.structure);
+        scene.setViewMarker(puzzle.view);
+      }
       return scene;
     })
     .catch(() => {
@@ -55,11 +58,11 @@ export function createGuessBoard(root, t, { onSolved } = {}) {
     state = { tries: 0, hint: false, start: performance.now(), solved: false };
     const view = t(`views.${puzzle.view}`);
     $('[data-question]').textContent = t('guess.question', { view });
-    $('[data-side-note]').hidden = puzzle.view !== 'side';
     hintButton.disabled = true;
     isoButton.hidden = true;
     say('');
     scene?.setStructure(puzzle.structure);
+    scene?.setViewMarker(puzzle.view);
 
     optionsEl.replaceChildren(
       ...puzzle.options.map((option, i) => {

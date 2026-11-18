@@ -43,6 +43,12 @@ Wyrfl is built on great open-source projects. Thanks to everyone who contributes
 | [QR Scanner](https://github.com/nimiq/qr-scanner) | Reading the QR code with the camera | MIT |
 | [jsQR](https://github.com/cozmo/jsQR) | QR detection (included in qr-scanner) | Apache-2.0 |
 
+### Graphics
+
+| Project | Used for | License |
+|---|---|---|
+| [Fluent Emoji (Microsoft)](https://github.com/microsoft/fluentui-emoji) | Duel characters (animals, fruit and vegetables) | MIT |
+
 ### For building
 
 | Project | Used for | License |

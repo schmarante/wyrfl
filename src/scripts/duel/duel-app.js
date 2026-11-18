@@ -4,7 +4,7 @@
 // channel open → lobby (host picks level + number of puzzles) → countdown → both solve the same View Guesser puzzles
 // (seeded) at their own pace, progress goes live to the other side → results → rematch (when both want one).
 //
-// Messages: { t: 'hello', name } · { t: 'setup', level, rounds } · { t: 'start', seed, level, rounds }
+// Messages: { t: 'hello', avatar } · { t: 'setup', level, rounds } · { t: 'start', seed, level, rounds }
 //           { t: 'solved', round, tries, hint, ms } · { t: 'again' }
 // Times are measured on each device (puzzle shown → solved), so network delay never matters.
 
@@ -14,9 +14,11 @@ import { createGuessPuzzle } from '../game/guess.js';
 import { LEVELS } from '../game/progress.js';
 import { createGuessBoard } from '../ui/guess-board.js';
 import { renderQr, startScanner } from '../ui/qr.js';
+import { renderLevelBadge } from '../ui/level-picker.js';
+import { AVATARS, avatarImg } from './avatars.js';
 import { localePath } from '../../i18n/index.js';
 
-const NAME_KEY = 'wyrfl:duel-name';
+const AVATAR_KEY = 'wyrfl:duel-avatar';
 const ROUNDS = [3, 5, 10];
 const NEXT_DELAY = 1300;   // ms to look at the revealed answer before the next puzzle
 
@@ -29,7 +31,6 @@ const storage = {
 export function startDuelApp(root, t) {
   const $ = sel => root.querySelector(sel);
   const screens = [...root.querySelectorAll('[data-screen]')];
-  const nameInput = $('[data-name]');
   const bannerEl = $('[data-banner]');
   const scanner = { el: $('[data-scanner]'), video: $('[data-video]'), status: $('[data-scan-status]'), handle: null };
 
@@ -37,7 +38,8 @@ export function startDuelApp(root, t) {
   let pairing = null;     // offer/answer from rtc.js
   let link = null;        // messenger on the open channel
   let accepting = false;
-  let theirName = '';
+  let myAvatar = AVATARS.includes(storage.get(AVATAR_KEY)) ? storage.get(AVATAR_KEY) : AVATARS[crypto.getRandomValues(new Uint8Array(1))[0] % AVATARS.length];
+  let theirAvatar = null;
   let settings = { level: LEVELS[0], rounds: 5 };
   let game = null;        // { seed, level, rounds, round, mine: [], theirs: [] }
   let again = { me: false, them: false };
@@ -56,8 +58,8 @@ export function startDuelApp(root, t) {
     bannerEl.textContent = text;
     bannerEl.hidden = !text;
   }
-  const myName = () => nameInput.value.trim() || t(role === 'guest' ? 'duel.colorGuest' : 'duel.colorHost');
-  const otherName = () => theirName || t(role === 'guest' ? 'duel.colorHost' : 'duel.colorGuest');
+  const myName = () => t(`avatars.${myAvatar}`);
+  const otherName = () => (theirAvatar ? t(`avatars.${theirAvatar}`) : '…');
   const settingsText = s => `${t(`levels.${s.level}`)} · ${s.rounds} ${t('duel.rounds')}`;
 
   async function copy(text, button) {
@@ -160,7 +162,7 @@ export function startDuelApp(root, t) {
     link = pairing = game = null;
     role = null;
     accepting = false;
-    theirName = '';
+    theirAvatar = null;
     $('[data-scan-answer]').disabled = true;
     $('[data-offer-qr]').textContent = t('duel.preparing');
     $('[data-answer-qr]').textContent = t('duel.connecting');
@@ -173,13 +175,14 @@ export function startDuelApp(root, t) {
     link = messenger(channel);
     link.onmessage = onMessage;
     link.onclose = onClose;
-    link.send({ t: 'hello', name: myName() });
+    link.send({ t: 'hello', avatar: myAvatar });
     banner('');
     showLobby();
   }
 
   function showLobby() {
     $('[data-connected]').textContent = t('duel.connected', { name: otherName() });
+    $('[data-versus]').innerHTML = `${avatarImg(myAvatar, 72)}<span class="text-lg font-bold text-muted">vs</span>${theirAvatar ? avatarImg(theirAvatar, 72) : '<span class="grid h-[72px] w-[72px] place-items-center text-3xl text-muted">?</span>'}`;
     $('[data-host-only]').hidden = role !== 'host';
     $('[data-guest-only]').hidden = role !== 'guest';
     $('[data-guest-only]').textContent = `${t('duel.hostChooses', { name: otherName() })} (${settingsText(settings)})`;
@@ -202,7 +205,7 @@ export function startDuelApp(root, t) {
   function onMessage(msg) {
     switch (msg?.t) {
       case 'hello':
-        theirName = String(msg.name ?? '').slice(0, 16);
+        theirAvatar = AVATARS.includes(msg.avatar) ? msg.avatar : AVATARS[0];
         if (current === 'lobby') showLobby();
         break;
       case 'setup':
@@ -288,6 +291,7 @@ export function startDuelApp(root, t) {
   function nextRound() {
     game.round++;
     $('[data-round]').textContent = t('duel.round', { n: game.round + 1, total: game.rounds });
+    renderLevelBadge($('[data-screen="play"] [data-level-picker]'), game.level, t);
     board.show(createGuessPuzzle(`${game.seed}:${game.round}`, game.level));
     updateProgress();
   }
@@ -310,7 +314,8 @@ export function startDuelApp(root, t) {
 
   function updateProgress() {
     if (!game) return;
-    $('[data-opponent]').textContent = t('duel.opponentProgress', { name: otherName(), done: done(game.theirs), total: game.rounds });
+    $('[data-opponent]').innerHTML = `${theirAvatar ? avatarImg(theirAvatar, 24) : ''}<span>${done(game.theirs)}/${game.rounds}</span>`;
+    $('[data-opponent]').title = t('duel.opponentProgress', { name: otherName(), done: done(game.theirs), total: game.rounds });
     $('[data-my-bar] div').style.width = `${(done(game.mine) / game.rounds) * 100}%`;
     $('[data-their-bar] div').style.width = `${(done(game.theirs) / game.rounds) * 100}%`;
   }
@@ -331,6 +336,8 @@ export function startDuelApp(root, t) {
       r.winner === 'mine' ? t('duel.won') : r.winner === 'tie' ? t('duel.tie')
         : t(r.total.theirs - r.total.mine <= 3 ? 'duel.lostClose' : 'duel.lost', { name: them });
     $('[data-me-name]').textContent = `${t('duel.you')} (${myName()})`;
+    $('[data-me-avatar]').innerHTML = avatarImg(myAvatar, 48);
+    $('[data-them-avatar]').innerHTML = theirAvatar ? avatarImg(theirAvatar, 48) : '';
     $('[data-them-name]').textContent = them;
     $('[data-me-points]').textContent = t('duel.points', { points: r.total.mine });
     $('[data-them-points]').textContent = t('duel.points', { points: r.total.theirs });
@@ -370,8 +377,17 @@ export function startDuelApp(root, t) {
 
   // ---- start ---------------------------------------------------------------------------------
 
-  nameInput.value = storage.get(NAME_KEY);
-  nameInput.addEventListener('input', () => storage.set(NAME_KEY, nameInput.value.trim()));
+  // character picker
+  const avatarButtons = [...root.querySelectorAll('[data-avatar]')];
+  const syncAvatars = () => avatarButtons.forEach(b => b.setAttribute('aria-checked', String(b.dataset.avatar === myAvatar)));
+  avatarButtons.forEach(b =>
+    b.addEventListener('click', () => {
+      myAvatar = b.dataset.avatar;
+      storage.set(AVATAR_KEY, myAvatar);
+      syncAvatars();
+    }),
+  );
+  syncAvatars();
 
   if (!rtcSupported()) {
     $('[data-unsupported]').hidden = false;
