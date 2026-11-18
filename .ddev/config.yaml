@@ -3,6 +3,14 @@ type: php
 docroot: "dist"
 php_version: "8.4"
 webserver_type: apache-fpm
+nodejs_version: "24"
+# Astro-Dev-Server (HMR) im web-Container: `ddev exec npm run dev` → https://wyrfl.dev.dasachtegebot.local:4321/
+# Der Docroot (dist/, gebaut mit `ddev npm run build`) bleibt unter https://wyrfl.dev.dasachtegebot.local/
+web_extra_exposed_ports:
+    - name: astro
+      container_port: 4321
+      http_port: 4320
+      https_port: 4321
 xdebug_enabled: false
 additional_hostnames: []
 additional_fqdns: []
