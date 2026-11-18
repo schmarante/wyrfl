@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import { useTranslations, localePath, LANGUAGES } from '../i18n/index.js';
+import { useTranslations, localePath, LANGUAGES, DEFAULT_LOCALE } from '../i18n/index.js';
 import { FLAGS, ICONS, SKIN_PREVIEWS } from '../scripts/ui/icons.js';
 import { SKINS } from '../scripts/game/skin-pref.js';
 import Icon from '../components/Icon.astro';
@@ -17,17 +17,49 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
 ---
 
 <!doctype html>
-<html lang={locale}>
+<!-- translate="no": our own texts are already in the reader's language – no browser translation offer -->
+<html lang={locale} translate="no">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="dark light" />
     <meta name="theme-color" content="#12151c" />
     <meta name="referrer" content="no-referrer" />
+    <meta name="google" content="notranslate" />
+    <!-- installable app (PWA): manifest + icons; the service worker is registered at the end of the page -->
+    <link rel="manifest" href={`${base}/manifest.webmanifest`} />
+    <link rel="apple-touch-icon" href={`${base}/pwa/apple-touch-icon.png`} />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Wyrfl" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>{title ? `${title} · Wyrfl` : t('meta.title')}</title>
     <meta name="description" content={t('meta.description')} />
     <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
     {LANGUAGES.map(({ code }) => <link rel="alternate" hreflang={code} href={localePath(code, page)} />)}
+    <!-- language, like ../rindr and ../mixr: ?lang=… > stored choice ('wyrfl:lang', set by the language menu) >
+         browser languages in order > German. The language lives in the URL here (/en/, /fr/ …): ?lang= works on every
+         page, the rest only on German (unprefixed) pages – a shared /en/… link always opens in English.
+         Runs before the first paint. -->
+    <script is:inline define:vars={{ codes: LANGUAGES.map(l => l.code), fallback: DEFAULT_LOCALE, current: locale, page, base }}>
+      try {
+        const match = value => {
+          const code = String(value || '').trim().toLowerCase().split(/[-_;]/)[0];
+          return codes.includes(code) ? code : undefined;
+        };
+        const params = new URLSearchParams(location.search);
+        const query = match(params.get('lang'));
+        let stored = null;
+        try { stored = localStorage.getItem('wyrfl:lang'); } catch {}
+        const wanted = query
+          ?? (current === fallback ? match(stored) ?? (navigator.languages || [navigator.language]).map(match).find(Boolean) : undefined)
+          ?? current;
+        if (wanted !== current) {
+          params.delete('lang');
+          const search = params.toString() ? `?${params}` : '';
+          location.replace(`${base}${wanted === fallback ? '' : `/${wanted}`}/${page}${search}${location.hash}`);
+        }
+      } catch {}
+    </script>
     <!-- theme before the first paint (no flash); dark is the default -->
     <script is:inline>
       try {
@@ -56,7 +88,7 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
             <ul class="absolute right-0 z-40 mt-1 min-w-44 overflow-hidden rounded-2xl border-2 border-line bg-surface py-1 shadow-lg">
               {LANGUAGES.map(({ code, name }) => (
                 <li>
-                  <a href={localePath(code, page)} hreflang={code} lang={code} aria-current={code === locale ? 'true' : undefined}
+                  <a href={localePath(code, page)} hreflang={code} lang={code} data-lang={code} aria-current={code === locale ? 'true' : undefined}
                      class:list={['flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-line', code === locale && 'font-bold']}>
                     <Fragment set:html={FLAGS[code]} />
                     <span class="flex-1">{name}</span>
@@ -110,7 +142,25 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
       import { currentSkin, setSkin, skinUnlocked } from '../scripts/game/skin-pref.js';
       import { registerUnlockAllShortcut } from '../scripts/ui/debug-solve.js';
 
-      registerUnlockAllShortcut();   // TEMPORARY test aid: key "P" on development hosts
+      registerUnlockAllShortcut();   // test aid: key "P" when built with PUBLIC_DEBUG=true
+
+      // a language picked in the menu is stored and wins over the browser language from now on (script in <head>)
+      document.querySelectorAll<HTMLAnchorElement>('[data-lang]').forEach(link =>
+        link.addEventListener('click', () => {
+          try {
+            localStorage.setItem('wyrfl:lang', link.dataset.lang!);
+          } catch {
+            /* not stored */
+          }
+        }),
+      );
+
+      // installable app: service worker (production builds only – the dev server must not be cached)
+      if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+        navigator.serviceWorker.register(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/sw.js`).catch(() => {
+          /* no offline mode – the game still works */
+        });
+      }
 
       // light/dark toggle – stored on this device only; the 3D scenes listen to 'wyrfl-theme'
       const root = document.documentElement;
