@@ -1,8 +1,9 @@
 ---
 // Playing field of the View Guesser (question, 3D building, six options, feedback) – used by GuessGame and DuelGame.
 // Top left of the 3D view: [data-level-picker] (stars), top right: back-to-tilted + hint. Logic: src/scripts/ui/guess-board.js
-// Phone: question → 3D → options → feedback. Tablet landscape and up (`land:`): 3D left (full height), options in a
-// column on the right, two columns when there is room (`land-wide:`). The default slot goes under the feedback.
+// Phone: question → 3D → options → feedback (+ default slot, e.g. "next puzzle").
+// Tablet landscape and up (`land:`): question + 3D on the left (full height); on the right the options in two columns,
+// below them feedback and the default slot – sized from the screen height so everything fits on a 16:9 screen.
 import { useTranslations } from '../i18n/index.js';
 import Icon from './Icon.astro';
 
@@ -11,19 +12,19 @@ interface Props {
 }
 const t = useTranslations(Astro.props.locale);
 const overlayButton = 'press pointer-events-auto grid h-10 w-10 place-items-center rounded-full bg-surface/85 text-text shadow-sm backdrop-blur hover:bg-line disabled:cursor-not-allowed disabled:opacity-35';
-// option size in landscape: six (one column) or three (two columns) options fill the screen height
-const optionColumn = [
-  'land:mt-0 land:col-start-2 land:row-span-2 land:row-start-1 land:content-start land:grid-cols-1',
-  'land:w-[var(--opt)] land:[--opt:clamp(5.5rem,calc((100dvh-8rem)/6-0.5rem),10rem)]',
-  'land-wide:grid-cols-2 land-wide:w-[calc(var(--opt)*2+0.75rem)] land-wide:[--opt:clamp(8rem,calc((100dvh-8rem)/3-0.75rem),11.5rem)]',
+// --opt = one option's width in landscape: three rows of options + feedback + button have to fit under the header
+const layout = [
+  'land:grid land:grid-cols-[minmax(0,1fr)_auto] land:grid-rows-[auto_1fr] land:gap-x-5',
+  'land:[--opt:clamp(5.5rem,calc((100dvh-19rem)/3),11rem)]',
 ].join(' ');
+const rightColumn = 'land:col-start-2 land:w-[calc(var(--opt)*2+0.75rem)]';
 ---
 
-<div data-guess-board class="land:grid land:grid-cols-[minmax(0,1fr)_auto] land:grid-rows-[auto_1fr] land:gap-x-4">
-  <div class="min-w-0 land:col-start-1 land:row-start-1">
+<div data-guess-board class={layout}>
+  <div class="min-w-0 land:col-start-1 land:row-span-2 land:row-start-1">
     <h1 data-question class="text-lg font-bold leading-snug sm:text-xl">&nbsp;</h1>
 
-    <div class="relative mt-2 aspect-[5/4] w-full overflow-hidden rounded-2xl bg-bg/50 sm:aspect-[16/10] land:aspect-auto land:h-[max(20rem,calc(100dvh-12rem))]">
+    <div class="relative mt-2 aspect-[5/4] w-full overflow-hidden rounded-2xl bg-bg/50 sm:aspect-[16/10] land:aspect-auto land:h-[max(18rem,calc(100dvh-11rem))]">
       <canvas data-canvas class="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing" role="img"
               aria-label={t('home.dragHint')}></canvas>
       <p data-loading class="absolute inset-0 grid place-items-center text-muted">{t('game.loading')}</p>
@@ -41,10 +42,10 @@ const optionColumn = [
     </div>
   </div>
 
-  <ul data-options class={`mt-3 grid grid-cols-3 gap-2 sm:gap-3 ${optionColumn}`}></ul>
+  <ul data-options class={`mt-3 grid grid-cols-3 gap-2 sm:gap-3 land:mt-0 land:row-start-1 land:grid-cols-2 land:content-start ${rightColumn}`}></ul>
 
-  <div class="land:col-start-1 land:row-start-2">
-    <p data-feedback class="mt-3 min-h-6 px-1 text-base font-semibold" aria-live="polite"></p>
+  <div class={`land:row-start-2 ${rightColumn}`}>
+    <p data-feedback class="mt-3 min-h-6 px-1 text-base font-semibold land:text-sm" aria-live="polite"></p>
     <slot />
   </div>
 </div>
