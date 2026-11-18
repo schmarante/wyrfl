@@ -665,8 +665,8 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   canvas.addEventListener('pointerleave', onLeave);
   canvas.addEventListener('contextmenu', onContextMenu);
 
-  // eyes follow the pointer (styles with lookAt): pointer anywhere on the page → a point in front of the building
-  // → the pupils turn towards it; at most one render per frame. Without a pointer they look at the viewer.
+  // eyes follow the pointer (styles with lookAt): pointer anywhere on the page → a point on its ray (only the screen
+  // position counts) → every pupil turns towards it on screen; at most one render per frame. Idle: at the viewer.
   const eyePoint = new THREE.Vector3();
   let eyeFrame = 0;
   function eyesFollow(clientX, clientY) {
@@ -675,9 +675,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     if (!rect.width || !rect.height) return;
     pointer.set(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
     raycaster.setFromCamera(pointer, camera);
-    const { origin, direction } = raycaster.ray;
-    const depth = eyePoint.copy(target).sub(origin).dot(direction);
-    skin.lookAt(eyePoint.copy(origin).addScaledVector(direction, depth - 6));
+    skin.lookAt(eyePoint.copy(raycaster.ray.origin));
     if (!eyeFrame && !frame) {
       eyeFrame = requestAnimationFrame(() => {
         eyeFrame = 0;
@@ -687,7 +685,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   }
   function eyesLookAtViewer() {
     if (!skin.lookAt) return;
-    skin.lookAt(eyePoint.copy(target).addScaledVector(camDir, 10));
+    skin.lookAt(null);
   }
   const onPagePointer = e => eyesFollow(e.clientX, e.clientY);
   window.addEventListener('pointermove', onPagePointer, { passive: true });

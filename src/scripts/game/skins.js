@@ -172,10 +172,22 @@ const EYES_FRAGMENT = /* glsl */ `
           float arc = (1.0 - smoothstep(0.014, 0.026, abs(r - 0.085))) * step(c.y, p.y);
           diffuseColor.rgb = mix(diffuseColor.rgb, ink, arc);
         #else
+          // Look where the pointer is ON SCREEN (orthographic: view-space xy = screen): the screen direction from this
+          // eye to the pointer is turned into the face's own axes (u, up as they appear on screen), so the pupil moves
+          // exactly towards the pointer – also right next to the eye. Idle (w = 0): straight at the viewer.
           vec3 eye = face + u * c.x + vec3(0.0, c.y, 0.0);
-          vec3 d = uEyeTarget - eye;
-          vec3 l = vec3(dot(d, u), d.y, dot(d, n));
-          vec2 look = l.xy / (length(l) + 0.0001) * 0.07;   // pupil moves towards the target
+          vec2 look = vec2(0.0);
+          vec2 d = (viewMatrix * vec4(uEyeTarget.xyz, 1.0)).xy - (viewMatrix * vec4(eye, 1.0)).xy;
+          if (uEyeTarget.w > 0.5 && length(d) > 0.0001) {
+            vec2 su = (viewMatrix * vec4(u, 0.0)).xy;
+            vec2 sy = (viewMatrix * vec4(0.0, 1.0, 0.0, 0.0)).xy;
+            float det = su.x * sy.y - su.y * sy.x;
+            det = det < 0.0 ? min(det, -0.05) : max(det, 0.05);   // face nearly edge-on: no blow-up
+            vec2 dir = normalize(d);
+            vec2 ab = vec2(dir.x * sy.y - dir.y * sy.x, su.x * dir.y - su.y * dir.x) / det;
+            float reach = smoothstep(0.0, 0.45, length(d));   // pointer on the eye → centered, further away → full
+            look = normalize(ab) * 0.07 * reach;
+          }
           float white = 1.0 - smoothstep(0.128, 0.138, r);
           float rim = smoothstep(0.112, 0.124, r) * white;
           float pupil = 1.0 - smoothstep(0.058, 0.066, length(p - c - look));
@@ -201,7 +213,7 @@ function eyeMaterial(color, face, closed, target) {
       .replace('#include <common>', '#include <common>\nvarying vec3 vEyeWorld;\nvarying vec3 vEyeNormal;\nvarying vec3 vEyeCenter;\nvarying float vEyeFront;')
       .replace('#include <begin_vertex>', `#include <begin_vertex>${EYES_VERTEX}`);
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform vec3 uEyeTarget;\nvarying vec3 vEyeWorld;\nvarying vec3 vEyeNormal;\nvarying vec3 vEyeCenter;\nvarying float vEyeFront;')
+      .replace('#include <common>', '#include <common>\nuniform vec4 uEyeTarget;\nvarying vec3 vEyeWorld;\nvarying vec3 vEyeNormal;\nvarying vec3 vEyeCenter;\nvarying float vEyeFront;')
       .replace('#include <color_fragment>', `#include <color_fragment>${EYES_FRAGMENT}`)
       .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\ntotalEmissiveRadiance += vec3(0.38) * eyeGlow;');
   };
@@ -210,7 +222,7 @@ function eyeMaterial(color, face, closed, target) {
 }
 
 function eyesSkin() {
-  const target = { value: new THREE.Vector3(10, 10, 10) };
+  const target = { value: new THREE.Vector4(0, 0, 0, 0) };   // xyz: pointer on screen (any depth), w: 0 = idle
   // per color × eye face one material, and its closed twin for blinking
   const open = EYE_COLORS.map(color => EYE_FACES.map((_, face) => eyeMaterial(color, face, false, target)));
   const closed = EYE_COLORS.map(color => EYE_FACES.map((_, face) => eyeMaterial(color, face, true, target)));
@@ -223,9 +235,10 @@ function eyesSkin() {
     },
     /** the same cube with closed eyes (the scene blinks a few cubes now and then) */
     blink: base => closedOf.get(base),
-    /** point in world space the pupils look at (pointer / finger, or the camera when idle) */
+    /** a world point under the pointer / finger (only its screen position counts); null = look at the viewer */
     lookAt(point) {
-      target.value.copy(point);
+      if (point) target.value.set(point.x, point.y, point.z, 1);
+      else target.value.w = 0;
     },
     edge,
     dispose() {
