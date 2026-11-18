@@ -1,49 +1,106 @@
-// Wyrfl service worker – makes the app installable and keeps visited pages playable offline.
-// - pages (navigations): network first, the cached copy when offline
-// - built assets (/_astro/…, hashed names): cache first – a new build has new names
-// - everything else of this site (icons, avatars …): cached copy right away, refreshed in the background
-// Nothing from other origins is touched (Wyrfl makes no external requests anyway).
-const CACHE = 'wyrfl-v1';
+// Wyrfl service worker – installable app + offline play. Written to be safe, because a broken service worker stays
+// on the players' devices (nobody clears caches by hand):
+//
+// - BUILD and PRECACHE are filled in after every build (astro.config.mjs, integration "wyrfl-service-worker"):
+//   BUILD = hash of all files → a new version only when something really changed.
+// - install: the whole build goes into its own cache (fetched past the HTTP cache). If anything fails, the install
+//   fails and the previous version simply keeps working – there is never a half-updated app.
+// - activate: the previous build's cache is kept (pages that are still open can load their chunks), older ones and
+//   unknown wyrfl-* caches are deleted – the cache never grows.
+// - pages: always from the network first (fresh after every deploy); offline: the cached copy, else a small offline page.
+// - files: current build's cache → any older wyrfl cache → network. Never anything from other origins.
+// - unconfigured (BUILD still the placeholder, e.g. served from public/ unbuilt): does nothing at all.
+// Emergency: scripts/sw-kill-switch.js (see CLAUDE.md) removes the service worker and all caches from every device.
 
-self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', event => {
+const BUILD = '__WYRFL_BUILD__';
+const PRECACHE = [] /*__WYRFL_PRECACHE__*/;
+const PREFIX = 'wyrfl-';
+const CACHE = `${PREFIX}${BUILD}`;
+const META = '__wyrfl-installed';   // timestamp entry in every cache (which build is newer)
+const ACTIVE = !BUILD.startsWith('__');
+
+self.addEventListener('install', event => {
+  if (!ACTIVE) {
+    self.skipWaiting();
+    return;
+  }
   event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k.startsWith('wyrfl-') && k !== CACHE).map(k => caches.delete(k))))
-      .then(() => self.clients.claim()),
+    (async () => {
+      const cache = await caches.open(CACHE);
+      await cache.addAll(PRECACHE.map(url => new Request(url, { cache: 'reload' })));   // all or nothing
+      await cache.put(META, new Response(String(Date.now())));
+      await self.skipWaiting();
+    })(),
   );
 });
 
-// the copy for the cache has to be made right away – once the page has read the response, it can't be cloned anymore
-const put = (request, response) => {
-  if (response.ok && response.type === 'basic') {
-    const copy = response.clone();
-    caches.open(CACHE).then(cache => cache.put(request, copy));
-  }
-  return response;
-};
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    (async () => {
+      // keep the current cache and the newest other build, delete everything else of ours
+      const others = [];
+      for (const name of await caches.keys()) {
+        if (!name.startsWith(PREFIX) || name === CACHE) continue;
+        const stamp = await (await caches.open(name)).match(META);
+        others.push({ name, time: stamp ? Number(await stamp.text()) || 0 : 0 });
+      }
+      others.sort((a, b) => b.time - a.time);
+      const keep = ACTIVE ? others.filter(c => c.time > 0).slice(0, 1).map(c => c.name) : [];
+      await Promise.all(others.filter(c => !keep.includes(c.name)).map(c => caches.delete(c.name)));
+      await self.clients.claim();
+    })(),
+  );
+});
+
+function offlinePage() {
+  const body = `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wyrfl</title><body style="margin:0;display:grid;place-items:center;min-height:100vh;background:#12151c;color:#eef1f7;font-family:system-ui,sans-serif;text-align:center">
+<div><p style="font-size:1.4rem;font-weight:700">Offline</p><p>Keine Verbindung – bitte gleich noch einmal versuchen.<br>No connection – please try again in a moment.</p></div>`;
+  return new Response(body, { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+}
+
+async function store(event, request, response) {
+  if (!response.ok || response.type !== 'basic' || response.redirected) return;
+  const copy = response.clone();   // right away – once the page has read the body it can't be cloned
+  event.waitUntil(caches.open(CACHE).then(cache => cache.put(request, copy)).catch(() => {}));
+}
 
 self.addEventListener('fetch', event => {
+  if (!ACTIVE) return;
   const { request } = event;
+  if (request.method !== 'GET') return;
   const url = new URL(request.url);
-  if (request.method !== 'GET' || url.origin !== self.location.origin) return;
+  if (url.origin !== self.location.origin || !url.href.startsWith(self.registration.scope)) return;
 
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request)
-        .then(response => put(request, response))
-        .catch(() => caches.match(request, { ignoreSearch: true }).then(hit => hit || caches.match(new URL('./', self.registration.scope)))),
+      (async () => {
+        try {
+          const response = await fetch(request);
+          store(event, request, response);
+          return response;
+        } catch {
+          return (await caches.match(request, { ignoreSearch: true }))
+            || (await caches.match(new URL('./', self.registration.scope).href))
+            || offlinePage();
+        }
+      })(),
     );
     return;
   }
-  if (url.pathname.includes('/_astro/')) {
-    event.respondWith(caches.match(request).then(hit => hit || fetch(request).then(response => put(request, response))));
-    return;
-  }
+
   event.respondWith(
-    caches.match(request).then(hit => {
-      const fresh = fetch(request).then(response => put(request, response)).catch(() => hit);
-      return hit || fresh;
-    }),
+    (async () => {
+      const current = await caches.open(CACHE);
+      const hit = (await current.match(request)) || (await caches.match(request));
+      if (hit) return hit;
+      try {
+        const response = await fetch(request);
+        store(event, request, response);
+        return response;
+      } catch {
+        return Response.error();
+      }
+    })(),
   );
 });
