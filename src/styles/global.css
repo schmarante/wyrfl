@@ -23,12 +23,11 @@
   --color-line: #d9dfe9;
   --color-text: #151b27;
   --color-muted: #5a6477;
-  --color-front: #f2b300;
-  color-scheme: light;
+  color-scheme: light;   /* the yellow (--color-front) stays exactly the same as in the dark theme */
 }
-/* yellow text is too light on white – darker amber for text, fills stay yellow */
+/* yellow text on white: same yellow, only a hairline dark edge so it stays readable – no muddy darker tone */
 :root[data-theme="light"] .text-front {
-  color: #8a5800;
+  text-shadow: 0 0 1px rgba(60, 40, 0, 0.55), 0 0 1px rgba(60, 40, 0, 0.35);
 }
 
 html {
