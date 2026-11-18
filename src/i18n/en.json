@@ -29,7 +29,8 @@
   },
   "nav": {
     "about": "About Wyrfl",
-    "theme": "Light / dark"
+    "theme": "Light / dark",
+    "language": "Language"
   },
   "about": {
     "title": "About Wyrfl",
@@ -185,5 +186,10 @@
     "pineapple": "Pineapple",
     "watermelon": "Melon",
     "grapes": "Grapes"
+  },
+  "viewWords": {
+    "top": "top",
+    "front": "front",
+    "side": "right"
   }
 }

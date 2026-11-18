@@ -37,6 +37,23 @@ export function createGuessBoard(root, t, { onSolved } = {}) {
       return null;
     });
 
+  /** Text with the asked perspective word ("vorne", "oben", "rechts" – viewWords.*) highlighted in yellow, the same
+   *  color as the 3D arrow. Only that word is marked, not the whole phrase ("von vorne"). */
+  function withView(el, key, view) {
+    const phrase = t(`views.${view}`);
+    const word = t(`viewWords.${view}`);
+    const at = phrase.indexOf(word);
+    const viewNodes = () => {
+      if (at < 0) return [phrase];
+      const mark = document.createElement('span');
+      mark.className = 'text-front';
+      mark.textContent = word;
+      return [phrase.slice(0, at), mark, phrase.slice(at + word.length)];
+    };
+    const parts = t(key).split('{view}');   // without params the placeholder stays in the text
+    el.replaceChildren(...parts.flatMap((part, i) => (i === 0 ? [part] : [...viewNodes(), part])));
+  }
+
   function say(text, tone = 'info') {
     feedback.textContent = text;
     feedback.classList.toggle('text-front', tone === 'good');
@@ -56,8 +73,7 @@ export function createGuessBoard(root, t, { onSolved } = {}) {
   function show(next) {
     puzzle = next;
     state = { tries: 0, hint: false, start: performance.now(), solved: false };
-    const view = t(`views.${puzzle.view}`);
-    $('[data-question]').textContent = t('guess.question', { view });
+    withView($('[data-question]'), 'guess.question', puzzle.view);
     hintButton.disabled = true;
     isoButton.hidden = true;
     say('');
@@ -115,7 +131,8 @@ export function createGuessBoard(root, t, { onSolved } = {}) {
     state.hint = true;
     scene?.lookFrom(puzzle.view);
     isoButton.hidden = false;
-    say(t('guess.hintDone', { view: t(`views.${puzzle.view}`) }));
+    say('');
+    withView(feedback, 'guess.hintDone', puzzle.view);
   });
   isoButton.addEventListener('click', () => {
     scene?.lookFrom('iso');

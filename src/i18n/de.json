@@ -29,7 +29,8 @@
   },
   "nav": {
     "about": "Über Wyrfl",
-    "theme": "Hell / Dunkel"
+    "theme": "Hell / Dunkel",
+    "language": "Sprache"
   },
   "about": {
     "title": "Über Wyrfl",
@@ -185,5 +186,10 @@
     "pineapple": "Ananas",
     "watermelon": "Melone",
     "grapes": "Traube"
+  },
+  "viewWords": {
+    "top": "oben",
+    "front": "vorne",
+    "side": "rechts"
   }
 }
