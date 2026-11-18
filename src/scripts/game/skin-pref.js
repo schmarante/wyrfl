@@ -10,17 +10,26 @@
 // The choice is stored on this device only.
 
 import { dailyDate } from './rng.js';
-import { levelDone, duelWins, MODES, seenSkins, markSkinsSeen } from './progress.js';
+import { levelDone, duelWins, MODES, seenSkins, markSkinsSeen, DEBUG_ALL_KEY } from './progress.js';
 
 export const SKINS = ['classic', 'colors', 'pixel', 'eyes', 'gifts'];
 const KEY = 'wyrfl:skin';
 const DAY_KEY = 'wyrfl:skin-day';
+
+const read = key => {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
 
 const GIFT_DAYS = ['12-06', '12-24', '12-25', '12-26'];
 export const isGiftDay = (date = dailyDate()) => GIFT_DAYS.includes(date.slice(5));
 
 /** how a style is unlocked (key for the hint text: skins.unlock.<name>) */
 export function skinUnlocked(name, date = dailyDate()) {
+  if (SKINS.includes(name) && read(DEBUG_ALL_KEY) === '1') return true;   // TEMPORARY test aid (key "P")
   switch (name) {
     case 'classic':
       return true;
@@ -36,14 +45,6 @@ export function skinUnlocked(name, date = dailyDate()) {
       return false;
   }
 }
-
-const read = key => {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-};
 
 export function currentSkin(date = dailyDate()) {
   const chosen = read(KEY);

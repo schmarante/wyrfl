@@ -78,6 +78,23 @@ export function recordDuelWin() {
   save(data);
 }
 
+// ---- TEMPORARY test aid (debug-solve.js, key "P"): everything unlocked ---------------------------------
+
+export const DEBUG_ALL_KEY = 'wyrfl:debug-unlock-all';
+
+export function unlockEverything(skins) {
+  const data = load();
+  data.solved = Object.fromEntries(MODES.map(mode => [mode, Object.fromEntries(LEVELS.map(level => [level, UNLOCK_AFTER]))]));
+  data.duelWins = Math.max(1, data.duelWins ?? 0);
+  data.skinsSeen = skins;   // no celebration for each of them
+  save(data);
+  try {
+    localStorage.setItem(DEBUG_ALL_KEY, '1');   // also styles that depend on the date (gifts)
+  } catch {
+    /* ignore */
+  }
+}
+
 // ---- cube styles already celebrated (so an unlock is shown only once) --------------------------------------
 
 export function seenSkins() {

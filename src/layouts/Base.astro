@@ -108,6 +108,9 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
 
     <script>
       import { currentSkin, setSkin, skinUnlocked } from '../scripts/game/skin-pref.js';
+      import { registerUnlockAllShortcut } from '../scripts/ui/debug-solve.js';
+
+      registerUnlockAllShortcut();   // TEMPORARY test aid: key "P" on development hosts
 
       // light/dark toggle – stored on this device only; the 3D scenes listen to 'wyrfl-theme'
       const root = document.documentElement;
