@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import { useTranslations, localePath, LANGUAGES, DEFAULT_LOCALE } from '../i18n/index.js';
-import { FLAGS, ICONS, SKIN_PREVIEWS } from '../scripts/ui/icons.js';
+import { FLAGS, ICONS, LOGO, SKIN_PREVIEWS } from '../scripts/ui/icons.js';
 import { SKINS } from '../scripts/game/skin-pref.js';
 import Icon from '../components/Icon.astro';
 
@@ -74,7 +74,7 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
     <div class="mx-auto flex min-h-dvh max-w-3xl flex-col land:max-w-7xl px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4">
       <header class="flex items-center justify-between py-2">
         <a href={localePath(locale)} data-locale-href="" class="flex items-center gap-2 text-xl font-extrabold tracking-tight">
-          <img src={`${base}/favicon.svg`} alt="" width="28" height="28" />
+          <Fragment set:html={LOGO} />
           Wyrfl
         </a>
         <nav class="flex items-center gap-1">

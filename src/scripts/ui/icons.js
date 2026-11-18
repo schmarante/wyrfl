@@ -48,9 +48,13 @@ export const FLAGS = {
 };
 
 // cube style previews (header menu): an iso cube in the colors of each style
-const isoCube = (top, left, right, extra = '', stroke = '#0b1530') => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="2 1 28 31" width="22" height="22" aria-hidden="true" class="block shrink-0"><polygon points="16,3 28,10 16,17 4,10" fill="${top}"/><polygon points="4,10 16,17 16,30 4,23" fill="${left}"/><polygon points="28,10 16,17 16,30 28,23" fill="${right}"/>${extra}<path d="M16 3 28 10 28 23 16 30 4 23 4 10Z M4 10 16 17 28 10 M16 17V30" fill="none" stroke="${stroke}" stroke-width="1.3" stroke-linejoin="round"/></svg>`;
+const isoCube = (top, left, right, extra = '', stroke = '#0b1530') => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="2 1 28 31" width="22" height="22" aria-hidden="true" class="block shrink-0"><polygon points="16,3 28,10 16,17 4,10" style="fill:${top}"/><polygon points="4,10 16,17 16,30 4,23" style="fill:${left}"/><polygon points="28,10 16,17 16,30 28,23" style="fill:${right}"/>${extra}<path d="M16 3 28 10 28 23 16 30 4 23 4 10Z M4 10 16 17 28 10 M16 17V30" fill="none" stroke="${stroke}" stroke-width="1.3" stroke-linejoin="round"/></svg>`;
+/** Header logo – inline, so it follows the theme (the favicon file stays blue). */
+export const LOGO = isoCube('var(--color-logo-top)', 'var(--color-logo-left)', 'var(--color-logo-right)').replace('width="22" height="22"', 'width="28" height="28"');
+
 export const SKIN_PREVIEWS = {
-  classic: isoCube('#8fb4ff', '#4f8cff', '#2f63c9'),
+  // classic follows the theme like the logo: blue in the dark theme, yellow in the light one (global.css)
+  classic: isoCube('var(--color-logo-top)', 'var(--color-logo-left)', 'var(--color-logo-right)'),
   colors: isoCube('#facc15', '#ef4444', '#22c3ee'),
   pixel: isoCube('#5aa83a', '#8b5a34', '#6f4527', '<polygon points="4,10 16,17 16,20.5 4,13.5" fill="#4f9a33"/><polygon points="28,10 16,17 16,20.5 28,13.5" fill="#3f7f28"/>'),
   eyes: isoCube('#ffcf3f', '#f2b92a', '#e0a516', '<circle cx="7.6" cy="17.2" r="1.9" fill="#fff"/><circle cx="12" cy="19.7" r="1.9" fill="#fff"/><circle cx="8" cy="17.6" r="0.9" fill="#2a1a0c"/><circle cx="12.4" cy="20.1" r="0.9" fill="#2a1a0c"/>'),
