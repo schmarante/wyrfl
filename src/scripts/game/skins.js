@@ -316,24 +316,24 @@ function galaxySkin() {
 }
 
 // ---- skyscrapers ----------------------------------------------------------------------------------
-// Every column is one building (facade picked from its position: concrete, glass, brick, sandstone), every cube a floor
-// with rows of windows, a flat roof on top. Dark theme: some windows glow warm (emissive map); light theme: dark glass.
+// Every column is one building (facade + window layout picked from its position), every cube a floor, a flat roof on
+// top. Dark theme: windows glow (emissive map) – each floor lit differently: warm and cool light, TV glow, half-closed
+// blinds, slatted blinds, some floors nearly dark, some nearly all lit. Light theme: dark glass.
 
-const FACADES = [
-  { wall: '#9aa3ad', trim: '#7f8893', glass: '#2b3a52' },   // concrete
-  { wall: '#4f6d8f', trim: '#3d5878', glass: '#1d2b43' },   // glass tower
-  { wall: '#a5563f', trim: '#87442f', glass: '#272c37' },   // brick
-  { wall: '#c9b58b', trim: '#ad9a71', glass: '#2b3346' },   // sandstone
-];
-const WINDOW = { cols: 3, rows: 2, x0: 8, y0: 8, w: 12, h: 18, gx: 6, gy: 10 };
-const windowRects = () => {
+const grid = (cols, rows, x0, y0, w, h, gx, gy) => {
   const out = [];
-  for (let r = 0; r < WINDOW.rows; r++) for (let c = 0; c < WINDOW.cols; c++) {
-    out.push([WINDOW.x0 + c * (WINDOW.w + WINDOW.gx), WINDOW.y0 + r * (WINDOW.h + WINDOW.gy), WINDOW.w, WINDOW.h]);
-  }
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) out.push([x0 + c * (w + gx), y0 + r * (h + gy), w, h]);
   return out;
 };
-const LIGHTS = ['#ffd27a', '#ffe3a3', '#ffbf5e', '#fff1c9'];
+const FACADES = [
+  { wall: '#9aa3ad', trim: '#7f8893', glass: '#2b3a52', windows: grid(3, 2, 8, 8, 12, 18, 6, 10) },               // concrete
+  { wall: '#4f6d8f', trim: '#3d5878', glass: '#1d2b43', windows: grid(4, 3, 5, 5, 11, 14, 3.67, 4.5), panes: true }, // glass tower
+  { wall: '#a5563f', trim: '#87442f', glass: '#272c37', windows: grid(2, 2, 9, 6, 17, 19, 12, 9), sill: true },      // brick
+  { wall: '#c9b58b', trim: '#ad9a71', glass: '#2b3346', windows: grid(3, 1, 9, 7, 11, 46, 7.5, 0) },                // sandstone
+  { wall: '#353c47', trim: '#262c35', glass: '#1a2233', windows: grid(4, 2, 3, 8, 13.5, 16, 1, 14), ribbon: true },  // modern, window bands
+];
+const LIGHTS = ['#ffd27a', '#ffe3a3', '#ffbf5e', '#fff1c9', '#f4f7ff', '#ffcf8a'];
+const TV = ['#8fb8ff', '#a6c8ff', '#7fa7f5'];
 
 function citySkin() {
   const rng = createRng('wyrfl-city');
@@ -349,27 +349,63 @@ function citySkin() {
     ctx.fillRect(0, 0, s, s);
     ctx.fillStyle = f.trim;   // floor ledge
     ctx.fillRect(0, s - 4, s, 4);
-    for (const [x, y, w, h] of windowRects()) {
+    if (f.ribbon) {   // continuous bands behind the panes
       ctx.fillStyle = f.trim;
-      ctx.fillRect(x - 1.5, y - 1.5, w + 3, h + 3);
+      for (const y of [6, 36]) ctx.fillRect(0, y, s, 20);
+    }
+    for (const [x, y, w, h] of f.windows) {
+      ctx.fillStyle = f.trim;
+      if (!f.ribbon) ctx.fillRect(x - 1.5, y - 1.5, w + 3, h + 3);
       const glass = ctx.createLinearGradient(x, y, x + w, y + h);   // a little reflection
       glass.addColorStop(0, '#6f86a8');
       glass.addColorStop(0.35, f.glass);
       glass.addColorStop(1, f.glass);
       ctx.fillStyle = glass;
       ctx.fillRect(x, y, w, h);
+      if (f.panes) {   // mullions
+        ctx.fillStyle = f.trim;
+        ctx.fillRect(x + w / 2 - 0.5, y, 1, h);
+      }
+      if (f.sill) {
+        ctx.fillStyle = '#d8c7b8';
+        ctx.fillRect(x - 2, y + h + 1.5, w + 4, 2);
+      }
     }
   }));
-  // lit windows (emissive): several random patterns, picked per floor
-  const lightMaps = Array.from({ length: 5 }, () => tex((ctx, s) => {
+  // lit windows (emissive): per facade several patterns, each with its own mood (how many lights are on)
+  const paint = (ctx, [x, y, w, h]) => {
+    const kind = rng();
+    if (kind < 0.12) {   // TV glow: dim bluish
+      ctx.fillStyle = TV[rng.int(0, TV.length - 1)];
+      ctx.globalAlpha = 0.55;
+      ctx.fillRect(x, y, w, h);
+      ctx.globalAlpha = 1;
+      return;
+    }
+    ctx.fillStyle = LIGHTS[rng.int(0, LIGHTS.length - 1)];
+    if (kind < 0.27) {   // blinds half down
+      const down = h * (0.3 + rng() * 0.4);
+      ctx.fillRect(x, y + down, w, h - down);
+    } else if (kind < 0.37) {   // slatted blinds
+      for (let yy = y; yy < y + h; yy += 3) ctx.fillRect(x, yy, w, 1.6);
+    } else {
+      ctx.fillRect(x, y, w, h);
+      if (rng() < 0.25) {   // someone at home: a dark silhouette
+        ctx.fillStyle = '#000';
+        const cx = x + w * (0.3 + rng() * 0.4);
+        ctx.beginPath();
+        ctx.arc(cx, y + h * 0.55, Math.min(w, h) * 0.16, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillRect(cx - Math.min(w, h) * 0.22, y + h * 0.68, Math.min(w, h) * 0.44, h * 0.32);
+      }
+    }
+  };
+  const lightMaps = FACADES.map(f => Array.from({ length: 6 }, () => tex((ctx, s) => {
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, s, s);
-    for (const [x, y, w, h] of windowRects()) {
-      if (rng() < 0.45) continue;
-      ctx.fillStyle = LIGHTS[rng.int(0, LIGHTS.length - 1)];
-      ctx.fillRect(x, y, w, h);
-    }
-  }));
+    const on = [0.15, 0.35, 0.5, 0.6, 0.75, 0.9][rng.int(0, 5)];   // mood of this floor
+    for (const rect of f.windows) if (rng() < on) paint(ctx, rect);
+  })));
   const roof = lambert({
     map: tex((ctx, s) => {
       ctx.fillStyle = '#5d636d';
@@ -383,13 +419,13 @@ function citySkin() {
     }),
   });
   const night = () => document.documentElement.dataset.theme !== 'light';
-  const sides = FACADES.map((_, f) => lightMaps.map(emissiveMap => lambert({ map: facadeMaps[f], emissiveMap, emissive: night() ? 0xffffff : 0x000000 })));
+  const sides = FACADES.map((_, f) => lightMaps[f].map(emissiveMap => lambert({ map: facadeMaps[f], emissiveMap, emissive: night() ? 0xffffff : 0x000000 })));
   const sets = new Map();
   const edge = edges(0x1b2230, 0.5);
   return {
     material: (x, y, z) => {
       const f = cellHash(x, 0, z) % FACADES.length;       // one facade per column = one building
-      const l = (cellHash(x, y, z) >>> 4) % lightMaps.length;   // lights differ per floor
+      const l = (cellHash(x, y, z) >>> 4) % lightMaps[f].length;   // lights differ per floor
       const key = `${f}:${l}`;
       if (!sets.has(key)) {
         const side = sides[f][l];

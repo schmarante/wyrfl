@@ -14,15 +14,14 @@ import { createSkin } from './skins.js';
 import { currentSkin } from './skin-pref.js';
 
 const PALETTES = {
-  dark: { plate: 0x2a3142, plateLine: 0x3b4458 },
-  light: { plate: 0xcfd6e3, plateLine: 0xb3bccc },
+  dark: { plate: 0x2a3142, plateLine: 0x3b4458, ghost: 0xffffff },   // ghost: preview cube when building
+  light: { plate: 0xcfd6e3, plateLine: 0xb3bccc, ghost: 0x3a4150 },
 };
 const COLORS = {
   cube: 0x4f8cff,
   edge: 0x0b1530,
   front: 0xffc53d,   // marks the front edge – same color as the "front" label in the UI
   arrow: 0xffbf1f,   // direction arrow: yellow, lit (shaded like the cubes)
-  ghostAdd: 0xffffff,
   ghostRemove: 0xff6b6b,
 };
 
@@ -83,8 +82,9 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   const noEdge = new THREE.LineBasicMaterial({ color: COLORS.edge });
   noEdge.userData.shared = true;
 
-  const ghostMaterial = new THREE.MeshBasicMaterial({ color: COLORS.ghostAdd, transparent: true, opacity: 0.35, depthWrite: false });
-  const ghostEdges = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 });
+  // preview cube when building: white in the dark theme, dark grey in the light one (white vanishes on a light board)
+  const ghostMaterial = new THREE.MeshBasicMaterial({ color: PALETTES[theme()].ghost, transparent: true, opacity: 0.35, depthWrite: false });
+  const ghostEdges = new THREE.LineBasicMaterial({ color: PALETTES[theme()].ghost, transparent: true, opacity: 0.8 });
   const ghost = new THREE.Mesh(cubeGeometry, ghostMaterial);
   ghost.add(new THREE.LineSegments(edgeGeometry, ghostEdges));
   ghost.visible = false;
@@ -574,7 +574,8 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       const h = heights[column.z][column.x];
       ghost.position.set(column.x - offset(), (action === 'remove' ? h - 1 : h) + 0.5, column.z - offset());
       ghost.scale.setScalar(action === 'remove' ? 1.04 : 1);
-      ghostMaterial.color.setHex(action === 'remove' ? COLORS.ghostRemove : COLORS.ghostAdd);
+      ghostMaterial.color.setHex(action === 'remove' ? COLORS.ghostRemove : PALETTES[theme()].ghost);
+      ghostEdges.color.setHex(action === 'remove' ? COLORS.ghostRemove : PALETTES[theme()].ghost);
       ghostMaterial.opacity = action === 'remove' ? 0.55 : 0.35;
     }
     if (ghost.visible !== Boolean(show) || show) {
@@ -681,6 +682,8 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
 
   const onTheme = () => {
     buildBase();
+    ghostEdges.color.setHex(PALETTES[theme()].ghost);
+    ghostMaterial.color.setHex(PALETTES[theme()].ghost);
     skin.onTheme?.();   // e.g. skyscraper windows glow only in the dark theme
     render();
   };
