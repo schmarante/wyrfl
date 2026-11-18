@@ -416,10 +416,18 @@ export function startDuelApp(root, t) {
     }),
   );
 
-  // opened via the host's QR code: …/duel/#join=<code> (the hash never reaches a server)
-  if (location.hash.startsWith('#join=')) {
+  // join link …/duel/#join=<code> (the hash never reaches a server): on page load, and also when the link is opened
+  // while this page is already open – then only the hash changes and the browser does not reload ('hashchange').
+  // Opening a join link means "join this one": a running pairing or duel here is ended first.
+  function joinFromLink() {
+    if (!location.hash.startsWith('#join=')) return;
     const code = location.hash.slice('#join='.length);
     history.replaceState(null, '', location.pathname + location.search);
-    if (rtcSupported()) guest(code);
+    if (!rtcSupported()) return;
+    closeScanner();
+    if (pairing || link || game) reset();
+    guest(code);
   }
+  addEventListener('hashchange', joinFromLink);
+  joinFromLink();
 }
