@@ -177,6 +177,10 @@
     "rematchWait": "Czekamy, aż {name} też zechce …",
     "end": "Zakończ",
     "disconnected": "Połączenie zostało przerwane ({name}).",
+    "leaveTitle": "Opuścić pojedynek?",
+    "leaveText": "Połączenie zostanie przerwane ({name}).",
+    "stay": "Graj dalej",
+    "leave": "Wyjdź",
     "newDuel": "Nowy pojedynek",
     "pickAvatar": "Wybierz swoją postać"
   },

@@ -177,6 +177,10 @@
     "rematchWait": "Čekáme, až {name} taky bude chtít …",
     "end": "Ukončit",
     "disconnected": "Spojení se přerušilo ({name}).",
+    "leaveTitle": "Opustit souboj?",
+    "leaveText": "Spojení se přeruší ({name}).",
+    "stay": "Hrát dál",
+    "leave": "Odejít",
     "newDuel": "Nový souboj",
     "pickAvatar": "Vyber si postavičku"
   },

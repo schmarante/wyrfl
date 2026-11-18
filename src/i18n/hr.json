@@ -177,6 +177,10 @@
     "rematchWait": "Čekamo da i {name} pristane …",
     "end": "Završi",
     "disconnected": "Veza je prekinuta ({name}).",
+    "leaveTitle": "Napustiti dvoboj?",
+    "leaveText": "Veza će se prekinuti ({name}).",
+    "stay": "Igraj dalje",
+    "leave": "Napusti",
     "newDuel": "Novi dvoboj",
     "pickAvatar": "Odaberi svoj lik"
   },

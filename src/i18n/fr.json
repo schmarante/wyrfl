@@ -172,6 +172,10 @@
     "rematchWait": "On attend que {name} accepte …",
     "end": "Terminer",
     "disconnected": "La connexion avec {name} est perdue.",
+    "leaveTitle": "Quitter le duel ?",
+    "leaveText": "La connexion avec {name} sera coupée.",
+    "stay": "Continuer",
+    "leave": "Quitter",
     "newDuel": "Nouveau duel",
     "pickAvatar": "Choisis ton personnage"
   },

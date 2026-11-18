@@ -20,6 +20,7 @@ import { ICONS } from '../ui/icons.js';
 import { AVATARS, avatarImg } from './avatars.js';
 import { localePath, DEFAULT_LOCALE } from '../../i18n/index.js';
 import { setLiveLocale } from '../ui/live-locale.js';
+import { guardLeaving } from '../ui/leave-guard.js';
 import { fireConfetti } from '../ui/confetti.js';
 import { secureGet, secureSet } from '../game/store.js';
 
@@ -179,6 +180,12 @@ export function startDuelApp(root, t) {
   }
 
   // ---- connected -----------------------------------------------------------------------------
+
+  // while connected, leaving the page (logo, info …) asks first – it would drop the connection
+  guardLeaving({
+    active: () => Boolean(link),
+    texts: () => ({ title: t('duel.leaveTitle'), text: t('duel.leaveText', { name: otherName() }), stay: t('duel.stay'), leave: t('duel.leave') }),
+  });
 
   function connected(channel) {
     link = messenger(channel);
