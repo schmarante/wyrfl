@@ -183,7 +183,7 @@
     "rematchWait": "Aún esperando a: {name}",
     "end": "Terminar",
     "addPlayer": "Añadir otra persona",
-    "backToLobby": "Listo – a la sala",
+    "backToLobby": "Volver a la sala",
     "disconnected": "Se ha perdido la conexión con {name}.",
     "leaveTitle": "¿Salir del duelo?",
     "leaveText": "Se cortará la conexión con {name}.",

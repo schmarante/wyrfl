@@ -183,7 +183,7 @@
     "rematchWait": "On attend encore : {name}",
     "end": "Terminer",
     "addPlayer": "Ajouter une personne",
-    "backToLobby": "Terminé – vers le salon",
+    "backToLobby": "Retour au salon",
     "disconnected": "La connexion avec {name} est perdue.",
     "leaveTitle": "Quitter le duel ?",
     "leaveText": "La connexion avec {name} sera coupée.",

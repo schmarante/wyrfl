@@ -289,9 +289,7 @@ export function startDuelApp(root, t) {
     link.send({ t: 'setup', ...settings });
     sendRoster();
     banner('');
-    // straight on to the next QR code (one per person) until the duel is full – "Done" leads to the lobby
-    if (players.length < MAX_PLAYERS) openPairing();
-    else showLobby();
+    showLobby();   // pick the settings there – or add another player (a new QR code)
   }
 
   /** host pairing screen: who is in already */

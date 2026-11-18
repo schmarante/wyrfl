@@ -183,7 +183,7 @@
     "rematchWait": "Still waiting for: {name}",
     "end": "Finish",
     "addPlayer": "Add another player",
-    "backToLobby": "Done – to the lobby",
+    "backToLobby": "Back to the lobby",
     "disconnected": "The connection to {name} is gone.",
     "leaveTitle": "Leave the duel?",
     "leaveText": "The connection to {name} will end.",
