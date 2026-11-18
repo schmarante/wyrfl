@@ -66,8 +66,8 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
             </ul>
           </details>
           <button type="button" data-theme-toggle class={iconButton} aria-label={t('nav.theme')} title={t('nav.theme')}>
-            <span class="theme-dark-icon"><Icon name="sun" /></span>
-            <span class="theme-light-icon hidden"><Icon name="moon" /></span>
+            <span class="theme-dark-icon flex"><Icon name="sun" /></span>
+            <span class="theme-light-icon flex" hidden><Icon name="moon" /></span>
           </button>
           <a href={localePath(locale, 'about/')} class={iconButton} aria-label={t('nav.about')} title={t('nav.about')}
              aria-current={page === 'about/' ? 'page' : undefined}>
@@ -87,8 +87,8 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
       const button = document.querySelector<HTMLButtonElement>('[data-theme-toggle]')!;
       const sync = () => {
         const light = root.dataset.theme === 'light';
-        button.querySelector('.theme-dark-icon')!.classList.toggle('hidden', light);
-        button.querySelector('.theme-light-icon')!.classList.toggle('hidden', !light);
+        button.querySelector<HTMLElement>('.theme-dark-icon')!.hidden = light;
+        button.querySelector<HTMLElement>('.theme-light-icon')!.hidden = !light;
         document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')!.content = light ? '#eef1f6' : '#12151c';
       };
       button.addEventListener('click', () => {

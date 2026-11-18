@@ -25,8 +25,9 @@ export const ICONS = {
   duel: svg('<circle cx="7" cy="8" r="3"/><circle cx="17" cy="8" r="3"/><path d="M2 20c0-3 2.2-5 5-5s5 2 5 5M12 20c0-3 2.2-5 5-5s5 2 5 5"/>', 30),
 };
 
-// language flags (public-domain designs, simplified), shown in the language menu
-const flag = body => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20" width="27" height="18" aria-hidden="true" class="block shrink-0 rounded-[3px] ring-1 ring-black/10">${body}</svg>`;
+// language flags (public-domain designs, simplified), round: the 3:2 flag is cropped to its centre (slice) – same
+// 22 px as the header icons
+const flag = body => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20" width="22" height="22" preserveAspectRatio="xMidYMid slice" aria-hidden="true" class="block shrink-0 rounded-full ring-1 ring-black/15">${body}</svg>`;
 const stripesH = (...colors) => colors.map((c, i) => `<rect y="${(20 / colors.length) * i}" width="30" height="${20 / colors.length + 0.05}" fill="${c}"/>`).join('');
 const stripesV = (...colors) => colors.map((c, i) => `<rect x="${(30 / colors.length) * i}" width="${30 / colors.length + 0.05}" height="20" fill="${c}"/>`).join('');
 // Croatian chequy shield (5 × 5), red top left
