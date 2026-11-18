@@ -35,7 +35,8 @@ const MAX_PLAYERS = 4;
 const HOST_ID = 'h';
 const RUNNER = 28;        // px – a character on the race track
 const RUNNER_GAP = 30;    // px between two characters on the same spot
-const NEXT_DELAY = 1300;   // ms to look at the revealed answer before the next puzzle
+const NEXT_DELAY = 1300;
+const STALE_AFTER = 45000;   // ms on the guest's answer screen before the "one QR code per person" hint   // ms to look at the revealed answer before the next puzzle
 
 const randomSeed = () => Array.from(crypto.getRandomValues(new Uint32Array(2)), n => n.toString(36)).join('');
 const storage = { get: key => secureGet(key) ?? '', set: secureSet };   // scrambled + signed like the progress
@@ -61,6 +62,7 @@ export function startDuelApp(root, t) {
   let game = null;          // { seed, level, rounds, round, ids, results: { id: [] }, finished }
   let again = new Set();    // ids that want a rematch
   let current = 'start';
+  let staleTimer = 0;
 
   const board = createGuessBoard($('[data-screen="play"] [data-guess-board]'), t, { onSolved });
 
@@ -153,6 +155,7 @@ export function startDuelApp(root, t) {
     show('host');
     $('[data-host-title]').textContent = t(peers.size ? 'duel.addPlayer' : 'duel.host');
     $('[data-back-lobby]').hidden = !peers.size;
+    renderHostPlayers();
     $('[data-host-status]').textContent = '';
     $('[data-offer-qr]').textContent = t('duel.preparing');
     $('[data-scan-answer]').disabled = true;
@@ -190,7 +193,11 @@ export function startDuelApp(root, t) {
       addGuest(channel, offer);
     } catch (err) {
       accepting = false;
-      if (err.message === 'invalid code') {
+      if (err.message === 'other offer') {
+        // an answer to an earlier QR code (already used by someone else) – this QR code stays valid
+        scanner.status.textContent = t('duel.otherCode');
+        status.textContent = t('duel.otherCode');
+      } else if (err.message === 'invalid code') {
         scanner.status.textContent = t('duel.wrongCode');
         status.textContent = t('duel.wrongCode');
       } else {
@@ -221,6 +228,14 @@ export function startDuelApp(root, t) {
     await renderQr($('[data-answer-qr]'), pairing.code);
     debugCopy('[data-copy-code]', pairing.code);
     const mine = pairing;
+    // still nothing after a while: maybe the QR code was already used by someone else – say what to do
+    clearTimeout(staleTimer);
+    staleTimer = setTimeout(() => {
+      if (pairing !== mine || hostLink || current !== 'guest') return;
+      const status = $('[data-guest-status]');
+      status.dataset.i18n = 'duel.guestStale';
+      status.textContent = t('duel.guestStale');
+    }, STALE_AFTER);
     mine.channel.then(
       channel => pairing === mine && hostConnected(channel),
       () => {
@@ -233,6 +248,10 @@ export function startDuelApp(root, t) {
 
   function reset() {
     setLiveLocale(false);
+    clearTimeout(staleTimer);
+    const guestStatus = $('[data-guest-status]');
+    guestStatus.dataset.i18n = 'duel.waiting';
+    guestStatus.textContent = t('duel.waiting');
     for (const link of peers.values()) link.close();
     for (const offer of connections.values()) offer.close();
     peers.clear();
@@ -270,7 +289,16 @@ export function startDuelApp(root, t) {
     link.send({ t: 'setup', ...settings });
     sendRoster();
     banner('');
-    showLobby();
+    // straight on to the next QR code (one per person) until the duel is full – "Done" leads to the lobby
+    if (players.length < MAX_PLAYERS) openPairing();
+    else showLobby();
+  }
+
+  /** host pairing screen: who is in already */
+  function renderHostPlayers() {
+    const box = $('[data-host-players]');
+    box.hidden = !peers.size;
+    box.innerHTML = players.filter(p => !p.left).map(p => face(p.id, 36)).join('');
   }
 
   /** a character nobody else has (two players with the same fox would be confusing) */
@@ -287,6 +315,7 @@ export function startDuelApp(root, t) {
       case 'hello':
         player.avatar = freeAvatar(msg.avatar, id);
         sendRoster();
+        if (current === 'host') renderHostPlayers();
         if (current === 'lobby') showLobby();
         if (game) updateProgress();
         break;
@@ -320,6 +349,10 @@ export function startDuelApp(root, t) {
     again.delete(id);
     sendRoster();
     goneToast(avatar);
+    if (current === 'host') {
+      renderHostPlayers();
+      $('[data-back-lobby]').hidden = !peers.size;
+    }
     if (!peers.size && current !== 'host') {
       if (current === 'results') {
         $('[data-rematch]').disabled = true;

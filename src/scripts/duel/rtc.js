@@ -15,6 +15,15 @@ const ICE_TIMEOUT = 4000;        // ms to gather the own addresses
 const CONNECT_TIMEOUT = 20000;   // ms from the answer to an open channel
 const CONFIG = { iceServers: [] };
 
+// One offer (QR code) pairs exactly one guest. The answer starts with a short tag of the offer it answers
+// ("<tag>.<answer>"), so the host can tell an answer to an older / other QR code apart and say so.
+const offerCode = code => String(code).trim().replace(/^.*#join=/, '').replace(/\s+/g, '');
+function offerTag(code) {
+  let h = 0x811c9dc5;
+  for (const c of offerCode(code)) h = Math.imul(h ^ c.charCodeAt(0), 0x01000193);
+  return (h >>> 0).toString(36);
+}
+
 const toBase64Url = bytes => btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const fromBase64Url = text => Uint8Array.from(atob(text.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
 const pipe = async (bytes, stream) => new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer());
@@ -153,10 +162,16 @@ export async function createOffer() {
   const channel = pc.createDataChannel('wyrfl-duel', { ordered: true });
   await pc.setLocalDescription(await pc.createOffer());
   await gathered(pc);
+  const code = await packDescription(pc.localDescription);
+  const tag = offerTag(code);
   return {
-    code: await packDescription(pc.localDescription),
+    code,
+    /** rejects 'invalid code', 'other offer' (an answer to another QR code – this one stays usable) or 'timeout' */
     async accept(answerCode) {
-      const answer = await unpackDescription(answerCode);
+      const text = String(answerCode).trim();
+      const dot = text.indexOf('.');
+      if (dot > 0 && text.slice(0, dot) !== tag) throw new Error('other offer');
+      const answer = await unpackDescription(dot > 0 ? text.slice(dot + 1) : text);
       if (answer.type !== 'answer') throw new Error('invalid code');
       await pc.setRemoteDescription(answer);
       return opened(pc, channel);
@@ -174,7 +189,7 @@ export async function answerOffer(offerCode) {
   await pc.setRemoteDescription(offer);
   await pc.setLocalDescription(await pc.createAnswer());
   await gathered(pc);
-  const code = await packDescription(pc.localDescription);
+  const code = `${offerTag(offerCode)}.${await packDescription(pc.localDescription)}`;
   const channel = new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('timeout')), 10 * 60 * 1000);   // time to bring the code across
     incoming.then(c => opened(pc, c)).then(c => (clearTimeout(timer), resolve(c)), reject);

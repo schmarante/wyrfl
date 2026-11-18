@@ -46,8 +46,11 @@ const debug = import.meta.env.PUBLIC_DEBUG === 'true';
   {/* host: show offer, scan answer */}
   <div data-screen="host" hidden class={card}>
     <h1 data-host-title class="text-xl font-bold">{t('duel.host')}</h1>
+    {/* who is already connected (from the 2nd QR code on) */}
+    <div data-host-players hidden class="mt-3 flex flex-wrap items-center gap-2"></div>
     <p class="mt-3" data-i18n="duel.step1">{t('duel.step1')}</p>
     <div data-offer-qr class={`${qrBox} mt-3 grid place-items-center text-muted`} data-i18n="duel.preparing">{t('duel.preparing')}</div>
+    <p class="mt-2 text-center text-xs text-muted" data-i18n="duel.oneCode">{t('duel.oneCode')}</p>
     <p class="mt-5" data-i18n="duel.step2">{t('duel.step2')}</p>
     <button type="button" data-scan-answer disabled class={`${primary} mt-3 w-full`} data-i18n="duel.scanAnswer">{t('duel.scanAnswer')}</button>
     <p data-host-status class="mt-3 min-h-6 text-sm font-semibold" aria-live="polite"></p>
