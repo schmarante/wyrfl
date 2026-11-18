@@ -44,7 +44,7 @@ const CAMERA_VIEWS = {
 
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 const easeInOut = t => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
-const easeOutBack = t => 1 + 2.2 * (t - 1) ** 3 + 1.2 * (t - 1) ** 2;   // tiny settle at the end
+const easeOutCubic = t => 1 - (1 - t) ** 3;   // no overshoot: a cube never dips below its place (into the one below)
 const theme = () => (document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
 
 /**
@@ -360,8 +360,19 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   };
   const edgeOf = () => skin.edge ?? noEdge;
 
+  // Faces are pushed back a little in the depth buffer, so the edge lines (which lie exactly on the faces, also on the
+  // touching faces of neighbouring cubes) always win – otherwise they flicker, look thinner or vanish in places.
+  const pushBack = m => {
+    if (m.polygonOffset) return;
+    m.polygonOffset = true;
+    m.polygonOffsetFactor = 1;
+    m.polygonOffsetUnits = 1;
+    m.needsUpdate = true;
+  };
+
   function applyStyle(mesh) {
     const lines = mesh.children[0];
+    mats(mesh.userData.base).forEach(pushBack);
     mesh.material = mesh.userData.base;
     lines.material = edgeOf();
     lines.visible = Boolean(skin.edge);
@@ -457,7 +468,10 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       addTween(mesh.userData.tween = {
         start: now + delay, duration: DROP.duration,
         step: t => {
-          mesh.position.y = yEnd + DROP.height * (1 - easeOutBack(t));
+          // stacked: never lower than on top of the cube below, even while that one is still falling – no overlap
+          const below = cubeMap.get(`${x},${y - 1},${z}`);
+          const floor = below ? below.position.y + 1 : yEnd;
+          mesh.position.y = Math.max(floor, yEnd + DROP.height * (1 - easeOutCubic(t)));
           setOpacity(mesh, Math.min(1, t * 1.6));
         },
         done: () => {
