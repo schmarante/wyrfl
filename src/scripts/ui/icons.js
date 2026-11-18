@@ -53,6 +53,6 @@ export const SKIN_PREVIEWS = {
   classic: isoCube('#8fb4ff', '#4f8cff', '#2f63c9'),
   colors: isoCube('#facc15', '#ef4444', '#22c3ee'),
   pixel: isoCube('#5aa83a', '#8b5a34', '#6f4527', '<polygon points="4,10 16,17 16,20.5 4,13.5" fill="#4f9a33"/><polygon points="28,10 16,17 16,20.5 28,13.5" fill="#3f7f28"/>'),
-  eyes: isoCube('#ffcf3f', '#f2b92a', '#e0a516', '<circle cx="7.6" cy="17.2" r="1.9" fill="#fff"/><circle cx="12" cy="19.7" r="1.9" fill="#fff"/><circle cx="8" cy="17.6" r="0.9" fill="#2a1a0c"/><circle cx="12.4" cy="20.1" r="0.9" fill="#2a1a0c"/><circle cx="20" cy="19.7" r="1.9" fill="#fff"/><circle cx="24.4" cy="17.2" r="1.9" fill="#fff"/><circle cx="20.4" cy="20.1" r="0.9" fill="#2a1a0c"/><circle cx="24.8" cy="17.6" r="0.9" fill="#2a1a0c"/>'),
+  eyes: isoCube('#ffcf3f', '#f2b92a', '#e0a516', '<circle cx="7.6" cy="17.2" r="1.9" fill="#fff"/><circle cx="12" cy="19.7" r="1.9" fill="#fff"/><circle cx="8" cy="17.6" r="0.9" fill="#2a1a0c"/><circle cx="12.4" cy="20.1" r="0.9" fill="#2a1a0c"/>'),
   gifts: isoCube('#e04a5a', '#d62839', '#a51f2c', '<path d="M22 6.5 10 13.5M10 6.5 22 13.5M10 13.5V26.5M22 13.5V26.5" stroke="#f6d860" stroke-width="2.4"/>'),
 };
