@@ -63,6 +63,23 @@ export function startDuelApp(root, t) {
   const otherName = () => (theirAvatar ? t(`avatars.${theirAvatar}`) : '…');
   const settingsText = s => `${t(`levels.${s.level}`)} · ${s.rounds} ${t('duel.rounds')}`;
 
+  /** test aid (PUBLIC_DEBUG=true): copy button for the join link / answer code – the elements exist only then */
+  function debugCopy(selector, text) {
+    const button = root.querySelector(selector);
+    if (!button) return;
+    button.disabled = false;
+    button.onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(text);
+        const label = button.textContent;
+        button.textContent = 'Kopiert!';
+        setTimeout(() => (button.textContent = label), 1500);
+      } catch {
+        window.prompt('Kopieren:', text);   // clipboard blocked: show it to copy by hand
+      }
+    };
+  }
+
   // ---- camera scanner ------------------------------------------------------------------------
 
   async function openScanner(onText) {
@@ -97,6 +114,7 @@ export function startDuelApp(root, t) {
     const url = `${location.origin}${localePath(document.documentElement.lang, 'duel/')}#join=${pairing.code}`;
     await renderQr($('[data-offer-qr]'), url);
     $('[data-scan-answer]').disabled = false;
+    debugCopy('[data-copy-link]', url);
   }
 
   async function acceptAnswer(code) {
@@ -134,6 +152,7 @@ export function startDuelApp(root, t) {
       return reset();
     }
     await renderQr($('[data-answer-qr]'), pairing.code);
+    debugCopy('[data-copy-code]', pairing.code);
     pairing.channel.then(connected, () => {
       banner(t('duel.failed'));
       reset();
@@ -384,6 +403,8 @@ export function startDuelApp(root, t) {
   }
   $('[data-host]').addEventListener('click', host);
   $('[data-scan-answer]').addEventListener('click', () => openScanner(acceptAnswer));
+  // test aid (only rendered with PUBLIC_DEBUG=true): paste the answer code instead of scanning it
+  root.querySelector('[data-paste-connect]')?.addEventListener('click', () => acceptAnswer($('[data-paste]').value));
   $('[data-join]').addEventListener('click', () =>
     openScanner(text => {
       if (!text.includes('#join=')) {

@@ -30,12 +30,17 @@ const iconButton = 'press grid h-12 w-12 shrink-0 place-items-center rounded-ful
     ))}
   </ul>
 
-  <div class="relative mt-2 aspect-square w-full overflow-hidden rounded-2xl bg-bg/50 sm:aspect-[4/3] land:col-start-1 land:row-span-2 land:row-start-1 land:mt-0 land:aspect-auto land:h-[max(22rem,calc(100dvh-7rem))]">
-    <canvas data-canvas tabindex="0" class="absolute inset-0 h-full w-full cursor-pointer" role="application"
-            aria-label={t('build.tapHint')}></canvas>
-    <p data-loading class="absolute inset-0 grid place-items-center text-muted">{t('game.loading')}</p>
-    <div class="pointer-events-none absolute left-2 top-2" data-level-picker></div>
-    <span data-count class="pointer-events-none absolute bottom-2 left-2 rounded-full bg-surface/85 px-3 py-1 text-sm text-muted backdrop-blur"></span>
+  <div class="mt-2 overflow-hidden rounded-2xl bg-bg/50 land:col-start-1 land:row-span-2 land:row-start-1 land:mt-0">
+    <!-- own bar above the 3D picture: stars left, cube count right – tall columns are never covered -->
+    <div class="flex min-h-12 items-center justify-between gap-2 px-2 pt-2">
+      <div data-level-picker></div>
+      <span data-count class="rounded-full bg-surface/85 px-3 py-1 text-sm text-muted"></span>
+    </div>
+    <div class="relative aspect-[6/5] w-full sm:aspect-[4/3] land:aspect-auto land:h-[max(19rem,calc(100dvh-10rem))]">
+      <canvas data-canvas tabindex="0" class="absolute inset-0 h-full w-full cursor-pointer" role="application"
+              aria-label={t('build.tapHint')}></canvas>
+      <p data-loading class="absolute inset-0 grid place-items-center text-muted">{t('game.loading')}</p>
+    </div>
   </div>
 
   <div class="land:col-start-2 land:row-start-2">

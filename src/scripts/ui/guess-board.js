@@ -25,7 +25,7 @@ export function createGuessBoard(root, t, { onSolved } = {}) {
 
   const sceneReady = import('../game/scene.js')
     .then(({ createCubeScene }) => {
-      scene = createCubeScene(canvas, { marker: true });
+      scene = createCubeScene(canvas, { marker: true, fitContent: true });
       $('[data-loading]').hidden = true;
       if (puzzle) {
         scene.setStructure(puzzle.structure);

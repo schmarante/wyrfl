@@ -214,6 +214,8 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
           const hint = item.querySelector<HTMLElement>('[data-skin-hint]');
           if (hint) hint.hidden = unlocked;
           item.querySelector('[data-skin-preview]')!.classList.toggle('opacity-40', !unlocked);
+          // gifts are a surprise on St. Nicholas' Day and at Christmas – on other days they are not in the menu at all
+          item.closest('li')!.hidden = item.dataset.skin === 'gifts' && !unlocked;
           if (active) skinMenu.querySelector('[data-skin-current]')!.innerHTML = item.querySelector('svg')!.outerHTML;
         }
       };

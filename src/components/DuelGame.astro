@@ -15,6 +15,8 @@ const primary = 'press inline-flex min-h-12 items-center justify-center gap-2 ro
 const secondary = 'press inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-line px-5 text-sm font-semibold hover:bg-cube/40 disabled:opacity-40';
 const card = 'mx-auto w-full max-w-3xl rounded-3xl border-2 border-line bg-surface p-4 sm:p-6';
 const qrBox = 'mx-auto aspect-square w-full max-w-72 overflow-hidden rounded-2xl bg-white p-2';
+// test aid (PUBLIC_DEBUG=true): pair by copy & paste instead of scanning – not part of the published game, so not translated
+const debug = import.meta.env.PUBLIC_DEBUG === 'true';
 ---
 
 <section id="duel" class="flex flex-col gap-4">
@@ -49,6 +51,15 @@ const qrBox = 'mx-auto aspect-square w-full max-w-72 overflow-hidden rounded-2xl
     <p class="mt-5">{t('duel.step2')}</p>
     <button type="button" data-scan-answer disabled class={`${primary} mt-3 w-full`}>{t('duel.scanAnswer')}</button>
     <p data-host-status class="mt-3 min-h-6 text-sm font-semibold" aria-live="polite"></p>
+    {debug && (
+      <div class="mt-4 flex flex-col gap-2 rounded-xl border-2 border-dashed border-front/60 p-3 text-sm">
+        <p class="font-semibold text-front">Debug: ohne Kamera koppeln</p>
+        <button type="button" data-copy-link disabled class={secondary}>Link kopieren</button>
+        <label for="duel-paste" class="mt-1">Antwort-Code des anderen Geräts einfügen</label>
+        <textarea id="duel-paste" data-paste rows="3" class="w-full rounded-xl border-2 border-line bg-bg p-2 font-mono text-xs"></textarea>
+        <button type="button" data-paste-connect class={secondary}>Verbinden</button>
+      </div>
+    )}
   </div>
 
   <!-- guest: show answer -->
@@ -57,6 +68,12 @@ const qrBox = 'mx-auto aspect-square w-full max-w-72 overflow-hidden rounded-2xl
     <p class="mt-3">{t('duel.answerText')}</p>
     <div data-answer-qr class={`${qrBox} mt-3 grid place-items-center text-muted`}>{t('duel.connecting')}</div>
     <p data-guest-status class="mt-3 min-h-6 text-sm font-semibold" aria-live="polite">{t('duel.waiting')}</p>
+    {debug && (
+      <div class="mt-4 flex flex-col gap-2 rounded-xl border-2 border-dashed border-front/60 p-3 text-sm">
+        <p class="font-semibold text-front">Debug: ohne Kamera koppeln</p>
+        <button type="button" data-copy-code disabled class={secondary}>Antwort-Code kopieren</button>
+      </div>
+    )}
   </div>
 
   <!-- lobby -->

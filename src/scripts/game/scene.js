@@ -54,8 +54,9 @@ const theme = () => (document.documentElement.dataset.theme === 'light' ? 'light
  * @param {{ editable?: boolean, marker?: boolean, frameFor?: { size: number, maxHeight: number },
  *           onTap?: (column: { x: number, z: number }, tool: 'add' | 'remove') => void }} [options]
  *   frameFor: keep the camera frame for this grid (home page hero – buildings of different sizes look different in size)
+ *   fitContent: frame the building that is shown, not the tallest one possible (View Guesser – the building is fixed)
  */
-export function createCubeScene(canvas, { editable = false, marker: withMarker = false, frameFor = null, onTap } = {}) {
+export function createCubeScene(canvas, { editable = false, marker: withMarker = false, frameFor = null, fitContent = false, onTap } = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
@@ -110,6 +111,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   let shadowTexture = null;   // plate shadow (alpha), rebuilt when the building changes
   let dropTexture = null;
   let lightingDirty = false;
+  let contentHeights = null;   // fitContent: the building to frame
   let tool = 'add';
   let markerView = null;
   let halfWidth = 1;    // half extents the camera has to show (rotation-safe around the vertical axis)
@@ -300,12 +302,50 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     const fs = frameFor?.size ?? size;
     const fh = frameFor?.maxHeight ?? maxHeight;
     const reach = Math.max((fs / 2 + 0.25) * Math.SQRT2, side ? fs / 2 + ARROW.gap + 0.15 : 0);
-    const top = fh + (markerView === 'top' ? ARROW.top + 0.1 : 0.05);
-    const bottom = -0.12;
-    target.set(0, (top + bottom) / 2, 0);
     halfWidth = reach;
-    halfHeight = Math.max(((top - bottom) / 2) * Math.cos(ISO_ELEVATION) + reach * Math.sin(ISO_ELEVATION), fs / 2 + 0.4);
+
+    // vertical: every relevant point at height y and horizontal distance d from the centre can appear anywhere between
+    // y·cos ± d·sin on screen while the building turns – so the frame is tight but never cuts anything off when dragged
+    const cos = Math.cos(ISO_ELEVATION);
+    const sin = Math.sin(ISO_ELEVATION);
+    let up = -Infinity;
+    let down = Infinity;
+    const point = (y, d) => {
+      up = Math.max(up, y * cos + d * sin);
+      down = Math.min(down, y * cos - d * sin);
+    };
+    const plate = (fs / 2 + 0.1) * Math.SQRT2 + 0.2;   // incl. the yellow front edge
+    point(0, plate);
+    point(-0.12, plate);
+    // columns: the building that is shown (fitContent) or the tallest one possible everywhere
+    const columns = fitContent && contentHeights ? contentHeights : Array.from({ length: fs }, () => Array(fs).fill(fh));
+    const off = (columns.length - 1) / 2;
+    let tallest = 0;
+    columns.forEach((row, z) => row.forEach((h, x) => {
+      if (!h) return;
+      tallest = Math.max(tallest, h);
+      if (fitContent) {
+        // the shown building: where its columns really are in the tilted view (back columns sit higher on screen),
+        // plus a little room for turning it by hand
+        const behind = (x - off + (z - off) - 1) / Math.SQRT2;
+        up = Math.max(up, h * cos - behind * sin + 0.25);
+      } else {
+        point(h, Math.hypot(Math.abs(x - off) + 0.5, Math.abs(z - off) + 0.5));
+      }
+    }));
+    if (side) point(ARROW.height + 0.35, fs / 2 + ARROW.gap + 0.1);
+    if (markerView === 'top') point(markerTop() + 0.1, 0.4);
+    const centre = (up + down) / 2 / cos;
+    target.set(0, centre, 0);
+    // also enough for the straight views: front/side (heights around the centre), top (the whole plate)
+    halfHeight = Math.max((up - down) / 2, tallest + 0.15 - centre, centre + 0.2, fs / 2 + 0.4);
     fitCamera();
+  }
+
+  /** height of the arrow's base above the building when the top view is asked */
+  function markerTop() {
+    const h = fitContent && contentHeights ? Math.max(1, ...contentHeights.flat()) : maxHeight;
+    return h + ARROW.top - 0.2;
   }
 
   // ---- materials: shared per style; a fading cube gets transparent copies until it has settled -------------
@@ -441,7 +481,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     const gap = size / 2 + ARROW.gap;   // arrow base; the tip ends just outside the plate
     marker.rotation.set(0, 0, 0);
     if (markerView === 'top') {
-      marker.position.set(0, maxHeight + ARROW.top - 0.2, 0);   // pointing down (as built)
+      marker.position.set(0, markerTop(), 0);   // pointing down (as built)
     } else if (markerView === 'front') {
       marker.position.set(0, ARROW.height, gap);
       marker.rotation.x = Math.PI / 2;   // -y → -z
@@ -712,6 +752,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
         currentView = 'iso';
         pivot.rotation.y = 0;
       }
+      contentHeights = structure.heights.map(row => [...row]);
       setGrid(structure.size, structure.maxHeight);
       setHeights(structure.heights, { stagger: true, animate });
     },

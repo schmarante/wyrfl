@@ -1,6 +1,7 @@
 ---
 // Playing field of the View Guesser (question, 3D building, six options, feedback) – used by GuessGame and DuelGame.
-// Top left of the 3D view: [data-level-picker] (stars), top right: back-to-tilted + hint. Logic: src/scripts/ui/guess-board.js
+// Bar above the 3D view: [data-level-picker] (stars) left, back-to-tilted + hint right – a bar of its own, not laid
+// over the picture, so tall columns are never covered. Logic: src/scripts/ui/guess-board.js
 // Phone: question → 3D → options → feedback (+ default slot, e.g. "next puzzle").
 // Tablet landscape and up (`land:`): question + 3D on the left (full height); on the right the options in two columns,
 // below them feedback and the default slot – sized from the screen height so everything fits on a 16:9 screen.
@@ -24,11 +25,9 @@ const rightColumn = 'land:col-start-2 land:w-[calc(var(--opt)*2+0.75rem)]';
   <div class="min-w-0 land:col-start-1 land:row-span-2 land:row-start-1">
     <h1 data-question class="text-lg font-bold leading-snug sm:text-xl">&nbsp;</h1>
 
-    <div class="relative mt-2 aspect-[5/4] w-full overflow-hidden rounded-2xl bg-bg/50 sm:aspect-[16/10] land:aspect-auto land:h-[max(18rem,calc(100dvh-11rem))]">
-      <canvas data-canvas class="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing" role="img"
-              aria-label={t('home.dragHint')}></canvas>
-      <p data-loading class="absolute inset-0 grid place-items-center text-muted">{t('game.loading')}</p>
-      <div class="pointer-events-none absolute inset-x-2 top-2 flex items-start justify-between gap-2">
+    <div class="mt-2 overflow-hidden rounded-2xl bg-bg/50">
+      <!-- own bar above the 3D picture: tall columns get their room below it, nothing is covered -->
+      <div class="flex min-h-12 items-center justify-between gap-2 px-2 pt-2">
         <div data-level-picker></div>
         <div class="flex gap-1.5">
           <button type="button" data-iso hidden class={overlayButton} aria-label={t('guess.backToIso')} title={t('guess.backToIso')}>
@@ -38,6 +37,11 @@ const rightColumn = 'land:col-start-2 land:w-[calc(var(--opt)*2+0.75rem)]';
             <Icon name="bulb" />
           </button>
         </div>
+      </div>
+      <div class="relative aspect-[5/4] w-full sm:aspect-[16/10] land:aspect-auto land:h-[max(15rem,calc(100dvh-14rem))]">
+        <canvas data-canvas class="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing" role="img"
+                aria-label={t('home.dragHint')}></canvas>
+        <p data-loading class="absolute inset-0 grid place-items-center text-muted">{t('game.loading')}</p>
       </div>
     </div>
   </div>
