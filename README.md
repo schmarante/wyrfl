@@ -1,29 +1,19 @@
-# Wyrfl
+<h1>
+  <img width="38" align="top" src="public/favicon.svg" alt="">
+  <b>Wyrfl</b>
+</h1>
 
 **Train your spatial thinking – with cube buildings.**
 
+<a href="https://schmarante.github.io/wyrfl/"><img src="https://img.shields.io/badge/%E2%96%B6%20Play%20now-schmarante.github.io%2Fwyrfl-4f8cff?style=for-the-badge" alt="Play now"></a>
+
 Wyrfl is a free puzzle game for kids and teens (and everyone else). Players translate between 3D cube buildings (Würfelgebäude) and their 2D views from the top, front and side:
 
-- **Guess the view** – which of six pictures shows the building from the front?
+- **Guess the view** – which of six pictures shows the building from the front, the top or the right?
 - **Build it** – three blueprints are given, place the cubes so every view fits.
-- **Daily Wyrfl** – one new puzzle every day, the same for everyone, with a spoiler-free emoji result to share.
-- **Duel** – two players, two devices, same Wi-Fi: paired by QR code, connected directly (WebRTC, no server), same puzzles – who is faster and more accurate?
+- **Duel** – 2 to 4 players, each on their own device in the same Wi-Fi: paired by QR code, connected directly (WebRTC, no server), same puzzles – who is fastest and most accurate?
 
-No sign-up, no ads, no tracking – progress stays in the browser (`localStorage`). Languages: German and English.
-
-## Development
-
-Everything runs inside [DDEV](https://ddev.com) – Node/npm are not needed on the host.
-
-```sh
-ddev start
-ddev npm install
-ddev exec npm run dev     # dev server with hot reload: https://wyrfl.dev.dasachtegebot.local:4321/
-ddev npm run build        # static site in ./dist (also served at https://wyrfl.dev.dasachtegebot.local/)
-ddev npm test             # game logic tests (Vitest)
-```
-
-Pushes to `master` are deployed to GitHub Pages by `.github/workflows/static.yml`.
+Four levels from 3×3 to 6×6, unlockable cube styles, light and dark theme. No sign-up, no ads, no tracking – progress stays in the browser. Installable as an app and playable offline. Languages: German, English, French, Spanish, Croatian, Polish and Czech.
 
 ## License
 
