@@ -106,7 +106,6 @@
     "add": "Bauen",
     "remove": "Wegnehmen",
     "undo": "Rückgängig",
-    "clear": "Alles weg",
     "check": "Prüfen",
     "cubes": "{count} Würfel",
     "tapHint": "Antippen baut einen Würfel, lange drücken oder Rechtsklick nimmt ihn weg. Wischen dreht das Gebäude.",

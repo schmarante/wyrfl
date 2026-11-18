@@ -106,7 +106,6 @@
     "add": "Construire",
     "remove": "Enlever",
     "undo": "Annuler",
-    "clear": "Tout enlever",
     "check": "Vérifier",
     "cubes": "{count} cubes",
     "tapHint": "Touche pour poser un cube, appui long ou clic droit pour l’enlever. Fais glisser pour tourner le bâtiment.",

@@ -106,7 +106,6 @@
     "add": "Build",
     "remove": "Remove",
     "undo": "Undo",
-    "clear": "Clear all",
     "check": "Check",
     "cubes": "{count} cubes",
     "tapHint": "Tap to build a cube, long press or right click to remove it. Swipe to turn the building.",

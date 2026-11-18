@@ -106,7 +106,6 @@
     "add": "Construir",
     "remove": "Quitar",
     "undo": "Deshacer",
-    "clear": "Quitar todo",
     "check": "Comprobar",
     "cubes": "{count} cubos",
     "tapHint": "Toca para poner un cubo; mantén pulsado o haz clic derecho para quitarlo. Desliza para girar el edificio.",

@@ -111,7 +111,6 @@
     "add": "Buduj",
     "remove": "Usuń",
     "undo": "Cofnij",
-    "clear": "Usuń wszystko",
     "check": "Sprawdź",
     "cubes": "Klocki: {count}",
     "tapHint": "Dotknij, żeby postawić klocek; przytrzymaj albo kliknij prawym przyciskiem, żeby go usunąć. Przesuń, żeby obrócić budowlę.",

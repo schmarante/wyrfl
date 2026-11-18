@@ -43,7 +43,6 @@ const iconButton = 'press grid h-12 w-12 shrink-0 place-items-center rounded-ful
     <button type="button" data-tool="add" aria-pressed="true" class={iconButton} aria-label={t('build.add')} title={t('build.add')}><Icon name="plus" /></button>
     <button type="button" data-tool="remove" aria-pressed="false" class={iconButton} aria-label={t('build.remove')} title={t('build.removeHint')}><Icon name="minus" /></button>
     <button type="button" data-undo disabled class={iconButton} aria-label={t('build.undo')} title={t('build.undo')}><Icon name="undo" /></button>
-    <button type="button" data-clear disabled class={iconButton} aria-label={t('build.clear')} title={t('build.clear')}><Icon name="trash" /></button>
     <button type="button" data-check
             class="press min-h-12 flex-1 rounded-full bg-cube px-4 text-lg font-bold text-white hover:brightness-110">
       {t('build.check')}
@@ -80,7 +79,6 @@ const iconButton = 'press grid h-12 w-12 shrink-0 place-items-center rounded-ful
   const canvas = $<HTMLCanvasElement>('[data-canvas]');
   const feedback = $('[data-feedback]');
   const undoButton = $<HTMLButtonElement>('[data-undo]');
-  const clearButton = $<HTMLButtonElement>('[data-clear]');
   const nextButton = $<HTMLButtonElement>('[data-next]');
   const toolButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-tool]')];
   const planButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-plan]')];
@@ -135,7 +133,6 @@ const iconButton = 'press grid h-12 w-12 shrink-0 place-items-center rounded-ful
   function update(heightsOnly = false) {
     $('[data-count]').textContent = t('build.cubes', { count: cubeCount(built) });
     undoButton.disabled = history.length === 0;
-    clearButton.disabled = cubeCount(built) === 0;
     if (!heightsOnly) scene?.setHeights(built.heights);
   }
 
@@ -179,12 +176,6 @@ const iconButton = 'press grid h-12 w-12 shrink-0 place-items-center rounded-ful
     const previous = history.pop();
     if (!previous) return;
     built.heights = previous;
-    renderPlans();
-    update();
-  });
-  clearButton.addEventListener('click', () => {
-    history.push(built.heights.map(row => [...row]));
-    built = emptyStructure(target.size, target.maxHeight);
     renderPlans();
     update();
   });
