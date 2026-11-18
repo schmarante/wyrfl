@@ -285,8 +285,10 @@ const GALAXY_FRAGMENT = /* glsl */ `
     // glowing rim along the edges of every face
     vec3 a = abs(vGalaxyLocal), nL = abs(vGalaxyNormal);
     float e = max(max(a.x * (1.0 - nL.x), a.y * (1.0 - nL.y)), a.z * (1.0 - nL.z));
-    float rim = smoothstep(0.40, 0.495, e);
-    diffuseColor.rgb = sky * shade + vec3(0.45, 0.95, 1.0) * rim * 0.75;
+    // thin, crisp rim: a hard edge, only ~1 pixel of anti-aliasing (fwidth)
+    float aa = fwidth(e);
+    float rim = smoothstep(0.481 - aa, 0.481, e);
+    diffuseColor.rgb = mix(sky * shade, vec3(0.55, 0.97, 1.0), rim);
   }`;
 
 function galaxySkin() {
