@@ -290,6 +290,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     buildBase();
     placeMarker();
     frame3d();
+    eyesLookAtViewer();
   }
 
   /** Tight camera frame for plate + building (+ arrow): horizontally the circle the plate sweeps when turned,
@@ -609,6 +610,35 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   canvas.addEventListener('pointerleave', onLeave);
   canvas.addEventListener('contextmenu', onContextMenu);
 
+  // eyes follow the pointer (styles with lookAt): pointer anywhere on the page → a point in front of the building
+  // → the pupils turn towards it; at most one render per frame. Without a pointer they look at the viewer.
+  const eyePoint = new THREE.Vector3();
+  let eyeFrame = 0;
+  function eyesFollow(clientX, clientY) {
+    if (!skin.lookAt) return;
+    const rect = canvas.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    pointer.set(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
+    raycaster.setFromCamera(pointer, camera);
+    const { origin, direction } = raycaster.ray;
+    const depth = eyePoint.copy(target).sub(origin).dot(direction);
+    skin.lookAt(eyePoint.copy(origin).addScaledVector(direction, depth - 6));
+    if (!eyeFrame && !frame) {
+      eyeFrame = requestAnimationFrame(() => {
+        eyeFrame = 0;
+        render();
+      });
+    }
+  }
+  function eyesLookAtViewer() {
+    if (!skin.lookAt) return;
+    skin.lookAt(eyePoint.copy(target).addScaledVector(camDir, 10));
+  }
+  const onPagePointer = e => eyesFollow(e.clientX, e.clientY);
+  window.addEventListener('pointermove', onPagePointer, { passive: true });
+  window.addEventListener('pointerdown', onPagePointer, { passive: true });
+  eyesLookAtViewer();
+
   const onTheme = () => {
     buildBase();
     render();
@@ -651,6 +681,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       applyStyle(mesh);
     }
     old.dispose();
+    eyesLookAtViewer();
     refreshLighting();
     render();
     startBlinking();
@@ -722,6 +753,9 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       window.removeEventListener('wyrfl-theme', onTheme);
       window.removeEventListener('wyrfl-skin', onSkin);
       clearInterval(blinkTimer);
+      cancelAnimationFrame(eyeFrame);
+      window.removeEventListener('pointermove', onPagePointer);
+      window.removeEventListener('pointerdown', onPagePointer);
       canvas.removeEventListener('pointerdown', onDown);
       canvas.removeEventListener('pointermove', onMove);
       canvas.removeEventListener('pointerup', onUp);

@@ -3,7 +3,7 @@
 // - classic: the Wyrfl blue
 // - colors:  seven bright colors, picked per cube position (stays the same while building around it)
 // - pixel:   original pixel-art blocks drawn in code – grass on top of a column, earth below, stone at the bottom
-// - eyes:    'googly eyes' – warm colors, big eyes looking around, rosy cheeks; now and then a cube blinks (own design)
+// - eyes:    'googly eyes' – only eyes (own design, drawn in the shader); they follow the pointer and blink now and then
 // - gifts:   six wrapping papers with a ribbon cross
 import * as THREE from 'three';
 import { createRng } from './rng.js';
@@ -139,79 +139,86 @@ function giftSkin() {
 }
 
 // ---- googly eyes ---------------------------------------------------------------------------------
+// Only eyes – drawn in the shader, so every pupil can look at the pointer on its own: the scene passes the pointer as a
+// point in 3D (lookAt), each eye turns its pupil towards it. Top and bottom stay plain. Blinking: the scene swaps a
+// cube to the "closed" twin of its material for a moment.
 
-const EYE_COLORS = ['#ffcf3f', '#ff8a65', '#5fd3a8', '#b69cff'];
-const GAZES = [[-3, 1], [0, 2], [3, 1], [0, -2]];   // where the pupils look
+const EYE_COLORS = [0xffcf3f, 0xff8a65, 0x5fd3a8, 0xb69cff];
 
-function drawFace(ctx, s, bg, gaze) {
-  const grad = ctx.createLinearGradient(0, 0, s, s);   // soft, a bit lighter top left
-  grad.addColorStop(0, 'rgba(255,255,255,0.25)');
-  grad.addColorStop(1, 'rgba(0,0,0,0.06)');
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, s, s);
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, s, s);
-  if (!gaze && gaze !== null) return;   // top / bottom: no face
-  // cheeks + small smile
-  ctx.fillStyle = 'rgba(255,105,135,0.45)';
-  for (const x of [15, 49]) { ctx.beginPath(); ctx.ellipse(x, 44, 6, 3.5, 0, 0, Math.PI * 2); ctx.fill(); }
-  ctx.strokeStyle = '#3b2412';
-  ctx.lineWidth = 2.5;
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.arc(32, 42, 5, 0.15 * Math.PI, 0.85 * Math.PI);
-  ctx.stroke();
-  for (const x of [22, 42]) {
-    if (gaze === null) {   // closed, happy: ∩
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(x, 30, 6, 1.1 * Math.PI, 1.9 * Math.PI);
-      ctx.stroke();
-      continue;
+const EYES_VERTEX = /* glsl */ `
+  vEyeWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;
+  vEyeNormal = normalize(mat3(modelMatrix) * objectNormal);
+  vEyeCenter = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;`;
+
+const EYES_FRAGMENT = /* glsl */ `
+  float eyeGlow = 0.0;   // the eye white glows a little so it reads as white on the shaded side faces
+  {
+    vec3 n = normalize(vEyeNormal);
+    if (abs(n.y) < 0.5) {   // side faces only
+      vec3 u = normalize(cross(vec3(0.0, 1.0, 0.0), n));
+      vec3 face = vEyeCenter + n * 0.5;
+      vec3 rel = vEyeWorld - face;
+      vec2 p = vec2(dot(rel, u), rel.y);
+      vec3 ink = vec3(0.09, 0.06, 0.04);
+      for (int i = 0; i < 2; i++) {
+        vec2 c = vec2(i == 0 ? -0.18 : 0.18, 0.06);
+        float r = length(p - c);
+        #ifdef EYES_CLOSED
+          // closed, happy: an arc
+          float arc = (1.0 - smoothstep(0.014, 0.026, abs(r - 0.085))) * step(c.y, p.y);
+          diffuseColor.rgb = mix(diffuseColor.rgb, ink, arc);
+        #else
+          vec3 eye = face + u * c.x + vec3(0.0, c.y, 0.0);
+          vec3 d = uEyeTarget - eye;
+          vec3 l = vec3(dot(d, u), d.y, dot(d, n));
+          vec2 look = l.xy / (length(l) + 0.0001) * 0.07;   // pupil moves towards the target
+          float white = 1.0 - smoothstep(0.128, 0.138, r);
+          float rim = smoothstep(0.112, 0.124, r) * white;
+          float pupil = 1.0 - smoothstep(0.058, 0.066, length(p - c - look));
+          float shine = 1.0 - smoothstep(0.012, 0.02, length(p - c - look - vec2(-0.022, 0.024)));
+          diffuseColor.rgb = mix(diffuseColor.rgb, vColor.rgb, white);   // white eye (keeps the AO shading)
+          diffuseColor.rgb = mix(diffuseColor.rgb, ink, max(pupil * white, rim * 0.55));
+          diffuseColor.rgb = mix(diffuseColor.rgb, vColor.rgb, shine * pupil * white);
+          eyeGlow = max(eyeGlow, white * (1.0 - max(pupil, rim * 0.55)) + shine * pupil * white);
+        #endif
+      }
     }
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath(); ctx.arc(x, 27, 9, 0, Math.PI * 2); ctx.fill();
-    ctx.lineWidth = 1.5;
-    ctx.strokeStyle = 'rgba(59,36,18,0.35)';
-    ctx.stroke();
-    ctx.fillStyle = '#2a1a0c';
-    ctx.beginPath(); ctx.arc(x + gaze[0], 27 + gaze[1], 4.5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath(); ctx.arc(x + gaze[0] - 1.5, 25.5 + gaze[1], 1.4, 0, Math.PI * 2); ctx.fill();
-  }
+  }`;
+
+function eyeMaterial(color, closed, target) {
+  const material = lambert({ color });
+  if (closed) material.defines = { EYES_CLOSED: '' };
+  material.onBeforeCompile = shader => {
+    shader.uniforms.uEyeTarget = target;   // shared object – one update moves every pupil
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vEyeWorld;\nvarying vec3 vEyeNormal;\nvarying vec3 vEyeCenter;')
+      .replace('#include <begin_vertex>', `#include <begin_vertex>${EYES_VERTEX}`);
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', '#include <common>\nuniform vec3 uEyeTarget;\nvarying vec3 vEyeWorld;\nvarying vec3 vEyeNormal;\nvarying vec3 vEyeCenter;')
+      .replace('#include <color_fragment>', `#include <color_fragment>${EYES_FRAGMENT}`)
+      .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\ntotalEmissiveRadiance += vec3(0.38) * eyeGlow;');
+  };
+  material.customProgramCacheKey = () => (closed ? 'wyrfl-eyes-closed' : 'wyrfl-eyes');
+  return material;
 }
 
 function eyesSkin() {
-  const textures = [];
-  const tex = (bg, gaze) => {
-    const t = canvasTexture(64, (ctx, s) => drawFace(ctx, s, bg, gaze));
-    textures.push(t);
-    return lambert({ map: t });
-  };
-  const plain = EYE_COLORS.map(bg => tex(bg, undefined));
-  const closed = EYE_COLORS.map(bg => tex(bg, null));
-  const open = EYE_COLORS.map(bg => GAZES.map(g => tex(bg, g)));
-  // per color + gaze one face set (+x, -x, +y, -y, +z, -z), the closed twin for blinking
-  const sets = new Map();
-  const closedOf = new Map();
-  EYE_COLORS.forEach((_, c) => GAZES.forEach((__, g) => {
-    const face = open[c][g];
-    const set = [face, face, plain[c], plain[c], face, face];
-    sets.set(`${c}:${g}`, set);
-    closedOf.set(set, [closed[c], closed[c], plain[c], plain[c], closed[c], closed[c]]);
-  }));
+  const target = { value: new THREE.Vector3(10, 10, 10) };
+  const open = EYE_COLORS.map(color => eyeMaterial(color, false, target));
+  const closed = EYE_COLORS.map(color => eyeMaterial(color, true, target));
+  const closedOf = new Map(open.map((m, i) => [m, closed[i]]));
   const edge = edges(0x3b2412, 0.35);
   return {
-    material: (x, y, z) => {
-      const h = cellHash(x, y, z);
-      return sets.get(`${h % EYE_COLORS.length}:${(h >> 3) % GAZES.length}`);
-    },
+    material: (x, y, z) => open[cellHash(x, y, z) % open.length],
     /** the same cube with closed eyes (the scene blinks a few cubes now and then) */
     blink: base => closedOf.get(base),
+    /** point in world space the pupils look at (pointer / finger, or the camera when idle) */
+    lookAt(point) {
+      target.value.copy(point);
+    },
     edge,
     dispose() {
-      [...plain, ...closed, ...open.flat()].forEach(m => m.dispose());
-      textures.forEach(t => t.dispose());
+      [...open, ...closed].forEach(m => m.dispose());
       edge.dispose();
     },
   };
