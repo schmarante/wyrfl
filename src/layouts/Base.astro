@@ -70,10 +70,10 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
       } catch {}
     </script>
   </head>
-  <body class="min-h-dvh bg-bg text-text antialiased">
+  <body class="min-h-dvh bg-bg text-text antialiased" data-page={page}>
     <div class="mx-auto flex min-h-dvh max-w-3xl flex-col land:max-w-7xl px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4">
       <header class="flex items-center justify-between py-2">
-        <a href={localePath(locale)} class="flex items-center gap-2 text-xl font-extrabold tracking-tight">
+        <a href={localePath(locale)} data-locale-href="" class="flex items-center gap-2 text-xl font-extrabold tracking-tight">
           <img src={`${base}/favicon.svg`} alt="" width="28" height="28" />
           Wyrfl
         </a>
@@ -81,8 +81,8 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
           <!-- language menu: current flag, opens a list of all languages (each named in itself) -->
           <details data-lang-menu class="relative">
             <summary class="press flex h-10 cursor-pointer list-none items-center gap-1 rounded-full px-2 text-muted hover:text-text [&::-webkit-details-marker]:hidden"
-                     aria-label={t('nav.language')} title={t('nav.language')}>
-              <Fragment set:html={FLAGS[locale]} />
+                     aria-label={t('nav.language')} data-i18n-aria="nav.language" title={t('nav.language')} data-i18n-title="nav.language">
+              <span data-lang-current class="flex"><Fragment set:html={FLAGS[locale]} /></span>
               <Fragment set:html={ICONS.chevron} />
             </summary>
             <ul class="absolute right-0 z-40 mt-1 min-w-44 overflow-hidden rounded-2xl border-2 border-line bg-surface py-1 shadow-lg">
@@ -92,7 +92,7 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
                      class:list={['flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-line', code === locale && 'font-bold']}>
                     <Fragment set:html={FLAGS[code]} />
                     <span class="flex-1">{name}</span>
-                    {code === locale && <span class="text-front" aria-hidden="true">✓</span>}
+                    <span data-lang-check hidden={code !== locale} class="text-front" aria-hidden="true">✓</span>
                   </a>
                 </li>
               ))}
@@ -101,7 +101,7 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
           <!-- cube style menu: preview of the current style; the choice is stored on this device -->
           <details data-skin-menu class="relative">
             <summary class="press flex h-10 cursor-pointer list-none items-center gap-1 rounded-full px-2 text-muted hover:text-text [&::-webkit-details-marker]:hidden"
-                     aria-label={t('nav.skin')} title={t('nav.skin')}>
+                     aria-label={t('nav.skin')} data-i18n-aria="nav.skin" title={t('nav.skin')} data-i18n-title="nav.skin">
               <span data-skin-current class="flex"><Fragment set:html={SKIN_PREVIEWS.classic} /></span>
               <Fragment set:html={ICONS.chevron} />
             </summary>
@@ -112,8 +112,8 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
                           class="flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm hover:bg-line aria-checked:font-bold disabled:cursor-not-allowed disabled:hover:bg-transparent">
                     <span data-skin-preview class="flex"><Fragment set:html={SKIN_PREVIEWS[name]} /></span>
                     <span class="flex flex-1 flex-col">
-                      <span>{t(`skins.${name}`)}</span>
-                      {name !== 'classic' && <span data-skin-hint hidden class="text-xs font-normal text-muted">{t(`skins.unlock.${name}`)}</span>}
+                      <span data-i18n={`skins.${name}`}>{t(`skins.${name}`)}</span>
+                      {name !== 'classic' && <span data-skin-hint hidden class="text-xs font-normal text-muted" data-i18n={`skins.unlock.${name}`}>{t(`skins.unlock.${name}`)}</span>}
                     </span>
                     <span data-skin-lock hidden class="text-muted"><Fragment set:html={ICONS.lock} /></span>
                     <span data-skin-check hidden class="text-front" aria-hidden="true">✓</span>
@@ -122,11 +122,11 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
               ))}
             </ul>
           </details>
-          <button type="button" data-theme-toggle class={iconButton} aria-label={t('nav.theme')} title={t('nav.theme')}>
+          <button type="button" data-theme-toggle class={iconButton} aria-label={t('nav.theme')} data-i18n-aria="nav.theme" title={t('nav.theme')} data-i18n-title="nav.theme">
             <span class="theme-dark-icon flex"><Icon name="sun" /></span>
             <span class="theme-light-icon flex" hidden><Icon name="moon" /></span>
           </button>
-          <a href={localePath(locale, 'about/')} class={iconButton} aria-label={t('nav.about')} title={t('nav.about')}
+          <a href={localePath(locale, 'about/')} data-locale-href="about/" class={iconButton} aria-label={t('nav.about')} data-i18n-aria="nav.about" title={t('nav.about')} data-i18n-title="nav.about"
              aria-current={page === 'about/' ? 'page' : undefined}>
             <Icon name="info" />
           </a>
@@ -141,17 +141,24 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
     <script>
       import { currentSkin, setSkin, skinUnlocked } from '../scripts/game/skin-pref.js';
       import { registerUnlockAllShortcut } from '../scripts/ui/debug-solve.js';
+      import { liveLocaleActive, switchLocaleInPlace } from '../scripts/ui/live-locale.js';
 
       registerUnlockAllShortcut();   // test aid: key "P" when built with PUBLIC_DEBUG=true
 
       // a language picked in the menu is stored and wins over the browser language from now on (script in <head>)
+      // During a duel (pairing or game) the page switches the language in place – loading the other language's page
+      // would drop the direct connection (live-locale.js).
       document.querySelectorAll<HTMLAnchorElement>('[data-lang]').forEach(link =>
-        link.addEventListener('click', () => {
+        link.addEventListener('click', event => {
           try {
             localStorage.setItem('wyrfl:lang', link.dataset.lang!);
           } catch {
             /* not stored */
           }
+          if (!liveLocaleActive()) return;
+          event.preventDefault();
+          link.closest('details')!.open = false;
+          switchLocaleInPlace(link.dataset.lang!);
         }),
       );
 

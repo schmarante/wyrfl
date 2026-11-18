@@ -150,6 +150,10 @@ export function createGuessBoard(root, t, { onSolved } = {}) {
     show,
     say,
     sceneReady,
+    /** texts again in the current language (language switched in place during a duel) */
+    relabel() {
+      if (puzzle) withView($('[data-question]'), 'guess.question', puzzle.view);
+    },
     /** stops answering (e.g. the duel ended) */
     lock() {
       if (state) state.locked = true;

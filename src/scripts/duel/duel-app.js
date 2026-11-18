@@ -17,7 +17,8 @@ import { createGuessBoard } from '../ui/guess-board.js';
 import { renderQr, startScanner } from '../ui/qr.js';
 import { renderLevelBadge } from '../ui/level-picker.js';
 import { AVATARS, avatarImg } from './avatars.js';
-import { localePath } from '../../i18n/index.js';
+import { localePath, DEFAULT_LOCALE } from '../../i18n/index.js';
+import { setLiveLocale } from '../ui/live-locale.js';
 
 const AVATAR_KEY = 'wyrfl:duel-avatar';
 const ROUNDS = [3, 5, 10];
@@ -61,7 +62,8 @@ export function startDuelApp(root, t) {
   }
   const myName = () => t(`avatars.${myAvatar}`);
   const otherName = () => (theirAvatar ? t(`avatars.${theirAvatar}`) : '…');
-  const settingsText = s => `${t(`levels.${s.level}`)} · ${s.rounds} ${t('duel.rounds')}`;
+  // "Puzzles: 5" instead of "5 Puzzles" – Slavic languages need another plural form after 5 than after 2–4
+  const settingsText = s => `${t(`levels.${s.level}`)} · ${t('duel.rounds')}: ${s.rounds}`;
 
   /** test aid (PUBLIC_DEBUG=true): copy button for the join link / answer code – the elements exist only then */
   function debugCopy(selector, text) {
@@ -103,6 +105,7 @@ export function startDuelApp(root, t) {
 
   async function host() {
     role = 'host';
+    setLiveLocale(true);
     banner('');
     show('host');
     try {
@@ -111,7 +114,8 @@ export function startDuelApp(root, t) {
       banner(t('duel.unsupported'));
       return show('start');
     }
-    const url = `${location.origin}${localePath(document.documentElement.lang, 'duel/')}#join=${pairing.code}`;
+    // language-neutral link (no /en/ …): every guest opens it in their own language
+    const url = `${location.origin}${localePath(DEFAULT_LOCALE, 'duel/')}#join=${pairing.code}`;
     await renderQr($('[data-offer-qr]'), url);
     $('[data-scan-answer]').disabled = false;
     debugCopy('[data-copy-link]', url);
@@ -143,6 +147,7 @@ export function startDuelApp(root, t) {
 
   async function guest(code) {
     role = 'guest';
+    setLiveLocale(true);
     banner('');
     show('guest');
     try {
@@ -160,6 +165,7 @@ export function startDuelApp(root, t) {
   }
 
   function reset() {
+    setLiveLocale(false);
     link?.close();
     pairing?.close();
     link = pairing = game = null;
@@ -333,7 +339,17 @@ export function startDuelApp(root, t) {
   }
 
   function showResults() {
-    const r = compareResults(game.mine, game.theirs, game.rounds);
+    renderResults();
+    show('results');
+    if (lastResult.winner === 'mine') {
+      recordDuelWin();
+      setTimeout(() => celebrateNewSkins(t), 900);   // first win: new cube style
+    }
+  }
+
+  let lastResult = null;
+  function renderResults() {
+    const r = (lastResult = compareResults(game.mine, game.theirs, game.rounds));
     const them = otherName();
     $('[data-result-title]').textContent =
       r.winner === 'mine' ? t('duel.won') : r.winner === 'tie' ? t('duel.tie')
@@ -357,11 +373,6 @@ export function startDuelApp(root, t) {
     $('[data-rows]').innerHTML = r.rows
       .map(row => `<tr class="border-t border-line"><td class="p-2">${row.round + 1}</td><td class="p-2">${cell(row.mine, row.faster === 'mine')}</td><td class="p-2">${cell(row.theirs, row.faster === 'theirs')}</td></tr>`)
       .join('');
-    show('results');
-    if (r.winner === 'mine') {
-      recordDuelWin();
-      setTimeout(() => celebrateNewSkins(t), 900);   // first win: new cube style
-    }
   }
 
   // ---- rematch / end -------------------------------------------------------------------------
@@ -380,6 +391,23 @@ export function startDuelApp(root, t) {
   $('[data-end]').addEventListener('click', () => {
     banner('');
     reset();
+  });
+
+  // ---- language switched in place (during pairing / duel): re-render the dynamic texts ------------
+
+  window.addEventListener('wyrfl-locale', () => {
+    document.title = `${t('modes.duel.title')} · Wyrfl`;
+    if (current === 'lobby') showLobby();
+    if (game) {
+      if (game.round >= 0) {
+        $('[data-round]').textContent = t('duel.round', { n: game.round + 1, total: game.rounds });
+        renderLevelBadge($('[data-screen="play"] [data-level-picker]'), game.level, t);
+        board.relabel();
+      }
+      updateProgress();
+      if (!$('[data-wait]').hidden) $('[data-wait]').textContent = t('duel.waitFor', { name: otherName() });
+      if (current === 'results') renderResults();
+    }
   });
 
   // ---- start ---------------------------------------------------------------------------------

@@ -30,18 +30,18 @@ const rightColumn = 'land:col-start-2 land:w-[calc(var(--opt)*2+0.75rem)]';
       <div class="flex min-h-12 items-center justify-between gap-2 px-2 pt-2">
         <div data-level-picker></div>
         <div class="flex gap-1.5">
-          <button type="button" data-iso hidden class={overlayButton} aria-label={t('guess.backToIso')} title={t('guess.backToIso')}>
+          <button type="button" data-iso hidden class={overlayButton} aria-label={t('guess.backToIso')} data-i18n-aria="guess.backToIso" title={t('guess.backToIso')} data-i18n-title="guess.backToIso">
             <Icon name="iso" />
           </button>
-          <button type="button" data-hint disabled class={overlayButton} aria-label={t('guess.hint')} title={t('guess.hint')}>
+          <button type="button" data-hint disabled class={overlayButton} aria-label={t('guess.hint')} data-i18n-aria="guess.hint" title={t('guess.hint')} data-i18n-title="guess.hint">
             <Icon name="bulb" />
           </button>
         </div>
       </div>
       <div class="relative aspect-[5/4] w-full sm:aspect-[16/10] land:aspect-auto land:h-[max(15rem,calc(100dvh-14rem))]">
         <canvas data-canvas class="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing" role="img"
-                aria-label={t('home.dragHint')}></canvas>
-        <p data-loading class="absolute inset-0 grid place-items-center text-muted">{t('game.loading')}</p>
+                aria-label={t('home.dragHint')} data-i18n-aria="home.dragHint"></canvas>
+        <p data-loading class="absolute inset-0 grid place-items-center text-muted" data-i18n="game.loading">{t('game.loading')}</p>
       </div>
     </div>
   </div>
