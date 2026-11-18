@@ -6,7 +6,7 @@
   "home": {
     "dragHint": "Swipe across the building to turn it. The yellow edge is the front.",
     "noWebgl": "Sorry, your browser can't show 3D graphics.",
-    "claim": "Train your spatial thinking."
+    "claim": "Train your spatial thinking with Wyrfl:"
   },
   "views": {
     "top": "from the top",
