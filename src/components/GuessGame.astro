@@ -4,7 +4,7 @@ import { useTranslations } from '../i18n/index.js';
 import GuessBoard from './GuessBoard.astro';
 
 interface Props {
-  locale: 'de' | 'en';
+  locale: string;
 }
 const { locale } = Astro.props;
 const t = useTranslations(locale);

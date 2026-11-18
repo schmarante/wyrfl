@@ -1,0 +1,193 @@
+{
+  "meta": {
+    "title": "Wyrfl – acertijos de cubos para tu visión espacial",
+    "description": "Wyrfl es un juego gratuito de construcciones con cubos: reconoce las vistas desde arriba, de frente y de lado, y reconstruye edificios. Sin registro y sin anuncios."
+  },
+  "home": {
+    "dragHint": "Desliza el dedo sobre el edificio para girarlo. El borde amarillo es la parte delantera.",
+    "noWebgl": "Lo sentimos, tu navegador no puede mostrar gráficos 3D."
+  },
+  "views": {
+    "top": "desde arriba",
+    "front": "desde delante",
+    "side": "desde la derecha"
+  },
+  "modes": {
+    "guess": {
+      "title": "Adivina la vista",
+      "text": "¿Qué imagen muestra el edificio desde delante? Encuentra la correcta entre seis."
+    },
+    "build": {
+      "title": "Constrúyelo",
+      "text": "Ves tres planos: coloca los cubos para que todo encaje."
+    },
+    "duel": {
+      "title": "Duelo",
+      "text": "Dos jugadores en el mismo wifi: ¿quién reconoce las vistas más rápido? Conexión con código QR."
+    },
+    "title": "Modos de juego"
+  },
+  "nav": {
+    "about": "Sobre Wyrfl",
+    "theme": "Claro / oscuro",
+    "language": "Idioma"
+  },
+  "about": {
+    "title": "Sobre Wyrfl",
+    "intro": "Wyrfl es un juego de acertijos para niños y jóvenes (y para todos) que entrena la visión espacial: pasas de edificios de cubos en 3D a sus vistas desde arriba, de frente y de lado.",
+    "privacy": "Wyrfl no necesita registro, no muestra anuncios y no recoge datos. Tu progreso se queda solo en tu dispositivo.",
+    "license": "Wyrfl es software libre con licencia MIT: escuelas, docentes y cualquier persona pueden usarlo, copiarlo y adaptarlo.",
+    "openSource": "Wyrfl está hecho con geniales proyectos de código abierto. ¡Gracias a todas las personas que colaboran en ellos!",
+    "runtime": "En el juego",
+    "build": "Para construirlo",
+    "project": "Proyecto",
+    "usedFor": "Se usa para",
+    "licenseCol": "Licencia",
+    "libs": {
+      "three": "Gráficos 3D de los edificios de cubos",
+      "astro": "Genera las páginas como HTML estático",
+      "tailwindcss": "Diseño (CSS)",
+      "vitest": "Pruebas automáticas de la lógica del juego",
+      "qrcode-generator": "Código QR para la conexión del duelo",
+      "qr-scanner": "Leer el código QR con la cámara",
+      "jsqr": "Detección de QR (incluido en qr-scanner)",
+      "fluent-emoji": "Personajes del duelo (animales, frutas y verduras)"
+    },
+    "assets": "Gráficos",
+    "author": "Autor",
+    "email": "Correo",
+    "version": "Versión",
+    "madeWith": "Designed with {heart}. Powered by Claude."
+  },
+  "levels": {
+    "easy": "Fácil",
+    "medium": "Medio",
+    "hard": "Difícil",
+    "hardcore": "Experto"
+  },
+  "level": {
+    "label": "Dificultad",
+    "solved": "Resueltos: {count}",
+    "toUnlock": "faltan {count} para «{level}»",
+    "locked": "Resuelve {count} acertijos en «{level}» para desbloquear este nivel.",
+    "unlocked": "¡Desbloqueado: «{level}»!"
+  },
+  "game": {
+    "next": "Siguiente acertijo",
+    "back": "Volver",
+    "play": "Jugar",
+    "loading": "Cargando 3D …"
+  },
+  "guess": {
+    "question": "¿Cómo se ve el edificio {view}?",
+    "option": "Respuesta {n}",
+    "correct": "¡Exacto! Así se ve {view}.",
+    "tryAgain": "Todavía no, ¡inténtalo otra vez!",
+    "hint": "Enséñamelo",
+    "hintDone": "Mira: así se ve el edificio {view}. ¿Qué imagen encaja?",
+    "backToIso": "Vista inclinada",
+    "why": {
+      "fromBack": "Está al revés: es el edificio visto desde atrás.",
+      "fromLeft": "Está al revés: es el edificio visto desde la izquierda.",
+      "isSide": "Es la vista desde la derecha, no desde delante.",
+      "isFront": "Es la vista desde delante, no desde la derecha.",
+      "otherSide": "Es la vista desde otro lado.",
+      "rotated": "Está girado. Visto desde arriba, la parte delantera (el borde amarillo) siempre está abajo.",
+      "mirrorTop": "Está reflejado: la izquierda y la derecha están cambiadas.",
+      "flipped": "Delante y detrás están cambiados. Visto desde arriba, la parte delantera siempre está abajo.",
+      "nearMiss": "¡Casi! Mira otra vez las casillas marcadas."
+    }
+  },
+  "build": {
+    "plans": "Planos",
+    "add": "Construir",
+    "remove": "Quitar",
+    "undo": "Deshacer",
+    "clear": "Quitar todo",
+    "check": "Comprobar",
+    "cubes": "{count} cubos",
+    "tapHint": "Toca para poner un cubo; mantén pulsado o haz clic derecho para quitarlo. Desliza para girar el edificio.",
+    "full": "No puede ser más alto: como máximo {max} cubos uno encima de otro.",
+    "ok": "encaja",
+    "notOk": "todavía no",
+    "success": "¡Genial! Tu edificio encaja con los tres planos.",
+    "successNote": "Por cierto: muchas veces hay más de una respuesta correcta.",
+    "almost": "¡Casi! Las casillas punteadas todavía no encajan.",
+    "empty": "Primero pon algunos cubos en el tablero.",
+    "removeHint": "Quitar: también con clic derecho o manteniendo pulsado"
+  },
+  "duel": {
+    "intro": "Jugad de dos en dos, cada uno en su dispositivo y en el mismo wifi. Recibís los mismos acertijos. ¿Quién es más rápido y más preciso?",
+    "privacy": "Vuestros dispositivos se conectan directamente. Nada sale de vuestro wifi: sin servidor y sin registro.",
+    "host": "Empezar un duelo",
+    "join": "Escanear un código",
+    "unsupported": "Lo sentimos, este navegador no puede crear una conexión directa. Prueba con un Chrome, Edge, Firefox o Safari actual.",
+    "preparing": "Preparando el código …",
+    "step1": "1. Escanea este código con el otro dispositivo, simplemente con la app de la cámara.",
+    "step2": "2. Después, el otro dispositivo muestra un código. Escanéalo aquí:",
+    "scanAnswer": "Escanear código de respuesta",
+    "answerTitle": "¡Ya casi está!",
+    "answerText": "Enseña este código al primer dispositivo y toca allí «Escanear código de respuesta».",
+    "waiting": "Esperando la conexión …",
+    "connecting": "Conectando …",
+    "scanTitle": "Apunta la cámara al código",
+    "cancel": "Cancelar",
+    "cameraError": "No se puede abrir la cámara. Permite el acceso a la cámara e inténtalo otra vez.",
+    "wrongCode": "Ese no es un código de Wyrfl válido. Inténtalo otra vez.",
+    "failed": "La conexión no ha funcionado. ¿Estáis en el mismo wifi? Algunas redes de colegios o de invitados no permiten conexiones directas.",
+    "connected": "¡Conectado con {name}!",
+    "level": "Dificultad",
+    "rounds": "Acertijos",
+    "start": "¡Vamos!",
+    "hostChooses": "{name} está eligiendo los ajustes. Empezamos enseguida …",
+    "get_ready": "¡Preparados!",
+    "round": "Acertijo {n} de {total}",
+    "opponentProgress": "{name}: {done} de {total}",
+    "waitFor": "¡Listo! {name} todavía está jugando …",
+    "won": "¡Has ganado!",
+    "lost": "Esta vez ganó {name}.",
+    "lostClose": "¡Por poco! Esta vez ganó {name}.",
+    "tie": "¡Empate! Sois igual de buenos.",
+    "points": "{points} puntos",
+    "you": "Tú",
+    "roundCol": "Acertijo",
+    "faster": "más rápido",
+    "rules": "Puntos: 3 al primer intento, 2 al segundo y si no, 1. Una pista cuesta 1. El más rápido gana 1 punto rayo.",
+    "hl": {
+      "allFirstTry": "¡Todos los acertijos bien al primer intento!",
+      "firstTry": "{count}× bien al primer intento",
+      "faster": "{count}× más rápido",
+      "fastest": "Acertijo más rápido: {seconds} s"
+    },
+    "rematch": "¡Revancha!",
+    "rematchAsked": "¡{name} quiere la revancha!",
+    "rematchWait": "Esperando a que {name} acepte …",
+    "end": "Terminar",
+    "disconnected": "Se ha perdido la conexión con {name}.",
+    "newDuel": "Nuevo duelo",
+    "pickAvatar": "Elige tu personaje"
+  },
+  "avatars": {
+    "fox": "Zorro",
+    "cat": "Gato",
+    "dog": "Perro",
+    "panda": "Panda",
+    "frog": "Rana",
+    "owl": "Búho",
+    "unicorn": "Unicornio",
+    "turtle": "Tortuga",
+    "strawberry": "Fresa",
+    "banana": "Plátano",
+    "carrot": "Zanahoria",
+    "broccoli": "Brócoli",
+    "avocado": "Aguacate",
+    "pineapple": "Piña",
+    "watermelon": "Sandía",
+    "grapes": "Uvas"
+  },
+  "viewWords": {
+    "top": "arriba",
+    "front": "delante",
+    "side": "derecha"
+  }
+}

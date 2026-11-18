@@ -1,0 +1,12 @@
+---
+import Base from '../../../layouts/Base.astro';
+import BuildGame from '../../../components/BuildGame.astro';
+import { useTranslations, otherLocalePaths } from '../../../i18n/index.js';
+
+export const getStaticPaths = otherLocalePaths;
+const { lang } = Astro.params;
+---
+
+<Base locale={lang} page="build/" title={useTranslations(lang)('modes.build.title')}>
+  <BuildGame locale={lang} />
+</Base>

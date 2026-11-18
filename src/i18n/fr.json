@@ -1,0 +1,193 @@
+{
+  "meta": {
+    "title": "Wyrfl – des énigmes en cubes pour ta vision dans l’espace",
+    "description": "Wyrfl est un jeu gratuit de constructions en cubes : reconnais les vues de dessus, de face et de côté, et reconstruis des bâtiments. Sans inscription, sans publicité."
+  },
+  "home": {
+    "dragHint": "Fais glisser ton doigt sur le bâtiment pour le tourner. Le bord jaune est l’avant.",
+    "noWebgl": "Désolé, ton navigateur ne peut pas afficher de 3D."
+  },
+  "views": {
+    "top": "vu de dessus",
+    "front": "vu de face",
+    "side": "vu de droite"
+  },
+  "modes": {
+    "guess": {
+      "title": "Devine la vue",
+      "text": "Quelle image montre le bâtiment vu de face ? Trouve la bonne parmi six."
+    },
+    "build": {
+      "title": "Construis-le",
+      "text": "Tu vois trois plans – place les cubes pour que tout corresponde."
+    },
+    "duel": {
+      "title": "Duel",
+      "text": "À deux dans le même Wi-Fi : qui reconnaît les vues le plus vite ? Connexion par QR code."
+    },
+    "title": "Modes de jeu"
+  },
+  "nav": {
+    "about": "À propos de Wyrfl",
+    "theme": "Clair / sombre",
+    "language": "Langue"
+  },
+  "about": {
+    "title": "À propos de Wyrfl",
+    "intro": "Wyrfl est un jeu d’énigmes pour les enfants et les ados (et tout le monde) qui entraîne la vision dans l’espace : tu passes de bâtiments en cubes en 3D à leurs vues de dessus, de face et de côté.",
+    "privacy": "Wyrfl ne demande pas d’inscription, n’affiche pas de publicité et ne collecte aucune donnée. Ta progression reste uniquement sur ton appareil.",
+    "license": "Wyrfl est un logiciel libre sous licence MIT – les écoles, les enseignants et tout le monde peuvent l’utiliser, le copier et l’adapter.",
+    "openSource": "Wyrfl est construit avec de super projets open source. Merci à toutes celles et ceux qui y contribuent !",
+    "runtime": "Dans le jeu",
+    "build": "Pour la construction",
+    "project": "Projet",
+    "usedFor": "Utilisé pour",
+    "licenseCol": "Licence",
+    "libs": {
+      "three": "Affichage 3D des bâtiments en cubes",
+      "astro": "Génère les pages en HTML statique",
+      "tailwindcss": "Mise en forme (CSS)",
+      "vitest": "Tests automatiques de la logique du jeu",
+      "qrcode-generator": "QR code pour la connexion en duel",
+      "qr-scanner": "Lecture du QR code avec la caméra",
+      "jsqr": "Détection de QR code (inclus dans qr-scanner)",
+      "fluent-emoji": "Personnages du duel (animaux, fruits et légumes)"
+    },
+    "assets": "Graphismes",
+    "author": "Auteur",
+    "email": "E-mail",
+    "version": "Version",
+    "madeWith": "Designed with {heart}. Powered by Claude."
+  },
+  "levels": {
+    "easy": "Facile",
+    "medium": "Moyen",
+    "hard": "Difficile",
+    "hardcore": "Expert"
+  },
+  "level": {
+    "label": "Difficulté",
+    "solved": "Résolues : {count}",
+    "toUnlock": "encore {count} pour « {level} »",
+    "locked": "Résous {count} énigmes en « {level} » pour débloquer ce niveau.",
+    "unlocked": "Débloqué : « {level} » !"
+  },
+  "game": {
+    "next": "Énigme suivante",
+    "back": "Retour",
+    "play": "Jouer",
+    "loading": "Chargement de la 3D …"
+  },
+  "guess": {
+    "question": "À quoi ressemble le bâtiment {view} ?",
+    "option": "Réponse {n}",
+    "correct": "Exactement ! Voilà à quoi il ressemble {view}.",
+    "tryAgain": "Pas encore – essaie encore !",
+    "hint": "Montre-moi",
+    "hintDone": "Regarde : voici le bâtiment {view}. Quelle image correspond ?",
+    "backToIso": "Vue en biais",
+    "why": {
+      "fromBack": "C’est à l’envers – c’est le bâtiment vu de derrière.",
+      "fromLeft": "C’est à l’envers – c’est le bâtiment vu de gauche.",
+      "isSide": "C’est la vue de droite, pas la vue de face.",
+      "isFront": "C’est la vue de face, pas la vue de droite.",
+      "otherSide": "C’est la vue d’un autre côté.",
+      "rotated": "C’est tourné. Vu de dessus, l’avant (le bord jaune) est toujours en bas.",
+      "mirrorTop": "C’est en miroir – la gauche et la droite sont inversées.",
+      "flipped": "L’avant et l’arrière sont inversés. Vu de dessus, l’avant est toujours en bas.",
+      "nearMiss": "Presque ! Regarde encore les cases marquées."
+    }
+  },
+  "build": {
+    "plans": "Plans",
+    "add": "Construire",
+    "remove": "Enlever",
+    "undo": "Annuler",
+    "clear": "Tout enlever",
+    "check": "Vérifier",
+    "cubes": "{count} cubes",
+    "tapHint": "Touche pour poser un cube, appui long ou clic droit pour l’enlever. Fais glisser pour tourner le bâtiment.",
+    "full": "Impossible plus haut – {max} cubes maximum les uns sur les autres.",
+    "ok": "correspond",
+    "notOk": "pas encore",
+    "success": "Bravo ! Ton bâtiment correspond aux trois plans.",
+    "successNote": "D’ailleurs : il y a souvent plusieurs bonnes réponses.",
+    "almost": "Presque ! Les cases en pointillés ne correspondent pas encore.",
+    "empty": "Pose d’abord quelques cubes sur le plateau.",
+    "removeHint": "Enlever – marche aussi avec un clic droit ou un appui long"
+  },
+  "duel": {
+    "intro": "Jouez à deux – chacun sur son appareil, dans le même Wi-Fi. Vous recevez les mêmes énigmes. Qui sera le plus rapide et le plus précis ?",
+    "privacy": "Vos appareils se connectent directement entre eux. Rien ne quitte votre Wi-Fi – pas de serveur, pas d’inscription.",
+    "host": "Lancer un duel",
+    "join": "Scanner un code",
+    "unsupported": "Désolé, ce navigateur ne peut pas établir de connexion directe. Essaie un Chrome, Edge, Firefox ou Safari récent.",
+    "preparing": "Préparation du code …",
+    "step1": "1. Scanne ce code avec l’autre appareil – avec l’appli appareil photo.",
+    "step2": "2. L’autre appareil affiche alors un code. Scanne-le ici :",
+    "scanAnswer": "Scanner le code réponse",
+    "answerTitle": "Presque fini !",
+    "answerText": "Montre ce code au premier appareil et appuie là-bas sur « Scanner le code réponse ».",
+    "waiting": "En attente de la connexion …",
+    "connecting": "Connexion …",
+    "scanTitle": "Dirige la caméra vers le code",
+    "cancel": "Annuler",
+    "cameraError": "Impossible d’ouvrir la caméra. Autorise l’accès à la caméra et réessaie.",
+    "wrongCode": "Ce n’est pas un bon code Wyrfl. Réessaie.",
+    "failed": "La connexion n’a pas marché. Êtes-vous dans le même Wi-Fi ? Certains réseaux d’école ou d’invités bloquent les connexions directes.",
+    "connected": "Connecté à {name} !",
+    "level": "Difficulté",
+    "rounds": "Énigmes",
+    "start": "C’est parti !",
+    "hostChooses": "{name} choisit les réglages. Ça commence bientôt …",
+    "get_ready": "Prêts ?",
+    "round": "Énigme {n} sur {total}",
+    "opponentProgress": "{name} : {done} sur {total}",
+    "waitFor": "Terminé ! {name} joue encore …",
+    "won": "Gagné !",
+    "lost": "{name} a gagné cette fois.",
+    "lostClose": "De justesse ! {name} a gagné cette fois.",
+    "tie": "Égalité – vous êtes aussi forts l’un que l’autre !",
+    "points": "{points} points",
+    "you": "Toi",
+    "roundCol": "Énigme",
+    "faster": "plus rapide",
+    "rules": "Points : 3 au premier essai, 2 au deuxième, sinon 1. Un indice coûte 1. Le plus rapide gagne 1 point éclair.",
+    "hl": {
+      "allFirstTry": "Toutes les énigmes réussies du premier coup !",
+      "firstTry": "{count}× juste du premier coup",
+      "faster": "{count}× plus rapide",
+      "fastest": "Énigme la plus rapide : {seconds} s"
+    },
+    "rematch": "Revanche !",
+    "rematchAsked": "{name} veut une revanche !",
+    "rematchWait": "On attend que {name} accepte …",
+    "end": "Terminer",
+    "disconnected": "La connexion avec {name} est perdue.",
+    "newDuel": "Nouveau duel",
+    "pickAvatar": "Choisis ton personnage"
+  },
+  "avatars": {
+    "fox": "Renard",
+    "cat": "Chat",
+    "dog": "Chien",
+    "panda": "Panda",
+    "frog": "Grenouille",
+    "owl": "Hibou",
+    "unicorn": "Licorne",
+    "turtle": "Tortue",
+    "strawberry": "Fraise",
+    "banana": "Banane",
+    "carrot": "Carotte",
+    "broccoli": "Brocoli",
+    "avocado": "Avocat",
+    "pineapple": "Ananas",
+    "watermelon": "Pastèque",
+    "grapes": "Raisin"
+  },
+  "viewWords": {
+    "top": "dessus",
+    "front": "face",
+    "side": "droite"
+  }
+}

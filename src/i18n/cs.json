@@ -1,0 +1,193 @@
+{
+  "meta": {
+    "title": "Wyrfl – hádanky z kostek pro prostorovou představivost",
+    "description": "Wyrfl je bezplatná hra se stavbami z kostek: poznávej pohledy shora, zepředu a ze strany a stav stavby znovu. Bez registrace a bez reklam."
+  },
+  "home": {
+    "dragHint": "Přejeď prstem po stavbě a otoč ji. Žlutý okraj je předek.",
+    "noWebgl": "Bohužel tvůj prohlížeč neumí zobrazit 3D grafiku."
+  },
+  "views": {
+    "top": "shora",
+    "front": "zepředu",
+    "side": "zprava"
+  },
+  "viewWords": {
+    "top": "shora",
+    "front": "zepředu",
+    "side": "zprava"
+  },
+  "modes": {
+    "guess": {
+      "title": "Uhodni pohled",
+      "text": "Který obrázek ukazuje stavbu zepředu? Najdi ten správný ze šesti."
+    },
+    "build": {
+      "title": "Postav to",
+      "text": "Vidíš tři plány – rozmísti kostky tak, aby všechno sedělo."
+    },
+    "duel": {
+      "title": "Souboj",
+      "text": "Ve dvou ve stejné Wi-Fi: kdo rychleji pozná pohledy? Spojení přes QR kód."
+    },
+    "title": "Herní režimy"
+  },
+  "nav": {
+    "about": "O hře Wyrfl",
+    "theme": "Světlý / tmavý",
+    "language": "Jazyk"
+  },
+  "about": {
+    "title": "O hře Wyrfl",
+    "intro": "Wyrfl je logická hra pro děti a mládež (a pro všechny ostatní), která trénuje prostorovou představivost: převádíš 3D stavby z kostek na jejich pohledy shora, zepředu a ze strany.",
+    "privacy": "Wyrfl nevyžaduje registraci, nezobrazuje reklamy a nesbírá žádná data. Tvůj postup zůstává jen ve tvém zařízení.",
+    "license": "Wyrfl je svobodný software pod licencí MIT – školy, učitelé a kdokoli další ho smějí používat, kopírovat a upravovat.",
+    "openSource": "Wyrfl vznikl díky skvělým open-source projektům. Děkujeme všem, kdo na nich pracují!",
+    "runtime": "Ve hře",
+    "build": "Pro sestavení",
+    "project": "Projekt",
+    "usedFor": "K čemu",
+    "licenseCol": "Licence",
+    "libs": {
+      "three": "3D zobrazení staveb z kostek",
+      "astro": "Vytváří stránky jako statické HTML",
+      "tailwindcss": "Vzhled (CSS)",
+      "vitest": "Automatické testy herní logiky",
+      "qrcode-generator": "QR kód pro spojení v souboji",
+      "qr-scanner": "Čtení QR kódu kamerou",
+      "jsqr": "Rozpoznávání QR kódů (součást qr-scanner)",
+      "fluent-emoji": "Postavičky v souboji (zvířata, ovoce a zelenina)"
+    },
+    "assets": "Grafika",
+    "author": "Autor",
+    "email": "E-mail",
+    "version": "Verze",
+    "madeWith": "Designed with {heart}. Powered by Claude."
+  },
+  "levels": {
+    "easy": "Lehká",
+    "medium": "Střední",
+    "hard": "Těžká",
+    "hardcore": "Mistr"
+  },
+  "level": {
+    "label": "Obtížnost",
+    "solved": "Vyřešeno: {count}",
+    "toUnlock": "ještě {count} do úrovně „{level}“",
+    "locked": "Vyřeš {count} hádanky na úrovni „{level}“ a odemkni tuhle úroveň.",
+    "unlocked": "Odemčeno: „{level}“!"
+  },
+  "game": {
+    "next": "Další hádanka",
+    "back": "Zpět",
+    "play": "Hrát",
+    "loading": "Načítám 3D …"
+  },
+  "guess": {
+    "question": "Jak vypadá stavba {view}?",
+    "option": "Odpověď {n}",
+    "correct": "Přesně tak! Takhle vypadá {view}.",
+    "tryAgain": "Ještě ne – zkus to znovu!",
+    "hint": "Ukaž mi to",
+    "hintDone": "Podívej: takhle vypadá stavba {view}. Který obrázek sedí?",
+    "backToIso": "Šikmý pohled",
+    "why": {
+      "fromBack": "Tohle je zrcadlově – takhle vypadá stavba zezadu.",
+      "fromLeft": "Tohle je zrcadlově – takhle vypadá stavba zleva.",
+      "isSide": "Tohle je pohled zprava, ne zepředu.",
+      "isFront": "Tohle je pohled zepředu, ne zprava.",
+      "otherSide": "Tohle je pohled z jiné strany.",
+      "rotated": "Tohle je otočené. Při pohledu shora je předek (žlutý okraj) vždycky dole.",
+      "mirrorTop": "Tohle je zrcadlově – levá a pravá strana jsou prohozené.",
+      "flipped": "Předek a zadek jsou prohozené. Při pohledu shora je předek vždycky dole.",
+      "nearMiss": "Těsně vedle! Podívej se ještě jednou na označená políčka."
+    }
+  },
+  "build": {
+    "plans": "Plány",
+    "add": "Stavět",
+    "remove": "Odebrat",
+    "undo": "Zpět",
+    "clear": "Odebrat vše",
+    "check": "Zkontrolovat",
+    "cubes": "Kostky: {count}",
+    "tapHint": "Klepnutím přidáš kostku, dlouhým podržením nebo pravým kliknutím ji odebereš. Tažením stavbu otočíš.",
+    "full": "Výš to nejde – nejvýš {max} kostky na sobě.",
+    "ok": "sedí",
+    "notOk": "ještě ne",
+    "success": "Super! Tvoje stavba sedí na všechny tři plány.",
+    "successNote": "Mimochodem: často existuje víc správných řešení.",
+    "almost": "Skoro! Čárkovaná políčka ještě nesedí.",
+    "empty": "Nejdřív polož na desku pár kostek.",
+    "removeHint": "Odebrat – jde to i pravým kliknutím nebo dlouhým podržením"
+  },
+  "duel": {
+    "intro": "Hrajte ve dvou – každý na svém zařízení ve stejné Wi-Fi. Dostanete stejné hádanky. Kdo bude rychlejší a přesnější?",
+    "privacy": "Vaše zařízení se propojí přímo. Nic neopustí vaši Wi-Fi – žádný server, žádná registrace.",
+    "host": "Spustit souboj",
+    "join": "Naskenovat kód",
+    "unsupported": "Bohužel tento prohlížeč neumí navázat přímé spojení. Zkus aktuální Chrome, Edge, Firefox nebo Safari.",
+    "preparing": "Připravuji kód …",
+    "step1": "1. Naskenuj tento kód druhým zařízením – stačí aplikace fotoaparátu.",
+    "step2": "2. Druhé zařízení pak ukáže kód. Naskenuj ho tady:",
+    "scanAnswer": "Naskenovat kód odpovědi",
+    "answerTitle": "Skoro hotovo!",
+    "answerText": "Ukaž tento kód prvnímu zařízení a klepni tam na „Naskenovat kód odpovědi“.",
+    "waiting": "Čekám na spojení …",
+    "connecting": "Připojuji …",
+    "scanTitle": "Namiř kameru na kód",
+    "cancel": "Zrušit",
+    "cameraError": "Kameru nejde otevřít. Povol přístup ke kameře a zkus to znovu.",
+    "wrongCode": "Tohle není správný kód Wyrfl. Zkus to znovu.",
+    "failed": "Spojení se nepovedlo. Jste ve stejné Wi-Fi? Některé školní sítě a sítě pro hosty přímá spojení nedovolují.",
+    "connected": "Spojeno! Tvůj soupeř: {name}",
+    "level": "Obtížnost",
+    "rounds": "Hádanky",
+    "start": "Jdeme na to!",
+    "hostChooses": "{name} vybírá nastavení. Za chvíli začínáme …",
+    "get_ready": "Připravit!",
+    "round": "Hádanka {n} z {total}",
+    "opponentProgress": "{name}: {done} z {total}",
+    "waitFor": "Hotovo! {name} ještě hraje …",
+    "won": "Vítězství!",
+    "lost": "Tentokrát vyhrává: {name}.",
+    "lostClose": "Těsně! Tentokrát vyhrává: {name}.",
+    "tie": "Remíza – jste stejně dobří!",
+    "points": "Body: {points}",
+    "you": "Ty",
+    "roundCol": "Hádanka",
+    "faster": "rychleji",
+    "rules": "Body: 3 za první pokus, 2 za druhý, jinak 1. Nápověda stojí 1. Rychlejší hráč dostane 1 bleskový bod.",
+    "hl": {
+      "allFirstTry": "Všechny hádanky na první pokus!",
+      "firstTry": "{count}× správně na první pokus",
+      "faster": "{count}× rychleji",
+      "fastest": "Nejrychlejší hádanka: {seconds} s"
+    },
+    "rematch": "Odveta!",
+    "rematchAsked": "{name} chce odvetu!",
+    "rematchWait": "Čekáme, až {name} taky bude chtít …",
+    "end": "Ukončit",
+    "disconnected": "Spojení se přerušilo ({name}).",
+    "newDuel": "Nový souboj",
+    "pickAvatar": "Vyber si postavičku"
+  },
+  "avatars": {
+    "fox": "Liška",
+    "cat": "Kočka",
+    "dog": "Pes",
+    "panda": "Panda",
+    "frog": "Žába",
+    "owl": "Sova",
+    "unicorn": "Jednorožec",
+    "turtle": "Želva",
+    "strawberry": "Jahoda",
+    "banana": "Banán",
+    "carrot": "Mrkev",
+    "broccoli": "Brokolice",
+    "avocado": "Avokádo",
+    "pineapple": "Ananas",
+    "watermelon": "Meloun",
+    "grapes": "Hrozny"
+  }
+}

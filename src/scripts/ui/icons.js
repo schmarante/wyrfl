@@ -16,6 +16,8 @@ export const ICONS = {
   sun: svg('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>', 22),
   moon: svg('<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/>', 22),
   star: svg(`<path d="${STAR}" fill="currentColor"/>`, 16),
+  heart: svg('<path d="M12 20.5s-7.5-4.6-9.2-9.4C1.6 7.6 3.9 4 7.4 4c2 0 3.5 1.1 4.6 2.7C13.1 5.1 14.6 4 16.6 4c3.5 0 5.8 3.6 4.6 7.1-1.7 4.8-9.2 9.4-9.2 9.4Z" fill="#ef4444" stroke="none"/>', 16, ' style="vertical-align:-2px"'),
+  chevron: svg('<path d="m6 9 6 6 6-6"/>', 14),
   starEmpty: svg(`<path d="${STAR}"/>`, 16, ' stroke-width="2"'),
   // game modes (home cards)
   eye: svg('<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>', 30),
@@ -23,8 +25,23 @@ export const ICONS = {
   duel: svg('<circle cx="7" cy="8" r="3"/><circle cx="17" cy="8" r="3"/><path d="M2 20c0-3 2.2-5 5-5s5 2 5 5M12 20c0-3 2.2-5 5-5s5 2 5 5"/>', 30),
 };
 
-// language flags (public-domain designs), 3:2-ish, used as buttons in the header
+// language flags (public-domain designs, simplified), shown in the language menu
+const flag = body => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20" width="27" height="18" aria-hidden="true" class="block shrink-0 rounded-[3px] ring-1 ring-black/10">${body}</svg>`;
+const stripesH = (...colors) => colors.map((c, i) => `<rect y="${(20 / colors.length) * i}" width="30" height="${20 / colors.length + 0.05}" fill="${c}"/>`).join('');
+const stripesV = (...colors) => colors.map((c, i) => `<rect x="${(30 / colors.length) * i}" width="${30 / colors.length + 0.05}" height="20" fill="${c}"/>`).join('');
+// Croatian chequy shield (5 × 5), red top left
+const hrShield = (() => {
+  let cells = '';
+  for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) if ((r + c) % 2 === 0) cells += `<rect x="${12.5 + c}" y="${5.5 + r}" width="1" height="1" fill="#FF0000"/>`;
+  return `<path d="M12.5 5.5h5v5a2.5 2.5 0 0 1-5 0Z" fill="#fff"/>${cells}<path d="M12.5 5.5h5v5a2.5 2.5 0 0 1-5 0Z" fill="none" stroke="#FF0000" stroke-width="0.3"/>`;
+})();
+
 export const FLAGS = {
-  de: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5 3" width="28" height="18" aria-hidden="true" class="block rounded-[3px]"><rect width="5" height="3" fill="#FFCE00"/><rect width="5" height="2" fill="#DD0000"/><rect width="5" height="1" fill="#000"/></svg>',
-  en: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" width="28" height="18" preserveAspectRatio="none" aria-hidden="true" class="block rounded-[3px]"><clipPath id="flag-uk-t"><path d="M30,15h30v15zv15h-30zh-30v-15zv-15h30z"/></clipPath><path d="M0,0v30h60v-30z" fill="#012169"/><path d="M0,0 60,30M60,0 0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 60,30M60,0 0,30" clip-path="url(#flag-uk-t)" stroke="#C8102E" stroke-width="4"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#C8102E" stroke-width="6"/></svg>',
+  de: flag(stripesH('#000', '#DD0000', '#FFCE00')),
+  en: flag('<clipPath id="flag-uk-t"><path d="M15,10h15v10zv10h-15zh-15v-10zv-10h15z"/></clipPath><path d="M0,0v20h30v-20z" fill="#012169"/><path d="M0,0 30,20M30,0 0,20" stroke="#fff" stroke-width="4"/><path d="M0,0 30,20M30,0 0,20" clip-path="url(#flag-uk-t)" stroke="#C8102E" stroke-width="2.6"/><path d="M15,0v20M0,10h30" stroke="#fff" stroke-width="6.6"/><path d="M15,0v20M0,10h30" stroke="#C8102E" stroke-width="4"/>'),
+  fr: flag(stripesV('#002395', '#fff', '#ED2939')),
+  es: flag('<rect width="30" height="20" fill="#AA151B"/><rect y="5" width="30" height="10" fill="#F1BF00"/>'),
+  hr: flag(stripesH('#FF0000', '#fff', '#171796') + hrShield),
+  pl: flag(stripesH('#fff', '#DC143C')),
+  cs: flag('<rect width="30" height="10" fill="#fff"/><rect y="10" width="30" height="10" fill="#D7141A"/><path d="M0 0 15 10 0 20Z" fill="#11457E"/>'),
 };

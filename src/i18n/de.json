@@ -53,7 +53,11 @@
       "jsqr": "QR-Erkennung (in qr-scanner enthalten)",
       "fluent-emoji": "Spielfiguren im Duell (Tiere, Obst und Gemüse)"
     },
-    "assets": "Grafiken"
+    "assets": "Grafiken",
+    "author": "Autor",
+    "email": "E-Mail",
+    "version": "Version",
+    "madeWith": "Designed with {heart}. Powered by Claude."
   },
   "levels": {
     "easy": "Leicht",
@@ -126,15 +130,9 @@
     "answerText": "Zeig diesen Code dem ersten Gerät. Dort auf „Antwort-Code scannen“ tippen.",
     "waiting": "Warte auf die Verbindung …",
     "connecting": "Verbinde …",
-    "noCamera": "Ohne Kamera",
-    "copyLink": "Link kopieren",
-    "copyCode": "Code kopieren",
-    "copied": "Kopiert!",
-    "pasteLabel": "Code vom anderen Gerät einfügen",
-    "connect": "Verbinden",
     "scanTitle": "Halte die Kamera auf den Code",
     "cancel": "Abbrechen",
-    "cameraError": "Die Kamera lässt sich nicht öffnen. Erlaube den Zugriff oder nutze „Ohne Kamera“.",
+    "cameraError": "Die Kamera lässt sich nicht öffnen. Erlaube den Zugriff auf die Kamera und versuch es noch mal.",
     "wrongCode": "Das ist kein passender Wyrfl-Code. Versuch es noch mal.",
     "failed": "Die Verbindung hat nicht geklappt. Seid ihr im selben WLAN? Manche Schul- oder Gast-WLANs erlauben keine direkten Verbindungen.",
     "connected": "Verbunden mit {name}!",

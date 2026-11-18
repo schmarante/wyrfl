@@ -2,7 +2,7 @@
 // purpose texts from the English language file. Replaces only the part between <!-- credits:start --> and
 // <!-- credits:end -->. Runs before every build (npm "prebuild") – commit the README afterwards.
 import fs from 'node:fs';
-import { RUNTIME, ASSETS, BUILD } from '../src/data/credits.js';
+import { RUNTIME, ASSETS, BUILD, ABOUT } from '../src/data/credits.js';
 
 const root = new URL('../', import.meta.url);
 const readmeUrl = new URL('README.md', root);
@@ -25,6 +25,11 @@ const section = [
   table(about.runtime, RUNTIME),
   table(about.assets, ASSETS),
   table(about.build, BUILD),
+  '---',
+  '',
+  `Made by ${ABOUT.author} – [${ABOUT.email}](mailto:${ABOUT.email})`,
+  '',
+  `<p align="center">${about.madeWith.replace('{heart}', '❤️')}</p>`,
   '<!-- credits:end -->',
 ].join('\n');
 

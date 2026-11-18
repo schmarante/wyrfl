@@ -1,0 +1,193 @@
+{
+  "meta": {
+    "title": "Wyrfl – zagonetke s kockicama za prostorno razmišljanje",
+    "description": "Wyrfl je besplatna igra s građevinama od kockica: prepoznaj poglede odozgo, sprijeda i sa strane te ponovno sagradi građevinu. Bez prijave i bez reklama."
+  },
+  "home": {
+    "dragHint": "Povuci prstom preko građevine da je okreneš. Žuti rub je prednja strana.",
+    "noWebgl": "Nažalost, tvoj preglednik ne može prikazati 3D grafiku."
+  },
+  "views": {
+    "top": "odozgo",
+    "front": "sprijeda",
+    "side": "s desne strane"
+  },
+  "viewWords": {
+    "top": "odozgo",
+    "front": "sprijeda",
+    "side": "desne"
+  },
+  "modes": {
+    "guess": {
+      "title": "Pogodi pogled",
+      "text": "Koja slika prikazuje građevinu sprijeda? Pronađi pravu među šest."
+    },
+    "build": {
+      "title": "Sagradi",
+      "text": "Vidiš tri nacrta – postavi kockice tako da sve odgovara."
+    },
+    "duel": {
+      "title": "Dvoboj",
+      "text": "Dvoje igrača u istoj Wi-Fi mreži: tko brže prepoznaje poglede? Povezivanje QR kodom."
+    },
+    "title": "Načini igre"
+  },
+  "nav": {
+    "about": "O Wyrflu",
+    "theme": "Svijetlo / tamno",
+    "language": "Jezik"
+  },
+  "about": {
+    "title": "O Wyrflu",
+    "intro": "Wyrfl je igra zagonetki za djecu i mlade (i sve ostale) koja vježba prostorno razmišljanje: prelaziš s 3D građevina od kockica na njihove poglede odozgo, sprijeda i sa strane.",
+    "privacy": "Wyrfl ne traži prijavu, ne prikazuje reklame i ne prikuplja podatke. Tvoj napredak ostaje samo na tvom uređaju.",
+    "license": "Wyrfl je slobodan softver pod MIT licencom – škole, učitelji i svi ostali smiju ga koristiti, kopirati i prilagođavati.",
+    "openSource": "Wyrfl je napravljen uz sjajne projekte otvorenog koda. Hvala svima koji na njima rade!",
+    "runtime": "U igri",
+    "build": "Za izradu",
+    "project": "Projekt",
+    "usedFor": "Za što",
+    "licenseCol": "Licenca",
+    "libs": {
+      "three": "3D prikaz građevina od kockica",
+      "astro": "Stvara stranice kao statički HTML",
+      "tailwindcss": "Oblikovanje (CSS)",
+      "vitest": "Automatski testovi logike igre",
+      "qrcode-generator": "QR kod za povezivanje u dvoboju",
+      "qr-scanner": "Čitanje QR koda kamerom",
+      "jsqr": "Prepoznavanje QR koda (dio qr-scannera)",
+      "fluent-emoji": "Likovi u dvoboju (životinje, voće i povrće)"
+    },
+    "assets": "Grafika",
+    "author": "Autor",
+    "email": "E-pošta",
+    "version": "Verzija",
+    "madeWith": "Designed with {heart}. Powered by Claude."
+  },
+  "levels": {
+    "easy": "Lagano",
+    "medium": "Srednje",
+    "hard": "Teško",
+    "hardcore": "Profi"
+  },
+  "level": {
+    "label": "Težina",
+    "solved": "Riješeno: {count}",
+    "toUnlock": "još {count} do razine „{level}“",
+    "locked": "Riješi {count} zadatka na razini „{level}“ da otključaš ovu razinu.",
+    "unlocked": "Otključano: „{level}“!"
+  },
+  "game": {
+    "next": "Sljedeći zadatak",
+    "back": "Natrag",
+    "play": "Igraj",
+    "loading": "Učitavam 3D …"
+  },
+  "guess": {
+    "question": "Kako građevina izgleda {view}?",
+    "option": "Odgovor {n}",
+    "correct": "Točno! Tako izgleda {view}.",
+    "tryAgain": "Još ne – pokušaj ponovno!",
+    "hint": "Pokaži mi",
+    "hintDone": "Pogledaj: ovako građevina izgleda {view}. Koja slika odgovara?",
+    "backToIso": "Kosi pogled",
+    "why": {
+      "fromBack": "To je zrcaljeno – tako građevina izgleda straga.",
+      "fromLeft": "To je zrcaljeno – tako građevina izgleda s lijeve strane.",
+      "isSide": "To je pogled s desne strane, a ne sprijeda.",
+      "isFront": "To je pogled sprijeda, a ne s desne strane.",
+      "otherSide": "To je pogled s neke druge strane.",
+      "rotated": "To je okrenuto. Gledano odozgo, prednja strana (žuti rub) uvijek je dolje.",
+      "mirrorTop": "To je zrcaljeno – lijevo i desno su zamijenjeni.",
+      "flipped": "Prednja i stražnja strana su zamijenjene. Gledano odozgo, prednja strana uvijek je dolje.",
+      "nearMiss": "Za dlaku! Pogledaj još jednom označena polja."
+    }
+  },
+  "build": {
+    "plans": "Nacrti",
+    "add": "Gradi",
+    "remove": "Makni",
+    "undo": "Poništi",
+    "clear": "Makni sve",
+    "check": "Provjeri",
+    "cubes": "Kockice: {count}",
+    "tapHint": "Dodirni za kockicu, dugo pritisni ili desni klik da je makneš. Povuci da okreneš građevinu.",
+    "full": "Više ne ide – najviše {max} kockica jedna na drugoj.",
+    "ok": "odgovara",
+    "notOk": "još ne",
+    "success": "Super! Tvoja građevina odgovara sva tri nacrta.",
+    "successNote": "Usput: često postoji više točnih rješenja.",
+    "almost": "Skoro! Iscrtkana polja još ne odgovaraju.",
+    "empty": "Najprije postavi nekoliko kockica na ploču.",
+    "removeHint": "Makni – može i desnim klikom ili dugim pritiskom"
+  },
+  "duel": {
+    "intro": "Igrajte u dvoje – svatko na svom uređaju u istoj Wi-Fi mreži. Dobivate iste zadatke. Tko je brži i točniji?",
+    "privacy": "Vaši se uređaji povezuju izravno. Ništa ne napušta vašu Wi-Fi mrežu – nema poslužitelja ni prijave.",
+    "host": "Pokreni dvoboj",
+    "join": "Skeniraj kod",
+    "unsupported": "Nažalost, ovaj preglednik ne može uspostaviti izravnu vezu. Probaj s novijim Chromeom, Edgeom, Firefoxom ili Safarijem.",
+    "preparing": "Pripremam kod …",
+    "step1": "1. Skeniraj ovaj kod drugim uređajem – jednostavno aplikacijom za kameru.",
+    "step2": "2. Drugi uređaj tada pokaže kod. Skeniraj ga ovdje:",
+    "scanAnswer": "Skeniraj kod odgovora",
+    "answerTitle": "Skoro gotovo!",
+    "answerText": "Pokaži ovaj kod prvom uređaju i tamo dodirni „Skeniraj kod odgovora“.",
+    "waiting": "Čekam vezu …",
+    "connecting": "Povezujem …",
+    "scanTitle": "Usmjeri kameru prema kodu",
+    "cancel": "Odustani",
+    "cameraError": "Kamera se ne može otvoriti. Dopusti pristup kameri i pokušaj ponovno.",
+    "wrongCode": "To nije odgovarajući Wyrfl kod. Pokušaj ponovno.",
+    "failed": "Povezivanje nije uspjelo. Jeste li u istoj Wi-Fi mreži? Neke školske mreže i mreže za goste ne dopuštaju izravne veze.",
+    "connected": "Povezano! Igraš protiv: {name}",
+    "level": "Težina",
+    "rounds": "Zadaci",
+    "start": "Krenimo!",
+    "hostChooses": "{name} bira postavke. Uskoro počinjemo …",
+    "get_ready": "Spremni?",
+    "round": "Zadatak {n} od {total}",
+    "opponentProgress": "{name}: {done} od {total}",
+    "waitFor": "Gotovo! {name} još igra …",
+    "won": "Pobjeda!",
+    "lost": "Ovaj put pobjeđuje: {name}.",
+    "lostClose": "Za dlaku! Ovaj put pobjeđuje: {name}.",
+    "tie": "Neriješeno – jednako ste dobri!",
+    "points": "Bodovi: {points}",
+    "you": "Ti",
+    "roundCol": "Zadatak",
+    "faster": "brže",
+    "rules": "Bodovi: 3 za prvi pokušaj, 2 za drugi, inače 1. Pomoć košta 1. Brži igrač dobiva 1 munja-bod.",
+    "hl": {
+      "allFirstTry": "Svi zadaci riješeni iz prvog pokušaja!",
+      "firstTry": "{count}× točno iz prvog pokušaja",
+      "faster": "{count}× brže",
+      "fastest": "Najbrži zadatak: {seconds} s"
+    },
+    "rematch": "Revanš!",
+    "rematchAsked": "{name} želi revanš!",
+    "rematchWait": "Čekamo da i {name} pristane …",
+    "end": "Završi",
+    "disconnected": "Veza je prekinuta ({name}).",
+    "newDuel": "Novi dvoboj",
+    "pickAvatar": "Odaberi svoj lik"
+  },
+  "avatars": {
+    "fox": "Lisica",
+    "cat": "Mačka",
+    "dog": "Pas",
+    "panda": "Panda",
+    "frog": "Žaba",
+    "owl": "Sova",
+    "unicorn": "Jednorog",
+    "turtle": "Kornjača",
+    "strawberry": "Jagoda",
+    "banana": "Banana",
+    "carrot": "Mrkva",
+    "broccoli": "Brokula",
+    "avocado": "Avokado",
+    "pineapple": "Ananas",
+    "watermelon": "Lubenica",
+    "grapes": "Grožđe"
+  }
+}

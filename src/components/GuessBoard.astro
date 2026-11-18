@@ -7,7 +7,7 @@ import { useTranslations } from '../i18n/index.js';
 import Icon from './Icon.astro';
 
 interface Props {
-  locale: 'de' | 'en';
+  locale: string;
 }
 const t = useTranslations(Astro.props.locale);
 const overlayButton = 'press pointer-events-auto grid h-10 w-10 place-items-center rounded-full bg-surface/85 text-text shadow-sm backdrop-blur hover:bg-line disabled:cursor-not-allowed disabled:opacity-35';

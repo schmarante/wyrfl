@@ -1,0 +1,12 @@
+---
+import Base from '../../layouts/Base.astro';
+import Home from '../../components/Home.astro';
+import { otherLocalePaths } from '../../i18n/index.js';
+
+export const getStaticPaths = otherLocalePaths;
+const { lang } = Astro.params;
+---
+
+<Base locale={lang} page="">
+  <Home locale={lang} />
+</Base>

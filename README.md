@@ -57,4 +57,9 @@ Wyrfl is built on great open-source projects. Thanks to everyone who contributes
 | [Tailwind CSS](https://tailwindcss.com) | Styling (CSS) | MIT |
 | [Vitest](https://vitest.dev) | Automated tests of the game logic | MIT |
 
+---
+
+Made by Marco Schrenk – [mail@marco-schrenk.de](mailto:mail@marco-schrenk.de)
+
+<p align="center">Designed with ❤️. Powered by Claude.</p>
 <!-- credits:end -->

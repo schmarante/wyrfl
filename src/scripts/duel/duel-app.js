@@ -62,17 +62,6 @@ export function startDuelApp(root, t) {
   const otherName = () => (theirAvatar ? t(`avatars.${theirAvatar}`) : '…');
   const settingsText = s => `${t(`levels.${s.level}`)} · ${s.rounds} ${t('duel.rounds')}`;
 
-  async function copy(text, button) {
-    try {
-      await navigator.clipboard.writeText(text);
-      const label = button.textContent;
-      button.textContent = t('duel.copied');
-      setTimeout(() => (button.textContent = label), 1500);
-    } catch {
-      /* clipboard blocked – the QR code still works */
-    }
-  }
-
   // ---- camera scanner ------------------------------------------------------------------------
 
   async function openScanner(onText) {
@@ -107,9 +96,6 @@ export function startDuelApp(root, t) {
     const url = `${location.origin}${localePath(document.documentElement.lang, 'duel/')}#join=${pairing.code}`;
     await renderQr($('[data-offer-qr]'), url);
     $('[data-scan-answer]').disabled = false;
-    const copyLink = $('[data-copy-link]');
-    copyLink.disabled = false;
-    copyLink.onclick = () => copy(url, copyLink);
   }
 
   async function acceptAnswer(code) {
@@ -147,9 +133,6 @@ export function startDuelApp(root, t) {
       return reset();
     }
     await renderQr($('[data-answer-qr]'), pairing.code);
-    const copyCode = $('[data-copy-code]');
-    copyCode.disabled = false;
-    copyCode.onclick = () => copy(pairing.code, copyCode);
     pairing.channel.then(connected, () => {
       banner(t('duel.failed'));
       reset();
@@ -396,7 +379,6 @@ export function startDuelApp(root, t) {
   }
   $('[data-host]').addEventListener('click', host);
   $('[data-scan-answer]').addEventListener('click', () => openScanner(acceptAnswer));
-  $('[data-paste-connect]').addEventListener('click', () => acceptAnswer($('[data-paste]').value));
   $('[data-join]').addEventListener('click', () =>
     openScanner(text => {
       if (!text.includes('#join=')) {

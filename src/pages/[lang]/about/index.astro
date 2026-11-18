@@ -1,0 +1,12 @@
+---
+import Base from '../../../layouts/Base.astro';
+import About from '../../../components/About.astro';
+import { useTranslations, otherLocalePaths } from '../../../i18n/index.js';
+
+export const getStaticPaths = otherLocalePaths;
+const { lang } = Astro.params;
+---
+
+<Base locale={lang} page="about/" title={useTranslations(lang)('about.title')}>
+  <About locale={lang} />
+</Base>

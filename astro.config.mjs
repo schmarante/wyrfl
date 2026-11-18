@@ -14,7 +14,7 @@ export default defineConfig({
   base: process.env.BASE_PATH || '/',
   ...(process.env.SITE_URL ? { site: process.env.SITE_URL } : {}),
   i18n: {
-    locales: ['de', 'en'],
+    locales: ['de', 'en', 'fr', 'es', 'hr', 'pl', 'cs'],
     defaultLocale: 'de',
     routing: { prefixDefaultLocale: false },
   },

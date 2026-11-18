@@ -1,0 +1,193 @@
+{
+  "meta": {
+    "title": "Wyrfl – łamigłówki z klocków dla wyobraźni przestrzennej",
+    "description": "Wyrfl to darmowa gra z budowlami z klocków: rozpoznawaj widoki z góry, z przodu i z boku i odbudowuj budowle. Bez rejestracji i bez reklam."
+  },
+  "home": {
+    "dragHint": "Przesuń palcem po budowli, żeby ją obrócić. Żółta krawędź to przód.",
+    "noWebgl": "Niestety, twoja przeglądarka nie potrafi wyświetlić grafiki 3D."
+  },
+  "views": {
+    "top": "z góry",
+    "front": "z przodu",
+    "side": "z prawej strony"
+  },
+  "viewWords": {
+    "top": "góry",
+    "front": "przodu",
+    "side": "prawej"
+  },
+  "modes": {
+    "guess": {
+      "title": "Zgadnij widok",
+      "text": "Który obrazek pokazuje budowlę z przodu? Znajdź właściwy spośród sześciu."
+    },
+    "build": {
+      "title": "Zbuduj",
+      "text": "Widzisz trzy plany – ustaw klocki tak, żeby wszystko pasowało."
+    },
+    "duel": {
+      "title": "Pojedynek",
+      "text": "We dwoje w tym samym Wi-Fi: kto szybciej rozpozna widoki? Połączenie przez kod QR."
+    },
+    "title": "Tryby gry"
+  },
+  "nav": {
+    "about": "O Wyrfl",
+    "theme": "Jasny / ciemny",
+    "language": "Język"
+  },
+  "about": {
+    "title": "O Wyrfl",
+    "intro": "Wyrfl to gra logiczna dla dzieci i młodzieży (i wszystkich innych), która ćwiczy wyobraźnię przestrzenną: przechodzisz od budowli z klocków w 3D do ich widoków z góry, z przodu i z boku.",
+    "privacy": "Wyrfl nie wymaga rejestracji, nie pokazuje reklam i nie zbiera danych. Twoje postępy zostają tylko na twoim urządzeniu.",
+    "license": "Wyrfl to wolne oprogramowanie na licencji MIT – szkoły, nauczyciele i wszyscy inni mogą go używać, kopiować i dostosowywać.",
+    "openSource": "Wyrfl powstał dzięki świetnym projektom open source. Dziękujemy wszystkim, którzy przy nich pracują!",
+    "runtime": "W grze",
+    "build": "Do budowania",
+    "project": "Projekt",
+    "usedFor": "Do czego",
+    "licenseCol": "Licencja",
+    "libs": {
+      "three": "Grafika 3D budowli z klocków",
+      "astro": "Tworzy strony jako statyczny HTML",
+      "tailwindcss": "Wygląd (CSS)",
+      "vitest": "Automatyczne testy logiki gry",
+      "qrcode-generator": "Kod QR do połączenia w pojedynku",
+      "qr-scanner": "Odczyt kodu QR kamerą",
+      "jsqr": "Rozpoznawanie kodów QR (część qr-scanner)",
+      "fluent-emoji": "Postacie w pojedynku (zwierzęta, owoce i warzywa)"
+    },
+    "assets": "Grafiki",
+    "author": "Autor",
+    "email": "E-mail",
+    "version": "Wersja",
+    "madeWith": "Designed with {heart}. Powered by Claude."
+  },
+  "levels": {
+    "easy": "Łatwy",
+    "medium": "Średni",
+    "hard": "Trudny",
+    "hardcore": "Mistrz"
+  },
+  "level": {
+    "label": "Poziom trudności",
+    "solved": "Rozwiązane: {count}",
+    "toUnlock": "jeszcze {count} do poziomu „{level}”",
+    "locked": "Rozwiąż {count} zagadki na poziomie „{level}”, żeby odblokować ten poziom.",
+    "unlocked": "Odblokowano: „{level}”!"
+  },
+  "game": {
+    "next": "Następna zagadka",
+    "back": "Wstecz",
+    "play": "Graj",
+    "loading": "Wczytywanie 3D …"
+  },
+  "guess": {
+    "question": "Jak wygląda budowla {view}?",
+    "option": "Odpowiedź {n}",
+    "correct": "Dokładnie! Tak wygląda {view}.",
+    "tryAgain": "Jeszcze nie – spróbuj jeszcze raz!",
+    "hint": "Pokaż mi",
+    "hintDone": "Zobacz: tak wygląda budowla {view}. Który obrazek pasuje?",
+    "backToIso": "Widok ukośny",
+    "why": {
+      "fromBack": "To jest odbite – tak budowla wygląda od tyłu.",
+      "fromLeft": "To jest odbite – tak budowla wygląda z lewej strony.",
+      "isSide": "To widok z prawej strony, a nie z przodu.",
+      "isFront": "To widok z przodu, a nie z prawej strony.",
+      "otherSide": "To widok z innej strony.",
+      "rotated": "To jest obrócone. Patrząc z góry, przód (żółta krawędź) jest zawsze na dole.",
+      "mirrorTop": "To jest lustrzane odbicie – lewa i prawa strona są zamienione.",
+      "flipped": "Przód i tył są zamienione. Patrząc z góry, przód jest zawsze na dole.",
+      "nearMiss": "Prawie! Przyjrzyj się jeszcze raz zaznaczonym polom."
+    }
+  },
+  "build": {
+    "plans": "Plany",
+    "add": "Buduj",
+    "remove": "Usuń",
+    "undo": "Cofnij",
+    "clear": "Usuń wszystko",
+    "check": "Sprawdź",
+    "cubes": "Klocki: {count}",
+    "tapHint": "Dotknij, żeby postawić klocek; przytrzymaj albo kliknij prawym przyciskiem, żeby go usunąć. Przesuń, żeby obrócić budowlę.",
+    "full": "Wyżej się nie da – najwyżej {max} klocki jeden na drugim.",
+    "ok": "pasuje",
+    "notOk": "jeszcze nie",
+    "success": "Super! Twoja budowla pasuje do wszystkich trzech planów.",
+    "successNote": "Przy okazji: często jest więcej niż jedno dobre rozwiązanie.",
+    "almost": "Prawie! Pola zaznaczone przerywaną linią jeszcze nie pasują.",
+    "empty": "Najpierw postaw kilka klocków na planszy.",
+    "removeHint": "Usuń – działa też prawym przyciskiem albo przytrzymaniem"
+  },
+  "duel": {
+    "intro": "Grajcie we dwoje – każdy na swoim urządzeniu w tym samym Wi-Fi. Dostajecie te same zagadki. Kto będzie szybszy i dokładniejszy?",
+    "privacy": "Wasze urządzenia łączą się bezpośrednio. Nic nie opuszcza waszego Wi-Fi – bez serwera i bez rejestracji.",
+    "host": "Rozpocznij pojedynek",
+    "join": "Zeskanuj kod",
+    "unsupported": "Niestety, ta przeglądarka nie potrafi nawiązać bezpośredniego połączenia. Spróbuj aktualnego Chrome, Edge, Firefoksa albo Safari.",
+    "preparing": "Przygotowuję kod …",
+    "step1": "1. Zeskanuj ten kod drugim urządzeniem – po prostu aparatem.",
+    "step2": "2. Drugie urządzenie pokaże wtedy kod. Zeskanuj go tutaj:",
+    "scanAnswer": "Zeskanuj kod odpowiedzi",
+    "answerTitle": "Prawie gotowe!",
+    "answerText": "Pokaż ten kod pierwszemu urządzeniu i dotknij tam „Zeskanuj kod odpowiedzi”.",
+    "waiting": "Czekam na połączenie …",
+    "connecting": "Łączenie …",
+    "scanTitle": "Skieruj kamerę na kod",
+    "cancel": "Anuluj",
+    "cameraError": "Nie można włączyć kamery. Zezwól na dostęp do kamery i spróbuj jeszcze raz.",
+    "wrongCode": "To nie jest pasujący kod Wyrfl. Spróbuj jeszcze raz.",
+    "failed": "Połączenie się nie udało. Czy jesteście w tym samym Wi-Fi? Niektóre sieci szkolne i dla gości nie pozwalają na bezpośrednie połączenia.",
+    "connected": "Połączono! Twój rywal: {name}",
+    "level": "Poziom trudności",
+    "rounds": "Zagadki",
+    "start": "Zaczynamy!",
+    "hostChooses": "{name} wybiera ustawienia. Zaraz zaczynamy …",
+    "get_ready": "Przygotujcie się!",
+    "round": "Zagadka {n} z {total}",
+    "opponentProgress": "{name}: {done} z {total}",
+    "waitFor": "Gotowe! {name} jeszcze gra …",
+    "won": "Wygrana!",
+    "lost": "Tym razem wygrywa: {name}.",
+    "lostClose": "Niewiele brakowało! Tym razem wygrywa: {name}.",
+    "tie": "Remis – jesteście tak samo dobrzy!",
+    "points": "Punkty: {points}",
+    "you": "Ty",
+    "roundCol": "Zagadka",
+    "faster": "szybciej",
+    "rules": "Punkty: 3 za pierwszą próbę, 2 za drugą, w innym razie 1. Podpowiedź kosztuje 1. Szybszy gracz dostaje 1 punkt błyskawicy.",
+    "hl": {
+      "allFirstTry": "Wszystkie zagadki za pierwszym razem!",
+      "firstTry": "{count}× dobrze za pierwszym razem",
+      "faster": "{count}× szybciej",
+      "fastest": "Najszybsza zagadka: {seconds} s"
+    },
+    "rematch": "Rewanż!",
+    "rematchAsked": "{name} chce rewanżu!",
+    "rematchWait": "Czekamy, aż {name} też zechce …",
+    "end": "Zakończ",
+    "disconnected": "Połączenie zostało przerwane ({name}).",
+    "newDuel": "Nowy pojedynek",
+    "pickAvatar": "Wybierz swoją postać"
+  },
+  "avatars": {
+    "fox": "Lis",
+    "cat": "Kot",
+    "dog": "Pies",
+    "panda": "Panda",
+    "frog": "Żaba",
+    "owl": "Sowa",
+    "unicorn": "Jednorożec",
+    "turtle": "Żółw",
+    "strawberry": "Truskawka",
+    "banana": "Banan",
+    "carrot": "Marchewka",
+    "broccoli": "Brokuł",
+    "avocado": "Awokado",
+    "pineapple": "Ananas",
+    "watermelon": "Arbuz",
+    "grapes": "Winogrona"
+  }
+}

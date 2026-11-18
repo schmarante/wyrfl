@@ -4,7 +4,7 @@ import { useTranslations, localePath } from '../i18n/index.js';
 import Icon from './Icon.astro';
 
 interface Props {
-  locale: 'de' | 'en';
+  locale: string;
 }
 const { locale } = Astro.props;
 const t = useTranslations(locale);

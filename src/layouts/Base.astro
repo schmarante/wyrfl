@@ -1,11 +1,11 @@
 ---
 import '../styles/global.css';
-import { useTranslations, localePath } from '../i18n/index.js';
-import { FLAGS } from '../scripts/ui/icons.js';
+import { useTranslations, localePath, LANGUAGES } from '../i18n/index.js';
+import { FLAGS, ICONS } from '../scripts/ui/icons.js';
 import Icon from '../components/Icon.astro';
 
 interface Props {
-  locale: 'de' | 'en';
+  locale: string;
   page: '' | 'about/' | 'guess/' | 'build/' | 'duel/';
   title?: string;
 }
@@ -26,8 +26,7 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
     <title>{title ? `${title} · Wyrfl` : t('meta.title')}</title>
     <meta name="description" content={t('meta.description')} />
     <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
-    <link rel="alternate" hreflang="de" href={localePath('de', page)} />
-    <link rel="alternate" hreflang="en" href={localePath('en', page)} />
+    {LANGUAGES.map(({ code }) => <link rel="alternate" hreflang={code} href={localePath(code, page)} />)}
     <!-- theme before the first paint (no flash); dark is the default -->
     <script is:inline>
       try {
@@ -46,14 +45,26 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
           Wyrfl
         </a>
         <nav class="flex items-center gap-1">
-          {(['de', 'en'] as const).map(lang => (
-            <a href={localePath(lang, page)} hreflang={lang} lang={lang} aria-label={lang === 'de' ? 'Deutsch' : 'English'}
-               aria-current={lang === locale ? 'true' : undefined}
-               class:list={['press grid h-10 w-10 place-items-center rounded-full',
-                            lang === locale ? 'bg-line' : 'opacity-50 hover:opacity-100']}>
-              <Fragment set:html={FLAGS[lang]} />
-            </a>
-          ))}
+          <!-- language menu: current flag, opens a list of all languages (each named in itself) -->
+          <details data-lang-menu class="relative">
+            <summary class="press flex h-10 cursor-pointer list-none items-center gap-1 rounded-full px-2 text-muted hover:text-text [&::-webkit-details-marker]:hidden"
+                     aria-label={t('nav.language')} title={t('nav.language')}>
+              <Fragment set:html={FLAGS[locale]} />
+              <Fragment set:html={ICONS.chevron} />
+            </summary>
+            <ul class="absolute right-0 z-40 mt-1 min-w-44 overflow-hidden rounded-2xl border border-line bg-surface py-1 shadow-lg">
+              {LANGUAGES.map(({ code, name }) => (
+                <li>
+                  <a href={localePath(code, page)} hreflang={code} lang={code} aria-current={code === locale ? 'true' : undefined}
+                     class:list={['flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-line', code === locale && 'font-bold']}>
+                    <Fragment set:html={FLAGS[code]} />
+                    <span class="flex-1">{name}</span>
+                    {code === locale && <span class="text-front" aria-hidden="true">✓</span>}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </details>
           <button type="button" data-theme-toggle class={iconButton} aria-label={t('nav.theme')} title={t('nav.theme')}>
             <span class="theme-dark-icon"><Icon name="sun" /></span>
             <span class="theme-light-icon hidden"><Icon name="moon" /></span>
@@ -93,6 +104,18 @@ const iconButton = 'press grid h-10 w-10 place-items-center rounded-full text-mu
         window.dispatchEvent(new CustomEvent('wyrfl-theme'));
       });
       sync();
+
+      // language menu: close on a click outside or Escape
+      const menu = document.querySelector<HTMLDetailsElement>('[data-lang-menu]')!;
+      document.addEventListener('click', e => {
+        if (menu.open && !menu.contains(e.target as Node)) menu.open = false;
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && menu.open) {
+          menu.open = false;
+          menu.querySelector('summary')!.focus();
+        }
+      });
     </script>
   </body>
 </html>
