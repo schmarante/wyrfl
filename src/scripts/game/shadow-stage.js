@@ -340,19 +340,20 @@ export function createShadowStage(scene) {
     const floor = new THREE.Mesh(new THREE.BoxGeometry(size + 0.2, 0.1, gap), new THREE.MeshLambertMaterial({ color: col.floor }));
     floor.position.set(0, -0.05, -(size / 2 + 0.1) - gap / 2);
 
-    // sun / moon on the other side: bigger and further out on bigger grids, high enough to stay clear of the building
+    // sun / moon on the other side, LEVEL with the building (half its height): only light that comes in horizontally
+    // and parallel casts exactly the view as a shadow. Far enough out to be seen beside the building in the tilted view.
     skyTex = skyTexture(theme() === 'light' ? 'sun' : 'moon');
     const sky = new THREE.Sprite(new THREE.SpriteMaterial({ map: skyTex, transparent: true, depthWrite: false }));
     const sun = 1.3 + size * 0.14;
     sky.scale.set(sun, sun, 1);
-    const sunY = maxHeight + 1.2 + size * 0.1;
-    const sunZ = size / 2 + 1.4 + maxHeight * 0.45;
+    const sunY = maxHeight / 2;
+    const sunZ = size + 0.6 + sun * 0.6;
     sky.position.set(0, sunY, sunZ);
     sky.renderOrder = 3;
 
-    // beam from the sun to the lit part of the wall, with dust in it
-    const near = { x: 0, y: sunY, z: sunZ, w: sun * 0.22, h: sun * 0.22 };
+    // beam: parallel rays – a straight shaft as big as the shadow area, from the sun to the wall, with dust in it
     const far = { x: 0, y: maxHeight / 2, z: back + 0.02, w: size / 2 + 0.05, h: maxHeight / 2 + 0.05 };
+    const near = { ...far, z: sunZ };
     const beam = new THREE.Mesh(
       beamGeometry(near, far),
       new THREE.ShaderMaterial({
