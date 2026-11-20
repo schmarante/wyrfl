@@ -540,24 +540,13 @@ const JELLY_BUMP = /* glsl */ `
     #endif
   }`;
 
-/** a slime strand hanging from the top (y = 0) down to a drop – turned around the vertical axis (lathe) */
-function dripGeometry() {
-  const profile = [[0, 0.06], [0.085, 0.025], [0.078, -0.09], [0.058, -0.23], [0.054, -0.38], [0.074, -0.5],
-    [0.115, -0.6], [0.13, -0.68], [0.112, -0.76], [0.065, -0.81], [0, -0.83]];
-  // lathe points go from bottom to top – the other way round the normals would point inwards
-  const geometry = new THREE.LatheGeometry(profile.reverse().map(([r, y]) => new THREE.Vector2(r, y)), 14);
-  // the style's materials use vertex colours (AO): plain white here, no corners to darken
-  geometry.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(geometry.attributes.position.count * 3).fill(1), 3));
-  return geometry;
-}
-
 function jellySkin() {
   const geometry = new RoundedBoxGeometry(1, 1, 1, 2, 0.09);   // edges softly rounded; 2 segments – few vertices (AO, beam)
-  const makeMaterial = (color, transmission) => {
+  const materials = JELLY_COLORS.map(color => {
     const material = new THREE.MeshPhysicalMaterial({
       color,
       vertexColors: true,
-      transmission,             // see-through …
+      transmission: 1,          // see-through …
       thickness: 1,             // … refracted like a body of about one cube …
       ior: 1.36,
       roughness: 0.34,          // … and blurred
@@ -579,30 +568,13 @@ function jellySkin() {
     };
     material.customProgramCacheKey = () => 'wyrfl-jelly';
     return material;
-  };
-  const materials = JELLY_COLORS.map(color => makeMaterial(color, 1));
-  // drips: thin – see-through they would vanish, so they are dense slime of the same colour (gloss and glow stay)
-  const dripMaterials = new Map(materials.map((m, i) => [m, makeMaterial(JELLY_COLORS[i], 0)]));
-  const drips = dripGeometry();
+  });
   return {
     geometry,   // own cube shape: rounded (the scene clones it per cube)
     material: (x, y, z) => materials[cellHash(x, y, z) % materials.length],
-    // slime drips on about one cube in three (stable by position): which side face, where along it, how high
-    drip: {
-      geometry: drips,
-      material: base => dripMaterials.get(base),
-      materials: [...dripMaterials.values()],
-      pick(x, y, z) {
-        const h = cellHash(x + 11, y + 7, z + 3);
-        if (h % 3) return null;
-        return { face: (h >>> 3) % 4, along: ((h >>> 6) % 100) / 100 - 0.5, phase: ((h >>> 10) % 628) / 100, top: y === 0 ? 0.32 : 0.16 };
-      },
-    },
     dispose() {
       materials.forEach(m => m.dispose());
-      dripMaterials.forEach(m => m.dispose());
       geometry.dispose();
-      drips.dispose();
     },
   };
 }
