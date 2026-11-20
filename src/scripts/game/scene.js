@@ -31,7 +31,7 @@ const DROP = { height: 1.6, duration: 320, layerDelay: 110, cellDelay: 28 };
 // another grid size: the plate springs to its new size first (elastic), then the new cubes drop in
 const GROW = { duration: 700, cubesAfter: 430 };
 // shadow mode, faces in the light beam: turned to the light brighter, turned away darker, the other sides a bit darker
-const BEAM = { lit: 0.42, away: 0.38, side: 0.12 };
+const BEAM = { lit: 0.85, away: 0.62, side: 0.18 };
 const FADE_OUT = 200;
 const ISO_ELEVATION = Math.asin(1 / Math.sqrt(3));   // 35.26° – camera height angle of the iso view
 // direction arrow: base this far outside the plate edge (front/side, level, just above the ground – a tilted arrow

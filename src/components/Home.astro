@@ -20,7 +20,7 @@ const side = 'lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] land:grid-cols-[minm
 
 <div class={`mt-1 grid gap-3 lg:gap-x-10 land:gap-x-8 xl:gap-x-14 ${side}`}>
   <section id="hero" class="relative overflow-hidden rounded-3xl border-2 border-line bg-surface aspect-[4/3] sm:aspect-[2/1] lg:aspect-auto lg:min-h-[30rem] land:aspect-auto land:h-[calc(100dvh-5.5rem)]">
-    <canvas data-hero class="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing" aria-hidden="true"></canvas>
+    <canvas data-hero class="scene-fade absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing" aria-hidden="true"></canvas>
   </section>
 
   {/* claim + game modes: right of the hero (tablet landscape / desktop), below it on phones */}
@@ -60,6 +60,7 @@ const side = 'lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] land:grid-cols-[minm
   import('../scripts/game/scene.js')
     .then(({ createCubeScene }) => {
       const scene = createCubeScene(canvas, { frameFor: { size: 6, maxHeight: 5 } });
+      requestAnimationFrame(() => canvas.classList.add('is-ready'));   // fade in
       let index = Math.floor(Math.random() * LEVELS.length);
       let timer = 0;
       let visible = true;

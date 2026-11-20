@@ -106,3 +106,17 @@ canvas {
   outline: 3px solid var(--color-front);
   outline-offset: 2px;
 }
+
+/* 3D views: invisible until the scene is ready, then they fade in – no "loading" text (three.js loads quickly) */
+canvas.scene-fade {
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+}
+canvas.scene-fade.is-ready {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  canvas.scene-fade {
+    transition: none;
+  }
+}

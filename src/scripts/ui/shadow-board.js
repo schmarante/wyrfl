@@ -43,11 +43,12 @@ export function createShadowBoard(root, t, { onSolved } = {}) {
       hidden.style.cssText = `position:fixed;left:-10000px;top:0;width:${THUMB}px;height:${THUMB}px;pointer-events:none`;
       document.body.append(hidden);
       thumbs = createCubeScene(hidden);
-      $('[data-loading]').hidden = true;
       if (puzzle) present(true);
+      requestAnimationFrame(() => $('[data-canvas]').classList.add('is-ready'));   // fade in, no loading text
     })
     .catch(() => {
       $('[data-loading]').textContent = t('home.noWebgl');
+      $('[data-loading]').hidden = false;
     });
 
   function say(text, tone = 'info') {

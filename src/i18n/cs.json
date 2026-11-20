@@ -88,8 +88,7 @@
   "game": {
     "next": "Další hádanka",
     "back": "Zpět",
-    "play": "Hrát",
-    "loading": "Načítám 3D …"
+    "play": "Hrát"
   },
   "guess": {
     "question": "Jak vypadá stavba {view}?",

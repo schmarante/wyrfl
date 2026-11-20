@@ -88,8 +88,7 @@
   "game": {
     "next": "Następna zagadka",
     "back": "Wstecz",
-    "play": "Graj",
-    "loading": "Wczytywanie 3D …"
+    "play": "Graj"
   },
   "guess": {
     "question": "Jak wygląda budowla {view}?",

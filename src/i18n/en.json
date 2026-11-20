@@ -83,8 +83,7 @@
   "game": {
     "next": "Next puzzle",
     "back": "Back to overview",
-    "play": "Play",
-    "loading": "Loading 3D …"
+    "play": "Play"
   },
   "guess": {
     "question": "What does the building look like {view}?",

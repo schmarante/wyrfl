@@ -83,8 +83,7 @@
   "game": {
     "next": "Nächstes Rätsel",
     "back": "Zur Übersicht",
-    "play": "Spielen",
-    "loading": "3D wird geladen …"
+    "play": "Spielen"
   },
   "guess": {
     "question": "Wie sieht das Gebäude {view} aus?",

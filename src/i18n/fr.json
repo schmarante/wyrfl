@@ -83,8 +83,7 @@
   "game": {
     "next": "Énigme suivante",
     "back": "Retour",
-    "play": "Jouer",
-    "loading": "Chargement de la 3D …"
+    "play": "Jouer"
   },
   "guess": {
     "question": "À quoi ressemble le bâtiment {view} ?",

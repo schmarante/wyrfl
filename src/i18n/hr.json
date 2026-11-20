@@ -88,8 +88,7 @@
   "game": {
     "next": "Sljedeći zadatak",
     "back": "Natrag",
-    "play": "Igraj",
-    "loading": "Učitavam 3D …"
+    "play": "Igraj"
   },
   "guess": {
     "question": "Kako građevina izgleda {view}?",

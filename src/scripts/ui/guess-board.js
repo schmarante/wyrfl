@@ -26,15 +26,16 @@ export function createGuessBoard(root, t, { onSolved } = {}) {
   const sceneReady = import('../game/scene.js')
     .then(({ createCubeScene }) => {
       scene = createCubeScene(canvas, { marker: true, fitContent: true });
-      $('[data-loading]').hidden = true;
       if (puzzle) {
         scene.setStructure(puzzle.structure);
         scene.setViewMarker(puzzle.view);
       }
+      requestAnimationFrame(() => canvas.classList.add('is-ready'));   // fade in, no loading text
       return scene;
     })
     .catch(() => {
       $('[data-loading]').textContent = t('home.noWebgl');
+      $('[data-loading]').hidden = false;
       return null;
     });
 

@@ -37,9 +37,9 @@ const iconButton = 'press grid h-12 w-12 shrink-0 place-items-center rounded-ful
       <span data-count class="rounded-full bg-surface/85 px-3 py-1 text-sm text-muted"></span>
     </div>
     <div class="relative aspect-[6/5] w-full sm:aspect-[4/3] land:aspect-auto land:h-[max(19rem,calc(100dvh-10rem))]">
-      <canvas data-canvas tabindex="0" class="absolute inset-0 h-full w-full cursor-pointer" role="application"
+      <canvas data-canvas tabindex="0" class="scene-fade absolute inset-0 h-full w-full cursor-pointer" role="application"
               aria-label={t('build.tapHint')}></canvas>
-      <p data-loading class="absolute inset-0 grid place-items-center text-muted">{t('game.loading')}</p>
+      <p data-loading hidden class="absolute inset-0 grid place-items-center p-4 text-center text-muted"></p>
     </div>
   </div>
 
@@ -251,9 +251,12 @@ const iconButton = 'press grid h-12 w-12 shrink-0 place-items-center rounded-ful
   loadScene()
     .then(s => {
       scene = s;
-      $('[data-loading]').hidden = true;
       scene.setStructure(built);
       scene.setTool(tool);
+      requestAnimationFrame(() => $('[data-canvas]').classList.add('is-ready'));   // fade in
     })
-    .catch(() => ($('[data-loading]').textContent = t('home.noWebgl')));
+    .catch(() => {
+      $('[data-loading]').textContent = t('home.noWebgl');
+      $('[data-loading]').hidden = false;
+    });
 </script>

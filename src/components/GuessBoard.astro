@@ -49,9 +49,10 @@ const optionGrid = shadow
         </div>
       </div>
       <div class="relative aspect-[5/4] w-full sm:aspect-[16/10] land:aspect-auto land:h-[max(15rem,calc(100dvh-11rem))]">
-        <canvas data-canvas class="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing" role="img"
+        <canvas data-canvas class="scene-fade absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing" role="img"
                 aria-label={t('home.dragHint')} data-i18n-aria="home.dragHint"></canvas>
-        <p data-loading class="absolute inset-0 grid place-items-center text-muted" data-i18n="game.loading">{t('game.loading')}</p>
+        {/* only for the case that 3D can't run (no WebGL) – otherwise the canvas just fades in when ready */}
+        <p data-loading hidden class="absolute inset-0 grid place-items-center p-4 text-center text-muted"></p>
       </div>
     </div>
   </div>
