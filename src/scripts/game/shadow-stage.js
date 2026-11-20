@@ -251,7 +251,7 @@ export function createShadowStage(scene) {
       depthWrite: false,
     });
     const points = new THREE.Points(geometry, material);
-    points.renderOrder = 2;
+    points.renderOrder = -1;   // before the fading cubes (see the beam)
     points.frustumCulled = false;
     dust = { points, specks, near, far };
     moveDust(0);
@@ -365,7 +365,8 @@ export function createShadowStage(scene) {
         side: THREE.DoubleSide,
         }),
     );
-    beam.renderOrder = 1;
+    // drawn before the transparent cubes that fade in: otherwise they would cut cube-shaped holes into the beam
+    beam.renderOrder = -2;
     group.add(floor, slab, face, beam, makeDust(near, far, col), sky);
     // light from the right: the same set-up turned by 90° (wall on the left, sun on the right)
     group.rotation.y = view === 'side' ? Math.PI / 2 : 0;
