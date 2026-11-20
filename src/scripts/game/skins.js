@@ -526,7 +526,7 @@ const JELLY_FRAGMENT = /* glsl */ `
   }`;
 
 function jellySkin() {
-  const geometry = new RoundedBoxGeometry(1, 1, 1, 3, 0.17);
+  const geometry = new RoundedBoxGeometry(1, 1, 1, 2, 0.17);   // 2 segments: round enough, far fewer vertices (AO, beam)
   const materials = JELLY_COLORS.map(color => {
     const material = new THREE.MeshPhysicalMaterial({
       color,

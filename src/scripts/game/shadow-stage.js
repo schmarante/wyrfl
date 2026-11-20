@@ -160,8 +160,8 @@ export function createShadowStage(scene) {
   const group = new THREE.Group();
   let puzzle = null;      // { size, maxHeight, view, shadow }
   let candidate = null;   // shadow grid of the picked building, or null
-  let wallTexture = null;
-  let skyTex = null;
+  let wallTexture = null;   // made once and reused (only its picture changes) – no new GPU texture per puzzle
+  const skyTextures = {};   // sun / moon, drawn once each
   let canvas = null;
   let frame = 0;
   let last = 0;
@@ -403,8 +403,6 @@ export function createShadowStage(scene) {
       child.material?.dispose();
       group.remove(child);
     }
-    wallTexture?.dispose();
-    skyTex?.dispose();
     if (!puzzle) return;
     const { size, maxHeight, view } = puzzle;
     const col = COLORS[theme()];
@@ -416,9 +414,18 @@ export function createShadowStage(scene) {
     const back = -(size / 2 + 0.1) - gap;
 
     draw();
-    wallTexture = new THREE.CanvasTexture(canvas);
-    wallTexture.colorSpace = THREE.SRGBColorSpace;
-    wallTexture.anisotropy = 4;
+    // a texture's GPU memory has a fixed size: new texture only when the grid size (and so the picture size) changes
+    if (wallTexture && (wallTexture.userData.w !== canvas.width || wallTexture.userData.h !== canvas.height)) {
+      wallTexture.dispose();
+      wallTexture = null;
+    }
+    if (!wallTexture) {
+      wallTexture = new THREE.CanvasTexture(canvas);
+      wallTexture.userData = { w: canvas.width, h: canvas.height };
+      wallTexture.colorSpace = THREE.SRGBColorSpace;
+      wallTexture.anisotropy = 4;
+    }
+    wallTexture.needsUpdate = true;
     const slab = new THREE.Mesh(
       new THREE.BoxGeometry(width + 0.08, height + 0.08, 0.12),
       new THREE.MeshLambertMaterial({ color: col.edge }),
@@ -432,8 +439,9 @@ export function createShadowStage(scene) {
 
     // sun / moon on the other side, LEVEL with the building (half its height): only light that comes in horizontally
     // and parallel casts exactly the view as a shadow. Far enough out to be seen beside the building in the tilted view.
-    skyTex = skyTexture(theme() === 'light' ? 'sun' : 'moon');
-    const sky = new THREE.Sprite(new THREE.SpriteMaterial({ map: skyTex, transparent: true, depthWrite: false }));
+    const kind = theme() === 'light' ? 'sun' : 'moon';
+    skyTextures[kind] ??= skyTexture(kind);
+    const sky = new THREE.Sprite(new THREE.SpriteMaterial({ map: skyTextures[kind], transparent: true, depthWrite: false }));
     const sun = 1.3 + size * 0.14;
     sky.scale.set(sun, sun, 1);
     const sunY = maxHeight / 2;
@@ -487,6 +495,7 @@ export function createShadowStage(scene) {
       build();
       // light from the right: the same set-up turned by 90° (wall on the left, sun on the right)
       const angle = view === 'side' ? Math.PI / 2 : 0;
+      if (!before) scene.precompile();   // first puzzle: wall, beam, dust, sun ready once – later puzzles reuse them
       if (!smooth || !before) {
         group.rotation.y = angle;
         group.scale.setScalar(1);
@@ -530,6 +539,8 @@ export function createShadowStage(scene) {
       finishTweens();
       dust.points.geometry.dispose();
       dust.points.material.dispose();
+      wallTexture?.dispose();
+      Object.values(skyTextures).forEach(t => t.dispose());
       scene.detach(room);
       scene.setBeamLight(null);
       puzzle = null;

@@ -40,37 +40,73 @@ export function cubeAO(occupied, x, y, z, positions, normals, out = new Float32A
   return out;
 }
 
+// the six faces of a cube (axis directions) and, per face, the two other axes (a, b)
+export const FACE_AXES = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
+const FACE_AB = FACE_AXES.map(n => [0, 1, 2].filter(i => !n[i]));
+
 /**
- * Like cubeAO, for any cube-like shape (rounded cubes): the four corners of each face as above, every vertex
- * blended between them by its position on the face – smooth, and the same as cubeAO for a plain box.
+ * The four corner values of every face of the cube at (x, y, z), as in cubeAO: 6 faces (FACE_AXES order) × corners
+ * (−a −b, +a −b, −a +b, +a +b). No allocations per vertex – the shaped cubes have many vertices.
+ */
+export function faceCorners(occupied, x, y, z, out = new Float32Array(24)) {
+  const p = [0, 0, 0];
+  const at = (n, a, b, da, db) => {
+    p[0] = x + n[0];
+    p[1] = y + n[1];
+    p[2] = z + n[2];
+    p[a] += da;
+    p[b] += db;
+    return occupied(p[0], p[1], p[2]);
+  };
+  FACE_AXES.forEach((n, f) => {
+    const [a, b] = FACE_AB[f];
+    let i = f * 4;
+    for (const sb of [-1, 1]) {
+      for (const sa of [-1, 1]) {
+        const side1 = at(n, a, b, sa, 0);
+        const side2 = at(n, a, b, 0, sb);
+        out[i++] = AO_LEVELS[side1 && side2 ? 0 : 3 - (side1 + side2 + at(n, a, b, sa, sb))];
+      }
+    }
+  });
+  return out;
+}
+
+/**
+ * Per vertex of a cube-like shape (rounded cubes): its face (FACE_AXES index) and where it sits on that face
+ * (u along a, w along b, 0…1) – worked out once per shape.
  * @param {ArrayLike<number>} normals  per vertex the face's axis (unit vector along x, y or z)
  */
-export function cubeAOSmooth(occupied, x, y, z, positions, normals, out = new Float32Array(positions.length)) {
-  const cell = [x, y, z];
-  const level = (n, a, b, sa, sb) => {
-    const at = (da, db) => {
-      const p = [cell[0] + n[0], cell[1] + n[1], cell[2] + n[2]];
-      p[a] += da;
-      p[b] += db;
-      return occupied(p[0], p[1], p[2]);
-    };
-    const side1 = at(sa, 0);
-    const side2 = at(0, sb);
-    return AO_LEVELS[side1 && side2 ? 0 : 3 - (side1 + side2 + at(sa, sb))];
-  };
-  const cache = new Map();   // per face: its four corner values
-  for (let v = 0; v < positions.length; v += 3) {
-    const n = [Math.round(normals[v]), Math.round(normals[v + 1]), Math.round(normals[v + 2])];
-    const axis = n.findIndex(c => c !== 0);
-    const [a, b] = [0, 1, 2].filter(i => i !== axis);
-    const key = n.join(',');
-    if (!cache.has(key)) cache.set(key, [level(n, a, b, -1, -1), level(n, a, b, 1, -1), level(n, a, b, -1, 1), level(n, a, b, 1, 1)]);
-    const [c00, c10, c01, c11] = cache.get(key);
-    const u = Math.min(1, Math.max(0, positions[v + a] + 0.5));
-    const w = Math.min(1, Math.max(0, positions[v + b] + 0.5));
-    out[v] = out[v + 1] = out[v + 2] = (c00 * (1 - u) + c10 * u) * (1 - w) + (c01 * (1 - u) + c11 * u) * w;
+export function faceMap(positions, normals) {
+  const count = positions.length / 3;
+  const face = new Uint8Array(count);
+  const u = new Float32Array(count);
+  const w = new Float32Array(count);
+  for (let i = 0; i < count; i++) {
+    const v = i * 3;
+    const f = FACE_AXES.findIndex(n => n[0] === Math.round(normals[v]) && n[1] === Math.round(normals[v + 1]) && n[2] === Math.round(normals[v + 2]));
+    const [a, b] = FACE_AB[Math.max(0, f)];
+    face[i] = Math.max(0, f);
+    u[i] = Math.min(1, Math.max(0, positions[v + a] + 0.5));
+    w[i] = Math.min(1, Math.max(0, positions[v + b] + 0.5));
+  }
+  return { face, u, w };
+}
+
+/** AO for a shaped cube: every vertex blended between its face's four corners (same as cubeAO at the corners) */
+export function shapeAO(corners, map, out) {
+  const { face, u, w } = map;
+  for (let i = 0; i < face.length; i++) {
+    const c = face[i] * 4;
+    const value = (corners[c] * (1 - u[i]) + corners[c + 1] * u[i]) * (1 - w[i]) + (corners[c + 2] * (1 - u[i]) + corners[c + 3] * u[i]) * w[i];
+    out[i * 3] = out[i * 3 + 1] = out[i * 3 + 2] = value;
   }
   return out;
+}
+
+/** Like cubeAO, for any cube-like shape (convenience – the scene keeps the map per shape) */
+export function cubeAOSmooth(occupied, x, y, z, positions, normals, out = new Float32Array(positions.length)) {
+  return shapeAO(faceCorners(occupied, x, y, z), faceMap(positions, normals), out);
 }
 
 function boxBlur(src, w, h, r) {

@@ -9,7 +9,7 @@
 // - fake global illumination (lighting.js): voxel AO as vertex colors, soft shadows on and under the plate
 
 import * as THREE from 'three';
-import { cubeAO, cubeAOSmooth, plateShadow, dropShadow } from './lighting.js';
+import { cubeAO, faceCorners, faceMap, shapeAO, plateShadow, dropShadow } from './lighting.js';
 import { createSkin } from './skins.js';
 import { currentSkin } from './skin-pref.js';
 
@@ -238,9 +238,8 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     base.add(shadowPlane, dropPlane);
   }
 
-  /** alpha values (0..1, row 0 = back) → texture for alphaMap (green channel) */
-  function alphaTexture({ alpha, width, height }) {
-    const data = new Uint8Array(width * height * 4);
+  /** alpha values (0..1, row 0 = back) → RGBA bytes for alphaMap (green channel) */
+  function fillAlpha({ alpha, width, height }, data) {
     for (let row = 0; row < height; row++) {
       const src = (height - 1 - row) * width;   // texture row 0 = front (+z) after the plane is laid down
       for (let x = 0; x < width; x++) {
@@ -250,6 +249,11 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
         data[i + 3] = 255;
       }
     }
+    return data;
+  }
+  function alphaTexture(shadow) {
+    const { width, height } = shadow;
+    const data = fillAlpha(shadow, new Uint8Array(width * height * 4));
     const texture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat);
     texture.magFilter = texture.minFilter = THREE.LinearFilter;
     texture.needsUpdate = true;
@@ -268,6 +272,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   }
 
   /** Recomputes AO of all cubes and the plate shadow from the landed cubes. */
+  const corners = new Float32Array(24);   // reused for every shaped cube
   function refreshLighting() {
     lightingDirty = false;
     const landed = new Set();
@@ -280,8 +285,9 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
         if (!mesh.userData.fading) applyStyle(mesh);
       }
       const colors = mesh.geometry.attributes.color;
-      const { pos, nrm, smooth } = mesh.userData.shape;
-      (smooth ? cubeAOSmooth : cubeAO)(occupied, x, y, z, pos, nrm, colors.array);
+      const { pos, nrm, smooth, map } = mesh.userData.shape;
+      if (smooth) shapeAO(faceCorners(occupied, x, y, z, corners), map, colors.array);
+      else cubeAO(occupied, x, y, z, pos, nrm, colors.array);
       mesh.userData.ao = colors.array.slice();
       // in the light beam, a face turned to the light is lit – unless another cube stands in front of it (its shadow)
       mesh.userData.blocked = Boolean(beamLight) && Array.from({ length: size }, (_, i) => i).some(i =>
@@ -290,10 +296,18 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     }
     const plane = base.getObjectByName('plate-shadow');
     if (plane) {
-      shadowTexture.dispose();
-      shadowTexture = alphaTexture(plateShadow(settledHeights(), size + 0.2));
-      plane.material.alphaMap = shadowTexture;
-      plane.material.needsUpdate = true;
+      // same texture, new data: no new GPU texture and no material update for every cube that lands
+      const next = plateShadow(settledHeights(), size + 0.2);
+      const image = shadowTexture.image;
+      if (image.width === next.width && image.height === next.height) {
+        fillAlpha(next, image.data);
+        shadowTexture.needsUpdate = true;
+      } else {
+        shadowTexture.dispose();
+        shadowTexture = alphaTexture(next);
+        plane.material.alphaMap = shadowTexture;
+        plane.material.needsUpdate = true;
+      }
     }
   }
 
@@ -483,7 +497,8 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
         const axis = abs.indexOf(Math.max(...abs));
         axes[v + axis] = Math.sign(n[v + axis]);
       }
-      return { geometry: style.geometry, pos: style.geometry.attributes.position.array, nrm: axes, smooth: true };
+      const pos = style.geometry.attributes.position.array;
+      return { geometry: style.geometry, pos, nrm: axes, smooth: true, map: faceMap(pos, axes) };   // map: once per shape
     })();
     return style.shape;
   }
@@ -846,8 +861,37 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     refreshLighting();
     render();
     startBlinking();
+    warmUp();   // the variants that are not on screen yet
   };
   window.addEventListener('wyrfl-skin', onSkin);
+
+  // ---- shaders ready before they are needed ------------------------------------------------------
+  // A material's shader is compiled the first time something is drawn with it – in the middle of the game that makes
+  // the GPU stutter (first level change, first fading cube …). So once, right after loading (and after a style
+  // change), every material the style can need – each colour / face variant, the closed eyes, the transparent copies
+  // used while fading, the edges – is compiled up front, in the background where the browser supports it.
+  // The stand-ins sit in a scene of their own (with this scene's lights), never in the picture.
+  function warmUp() {
+    const temp = new THREE.Scene();
+    const shape = shapeOf(skin);
+    const seen = new Set();
+    const add = m => mats(m).forEach(mat => mat && seen.add(mat));
+    for (let x = 0; x < 6; x++) for (let y = 0; y < 5; y++) for (let z = 0; z < 6; z++) {
+      for (const topFree of [true, false]) {
+        const m = skin.material(x, y, z, { topFree });
+        add(m);
+        if (skin.blink) add(skin.blink(m));
+      }
+    }
+    const copies = [...seen].map(transparentCopy);
+    const edgeCopy = transparentCopy(edgeOf());
+    for (const m of [...seen, ...copies]) temp.add(new THREE.Mesh(shape.geometry, m));
+    temp.add(new THREE.LineSegments(edgeGeometry, edgeOf()), new THREE.LineSegments(edgeGeometry, edgeCopy), new THREE.Mesh(cubeGeometry, ghostMaterial));
+    const done = () => [...copies, edgeCopy].forEach(m => m.dispose());
+    const compiling = renderer.compileAsync ? renderer.compileAsync(temp, camera, scene) : Promise.resolve(renderer.compile(temp, camera, scene));
+    compiling.then(done, done);
+  }
+  warmUp();
 
   const resize = new ResizeObserver(fitCamera);
   resize.observe(canvas);
@@ -916,6 +960,11 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     setTurn(angle) {
       pivot.rotation.y = angle;
       render();
+    },
+    /** Compiles the shaders of everything in the scene now (in the background where possible) – e.g. the shadow
+     *  mode's stage right after it was set up, so nothing stutters when it is drawn or changed later. */
+    precompile() {
+      return renderer.compileAsync ? renderer.compileAsync(scene, camera) : Promise.resolve(renderer.compile(scene, camera));
     },
     /** Draws the current state again (animated extras like the dust in the shadow mode's light beam). */
     redraw() {
