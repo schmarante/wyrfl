@@ -6,8 +6,9 @@
 // - eyes:    'googly eyes' – only eyes (own design, drawn in the shader); they follow the pointer and blink now and then
 // - galaxy:  every cube a window into the same night sky (shader), glowing cyan outline
 // - city:    skyscrapers – one building per column, a floor per cube; windows glow at night (dark theme)
-// - jelly:   slime – rounded, a little lumpy cubes (own shape: `geometry`), glossy, light scattering inside (faked:
-//            glowing translucent rim + a little body light – no real subsurface scattering, too expensive for old phones)
+// - jelly:   slime – rounded, a little lumpy, watery cubes (own shape: `geometry`): translucent, light scattering
+//            inside faked in the shader (glowing body and rims – no real subsurface scattering, too expensive for old
+//            phones), wet highlight and sky streak
 // - gifts:   six wrapping papers with a ribbon cross
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
@@ -484,7 +485,7 @@ function classicSkin() {
 
 // ---- slime ------------------------------------------------------------------------------------------------------
 
-const JELLY_COLORS = [0x7ee04d, 0x5fd86a, 0x9be04a, 0x4ccf7e];   // a few slime greens, picked per cube
+const JELLY_COLORS = [0x74f05a, 0x45e389, 0xa3f04c, 0x36d9a0];   // a few juicy slime greens, picked per cube
 
 const JELLY_NOISE = /* glsl */ `
   varying vec3 vJellyWorld;
@@ -508,22 +509,29 @@ const JELLY_VERTEX = /* glsl */ `
   vJellyWorld = (modelMatrix * vec4(position, 1.0)).xyz;
   transformed += objectNormal * (jNoise(vJellyWorld * 2.6) - 0.5) * 0.08;`;
 
-// faked subsurface scattering: some light comes out of the body itself, much more at the thin, rounded rims
-// (fresnel – where light shines through), plus a soft sheen; the density varies a little (noise)
+// watery slime: translucent (rims more opaque – fresnel, like real gel), light scattered strongly inside (the body
+// glows, shading gets soft, much light comes through at the thin rims), wet look: sharp white highlight + a bright
+// streak where the rounded edges reflect the sky above
 const JELLY_FRAGMENT = /* glsl */ `
   {
     vec3 jView = isOrthographic ? vec3(0.0, 0.0, 1.0) : normalize(vViewPosition);
-    float jFres = pow(1.0 - clamp(abs(dot(normal, jView)), 0.0, 1.0), 2.2);
-    float jDensity = jNoise(vJellyWorld * 4.0);
+    float jFacing = clamp(abs(dot(normal, jView)), 0.0, 1.0);
+    float jFres = pow(1.0 - jFacing, 2.0);
+    float jDensity = jNoise(vJellyWorld * 3.5);
     vec3 jBody = diffuseColor.rgb;
-    outgoingLight = outgoingLight * (0.88 + 0.2 * jDensity) + jBody * (0.2 + 0.55 * jFres);
-    outgoingLight += vec3(0.85, 1.0, 0.8) * pow(jFres, 5.0) * 0.3;
+    vec3 jGlow = mix(jBody, vec3(0.86, 1.0, 0.62), 0.45);
+    vec3 jScatter = jBody * (0.62 + 0.25 * jDensity) + jGlow * jFres * 1.1;
+    outgoingLight = mix(outgoingLight, jScatter, 0.6) + jGlow * jFres * 0.25;
+    vec3 jReflect = reflect(-jView, normal);
+    outgoingLight += vec3(1.0) * (pow(max(jReflect.y, 0.0), 14.0) * 0.55 + pow(jFres, 5.0) * 0.4);
+    diffuseColor.a *= mix(0.72, 1.0, jFres);
   }`;
 
 function jellySkin() {
   const geometry = new RoundedBoxGeometry(1, 1, 1, 3, 0.17);
   const materials = JELLY_COLORS.map(color => {
-    const material = new THREE.MeshPhongMaterial({ color, vertexColors: true, shininess: 70, specular: 0x5a7a50 });
+    // transparent: cubes behind shimmer through (sorted back to front per cube); depthWrite stays on
+    const material = new THREE.MeshPhongMaterial({ color, vertexColors: true, shininess: 45, specular: 0x9fb39a, transparent: true });
     material.userData.shared = true;
     material.onBeforeCompile = shader => {
       shader.vertexShader = shader.vertexShader
