@@ -22,6 +22,20 @@ const FADE_MS = 280;
 const easeInOut = t => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
 const easeOutElastic = t => (t <= 0 ? 0 : t >= 1 ? 1 : 2 ** (-9 * t) * Math.sin((t * 8 - 0.75) * ((2 * Math.PI) / 3)) + 1);
 
+// Beam and dust count as opaque objects with their own blending, drawn after the cubes (high renderOrder, depth test
+// on – hidden behind solid cubes, laid over what is in front): so they are part of the picture three.js draws for
+// see-through materials (the slime's transmission refracts what is behind it – transparent objects would be missing
+// there and leave dark cube-shaped holes in the light), and cubes fading in (transparent, drawn later) cut no holes.
+const GLOW_BLENDING = {
+  transparent: false,
+  blending: THREE.CustomBlending,
+  blendSrc: THREE.SrcAlphaFactor,
+  blendDst: THREE.OneMinusSrcAlphaFactor,
+  blendSrcAlpha: THREE.OneFactor,
+  blendDstAlpha: THREE.OneMinusSrcAlphaFactor,
+  depthWrite: false,
+};
+
 const theme = () => (document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 const COLORS = {
@@ -299,11 +313,10 @@ export function createShadowStage(scene) {
       uniforms: { color: { value: COLORS[theme()].dust.clone() }, size: { value: 3.2 * Math.min(window.devicePixelRatio || 1, 2) } },
       vertexShader: DUST_VERTEX,
       fragmentShader: DUST_FRAGMENT,
-      transparent: true,
-      depthWrite: false,
+      ...GLOW_BLENDING,
     });
     const points = new THREE.Points(geometry, material);
-    points.renderOrder = -1;   // before the fading cubes (see the beam)
+    points.renderOrder = 11;   // see GLOW_BLENDING
     points.frustumCulled = false;
     room.add(points);
     const specks = Array.from({ length: DUST }, () => ({
@@ -437,13 +450,11 @@ export function createShadowStage(scene) {
         uniforms: { color: { value: col.beam }, opacity: { value: col.beamOpacity } },
         vertexShader: BEAM_VERTEX,
         fragmentShader: BEAM_FRAGMENT,
-        transparent: true,
-        depthWrite: false,
+        ...GLOW_BLENDING,
         side: THREE.DoubleSide,
         }),
     );
-    // drawn before the transparent cubes that fade in: otherwise they would cut cube-shaped holes into the beam
-    beam.renderOrder = -2;
+    beam.renderOrder = 10;   // see GLOW_BLENDING
     group.add(floor, slab, face, beam, sky);
     dust.points.material.uniforms.color.value.copy(col.dust);
     // where dust lives (room): the beam's region from the front and from the right; the beam itself (stage coordinates)
