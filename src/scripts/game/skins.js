@@ -504,10 +504,10 @@ const JELLY_NOISE = /* glsl */ `
       f.z);
   }`;
 
-// lumpy: every vertex pushed in or out a little by a noise over the world position (the same for every viewer)
+// lumpy: every vertex pushed in or out by two layers of noise over the world position (the same for every viewer)
 const JELLY_VERTEX = /* glsl */ `
   vJellyWorld = (modelMatrix * vec4(position, 1.0)).xyz;
-  transformed += objectNormal * (jNoise(vJellyWorld * 2.6) - 0.5) * 0.08;`;
+  transformed += objectNormal * ((jNoise(vJellyWorld * 2.6) - 0.5) * 0.11 + (jNoise(vJellyWorld * 6.3) - 0.5) * 0.04);`;
 
 // watery slime. Light passing through it is refracted and blurred by three's transmission (the scene behind is drawn
 // into a buffer and read back offset and soft – real refraction and blur, an extra pass only while rendering, and
@@ -518,15 +518,30 @@ const JELLY_FRAGMENT = /* glsl */ `
   {
     vec3 jView = isOrthographic ? vec3(0.0, 0.0, 1.0) : normalize(vViewPosition);
     float jFres = pow(1.0 - clamp(abs(dot(normal, jView)), 0.0, 1.0), 2.0);
-    float jDensity = jNoise(vJellyWorld * 3.5);
+    float jDensity = jNoise(vJellyWorld * 3.5) * 0.65 + jNoise(vJellyWorld * 9.0) * 0.35;
     vec3 jGlow = mix(diffuseColor.rgb, vec3(0.86, 1.0, 0.62), 0.45);
-    outgoingLight = outgoingLight * (0.9 + 0.2 * jDensity) + diffuseColor.rgb * 0.16 + jGlow * jFres * 0.65;
+    outgoingLight = outgoingLight * (0.82 + 0.36 * jDensity) + diffuseColor.rgb * 0.16 + jGlow * jFres * 0.65;
     vec3 jReflect = reflect(-jView, normal);
     outgoingLight += vec3(1.0) * pow(max(jReflect.y, 0.0), 14.0) * 0.4;
   }`;
 
+// uneven surface: the gradient of a noise bends the normals (and the clearcoat's), so light, sheen and the glowing
+// rim run irregularly over the faces – not only the outline is lumpy
+const JELLY_BUMP = /* glsl */ `
+  {
+    vec3 jP = vJellyWorld * 4.5;
+    float jE = 0.08;
+    float jN0 = jNoise(jP);
+    vec3 jGrad = vec3(jNoise(jP + vec3(jE, 0.0, 0.0)) - jN0, jNoise(jP + vec3(0.0, jE, 0.0)) - jN0, jNoise(jP + vec3(0.0, 0.0, jE)) - jN0) / jE;
+    vec3 jBend = (viewMatrix * vec4(jGrad, 0.0)).xyz * 0.07;
+    normal = normalize(normal - jBend);
+    #ifdef USE_CLEARCOAT
+      clearcoatNormal = normalize(clearcoatNormal - jBend);
+    #endif
+  }`;
+
 function jellySkin() {
-  const geometry = new RoundedBoxGeometry(1, 1, 1, 2, 0.17);   // 2 segments: round enough, far fewer vertices (AO, beam)
+  const geometry = new RoundedBoxGeometry(1, 1, 1, 2, 0.09);   // edges softly rounded; 2 segments – few vertices (AO, beam)
   const materials = JELLY_COLORS.map(color => {
     const material = new THREE.MeshPhysicalMaterial({
       color,
@@ -548,6 +563,7 @@ function jellySkin() {
         .replace('#include <begin_vertex>', `#include <begin_vertex>${JELLY_VERTEX}`);
       shader.fragmentShader = shader.fragmentShader
         .replace('#include <common>', `#include <common>${JELLY_NOISE}`)
+        .replace('#include <clearcoat_normal_fragment_maps>', `#include <clearcoat_normal_fragment_maps>${JELLY_BUMP}`)
         .replace('#include <opaque_fragment>', `${JELLY_FRAGMENT}\n#include <opaque_fragment>`);
     };
     material.customProgramCacheKey = () => 'wyrfl-jelly';
