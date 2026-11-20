@@ -293,6 +293,8 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       mesh.userData.blocked = Boolean(beamLight) && Array.from({ length: size }, (_, i) => i).some(i =>
         beamLight.axis === 'z' ? i > z && landed.has(`${x},${y},${i}`) : i > x && landed.has(`${i},${y},${z}`));
       applyBeam(mesh);
+      const drip = mesh.userData.drip;
+      if (drip) drip.visible = !mesh.userData.fading && !landed.has(`${x + drip.userData.nx},${y},${z + drip.userData.nz}`);
     }
     const plane = base.getObjectByName('plate-shadow');
     if (plane) {
@@ -463,13 +465,82 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     mesh.material = mesh.userData.base;
     lines.material = edgeOf();
     lines.visible = Boolean(skin.edge);
+    const drip = mesh.userData.drip;
+    if (drip) {
+      drip.material = skin.drip.material(mats(mesh.userData.base)[0]);
+      drip.userData.growFrom = performance.now();   // landed: the strand runs down out of the cube
+      drip.visible = true;
+      startWobble();
+    }
   }
   function startFade(mesh) {
     if (mesh.userData.fading) return;
     mesh.userData.fading = true;
     mesh.material = transparentCopy(mesh.userData.base);
     mesh.children[0].material = transparentCopy(edgeOf());
+    if (mesh.userData.drip) mesh.userData.drip.visible = false;   // comes out once the cube has landed
   }
+
+  // ---- slime drips: a strand running down a side face, ending in a drop that sways ------------------------------
+  // Only styles with `drip` (slime): it picks the cubes (about one in three, by position – stable) and the face. A
+  // drip on a face that touches a neighbour is hidden. They are the only moving part: ~30 frames a second, only while
+  // the picture is on screen and the tab visible, standing still with reduced motion.
+  const DRIP_FACES = [[1, 0], [-1, 0], [0, 1], [0, -1]];   // [x, z] of the side face
+  const DRIP_OUT = 0.07;   // how far the strand's axis sits outside the face
+  function addDrip(mesh) {
+    const { x, y, z } = mesh.userData;
+    const spot = skin.drip?.pick(x, y, z);
+    if (!spot) return;
+    const [nx, nz] = DRIP_FACES[spot.face];
+    const drip = new THREE.Mesh(skin.drip.geometry, skin.drip.material(mats(mesh.userData.base)[0]));
+    // lying on the face (a little outside it – the lumpy surface would swallow it otherwise), somewhere along it,
+    // hanging from its upper half
+    const out = 0.5 + DRIP_OUT;
+    drip.position.set(nx * out + (nz ? spot.along * 0.6 : 0), spot.top, nz * out + (nx ? spot.along * 0.6 : 0));
+    drip.userData = { phase: spot.phase, nx, nz, growFrom: 0 };
+    drip.visible = !mesh.userData.fading;
+    mesh.add(drip);
+    mesh.userData.drip = drip;
+    startWobble();
+  }
+  function removeDrip(mesh) {
+    if (!mesh.userData.drip) return;
+    mesh.remove(mesh.userData.drip);
+    mesh.userData.drip = null;
+  }
+  let wobbleFrame = 0;
+  let wobbleLast = 0;
+  let onScreen = true;
+  function wobble(now) {
+    wobbleFrame = 0;
+    if (!skin.drip || !onScreen || document.hidden || reducedMotion()) return;
+    if (now - wobbleLast >= 33) {
+      wobbleLast = now;
+      const t = now / 1000;
+      for (const mesh of cubeMap.values()) {
+        const drip = mesh.userData.drip;
+        if (!drip?.visible) continue;
+        const { phase, nx } = drip.userData;
+        const grown = Math.min(1, (now - drip.userData.growFrom) / 700);   // 0.7 s to run out after landing
+        const grow = 1 - (1 - grown) ** 2;
+        const stretch = Math.sin(t * 1.7 + phase);
+        drip.scale.set(1 - 0.06 * stretch, (1 + 0.16 * stretch) * grow, 1 - 0.06 * stretch);   // stretches down, gets thinner
+        const sway = 0.07 * Math.sin(t * 1.15 + phase * 1.3);
+        drip.rotation.set(nx ? sway : 0, 0, nx ? 0 : sway);   // swings along the face
+      }
+      render();
+    }
+    wobbleFrame = requestAnimationFrame(wobble);
+  }
+  function startWobble() {
+    if (!wobbleFrame && skin.drip && onScreen && !document.hidden && !reducedMotion()) wobbleFrame = requestAnimationFrame(wobble);
+  }
+  const screenWatch = new IntersectionObserver(([entry]) => {
+    onScreen = entry.isIntersecting;
+    startWobble();
+  });
+  screenWatch.observe(canvas);
+  document.addEventListener('visibilitychange', startWobble);
   function setOpacity(mesh, opacity) {
     mats(mesh.material).forEach(m => (m.opacity = opacity));
     const lines = mesh.children[0].material;
@@ -517,6 +588,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     mesh.userData = { x, y, z, base: skin.material(x, y, z, { topFree: true }), fading: false };
     mesh.geometry = cubeGeometryFor(mesh);
     applyStyle(mesh);
+    addDrip(mesh);
     if (fading) {
       startFade(mesh);
       setOpacity(mesh, 0);
@@ -854,7 +926,9 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
         mesh.geometry.dispose();
         mesh.geometry = cubeGeometryFor(mesh);   // another shape (rounded slime ↔ box)
       }
+      removeDrip(mesh);
       applyStyle(mesh);
+      addDrip(mesh);
     }
     old.dispose();
     eyesLookAtViewer();
@@ -884,6 +958,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       }
     }
     const copies = [...seen].map(transparentCopy);
+    for (const m of skin.drip?.materials ?? []) temp.add(new THREE.Mesh(skin.drip.geometry, m));
     const edgeCopy = transparentCopy(edgeOf());
     for (const m of [...seen, ...copies]) temp.add(new THREE.Mesh(shape.geometry, m));
     temp.add(new THREE.LineSegments(edgeGeometry, edgeOf()), new THREE.LineSegments(edgeGeometry, edgeCopy), new THREE.Mesh(cubeGeometry, ghostMaterial));
@@ -1006,6 +1081,9 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       window.removeEventListener('wyrfl-skin', onSkin);
       clearInterval(blinkTimer);
       cancelAnimationFrame(eyeFrame);
+      cancelAnimationFrame(wobbleFrame);
+      screenWatch.disconnect();
+      document.removeEventListener('visibilitychange', startWobble);
       window.removeEventListener('pointermove', onPagePointer);
       window.removeEventListener('pointerdown', onPagePointer);
       canvas.removeEventListener('pointerdown', onDown);
