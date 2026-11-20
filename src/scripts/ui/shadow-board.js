@@ -31,6 +31,8 @@ export function createShadowBoard(root, t, { onSolved } = {}) {
   let state = null;     // { tries, hint, start, solved }
   let angles = [];       // turn of each answer picture (rad)
   let straight = false; // hint: answers seen from the light
+  let presentedOnce = false;
+  let changing = false;   // between two puzzles (old one fading out) – no picks until the new stage stands
 
   const ready = Promise.all([import('../game/scene.js'), import('../game/shadow-stage.js')])
     .then(([{ createCubeScene }, { createShadowStage }]) => {
@@ -42,7 +44,7 @@ export function createShadowBoard(root, t, { onSolved } = {}) {
       document.body.append(hidden);
       thumbs = createCubeScene(hidden);
       $('[data-loading]').hidden = true;
-      if (puzzle) present();
+      if (puzzle) present(true);
     })
     .catch(() => {
       $('[data-loading]').textContent = t('home.noWebgl');
@@ -80,12 +82,25 @@ export function createShadowBoard(root, t, { onSolved } = {}) {
   }
   const drawThumbs = () => puzzle?.options.forEach((_, i) => drawThumb(i));
 
-  /** puzzle on screen: empty plate, wall with the wanted shadow, sun/moon, answers */
-  function present() {
-    const { size, maxHeight } = puzzle.structure;
-    scene.setStructure({ size, maxHeight, heights: Array.from({ length: size }, () => Array(size).fill(0)) }, { animate: false });
-    stage.set(puzzle);
+  /** puzzle on screen: empty plate, wall with the wanted shadow, sun/moon, answers.
+   *  Next puzzle (not first): the old building and shadow fade out, the camera turns back to the tilted view, the
+   *  stage turns / grows to the new puzzle, the new shadow fades in – no jumps. */
+  let presenting = 0;
+  async function present(first = false) {
+    const token = ++presenting;
+    const current = puzzle;
     drawThumbs();
+    if (!first) {
+      changing = true;
+      stage.fadeOut();
+      await scene.clear();
+      if (token !== presenting) return;
+      changing = false;
+    }
+    const { size, maxHeight } = current.structure;
+    stage.set(current, { smooth: !first });
+    scene.setStructure({ size, maxHeight, heights: Array.from({ length: size }, () => Array(size).fill(0)) }, { animate: !first, keepView: !first });
+    if (!first) scene.lookFrom('iso');
   }
 
   function show(next) {
@@ -141,7 +156,8 @@ export function createShadowBoard(root, t, { onSolved } = {}) {
         return li;
       }),
     );
-    if (scene) present();
+    if (scene) present(!presentedOnce);
+    presentedOnce = true;
   }
 
   /** the picked building stands on the plate (drops in), then its shadow is compared with the wanted one */
@@ -154,7 +170,7 @@ export function createShadowBoard(root, t, { onSolved } = {}) {
   }
 
   function choose(index, button) {
-    if (!puzzle || state.solved) return;
+    if (!puzzle || state.solved || changing) return;
     const option = puzzle.options[index];
     state.tries++;
     place(option);

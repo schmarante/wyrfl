@@ -14,6 +14,13 @@ const PX = 96;          // texture pixels per cube
 const MARGIN = 0.12;    // wall border around the cells (world units)
 const DUST = 70;        // particles in the beam
 const FPS = 30;
+// next puzzle: the old shadow fades out, the stage turns to the new side (and springs to a new grid size together
+// with the plate – same timing and curve as GROW in scene.js), then the new shadow fades in. Nothing pops.
+const TURN_MS = 750;
+const GROW_MS = 700;
+const FADE_MS = 280;
+const easeInOut = t => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
+const easeOutElastic = t => (t <= 0 ? 0 : t >= 1 ? 1 : 2 ** (-9 * t) * Math.sin((t * 8 - 0.75) * ((2 * Math.PI) / 3)) + 1);
 
 const theme = () => (document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -146,6 +153,44 @@ export function createShadowStage(scene) {
   let frame = 0;
   let last = 0;
   let visible = true;
+  let shadowAlpha = 1;
+  let floorMesh = null;   // the strip between plate and wall – faded while the stage turns (it would cross the plate)    // fades the shadow (and the comparison) out and in between puzzles
+  const tweens = new Set();
+  let tweenFrame = 0;
+
+  /** small tween runner for the transitions (with reduced motion: straight to the end) */
+  function animate(duration, step, delay = 0) {
+    if (reducedMotion()) {
+      step(1);
+      scene.redraw();
+      return;
+    }
+    tweens.add({ start: performance.now() + delay, duration, step });
+    tweenFrame ||= requestAnimationFrame(runTweens);
+  }
+  function runTweens(now) {
+    tweenFrame = 0;
+    for (const tw of tweens) {
+      const t = Math.min(1, Math.max(0, (now - tw.start) / tw.duration));
+      tw.step(t);
+      if (t >= 1) tweens.delete(tw);
+    }
+    scene.redraw();
+    if (tweens.size) tweenFrame = requestAnimationFrame(runTweens);
+  }
+  function finishTweens() {
+    for (const tw of tweens) tw.step(1);
+    tweens.clear();
+    cancelAnimationFrame(tweenFrame);
+    tweenFrame = 0;
+  }
+  const fadeShadow = (to, delay = 0) => {
+    const from = shadowAlpha;
+    animate(FADE_MS, t => {
+      shadowAlpha = from + (to - from) * t;
+      draw();
+    }, delay);
+  };
 
   function draw() {
     if (!puzzle) return;
@@ -171,6 +216,7 @@ export function createShadowStage(scene) {
     // canvas shadow of a shape outside the picture – blurred the same way in every browser.
     const off = w + 100;
     g.save();
+    g.globalAlpha = shadowAlpha;
     g.shadowColor = col.shadow;
     g.shadowBlur = PX * 0.16;
     g.shadowOffsetX = off;
@@ -196,6 +242,7 @@ export function createShadowStage(scene) {
     }
     // the picked building's shadow over it
     if (candidate) {
+      g.globalAlpha = shadowAlpha;
       g.strokeStyle = col.accent;
       shadow.forEach((row, r) => row.forEach((wanted, c) => {
         const cast = candidate[r]?.[c];
@@ -227,6 +274,7 @@ export function createShadowStage(scene) {
         }
       }));
     }
+    g.globalAlpha = 1;
     if (wallTexture) wallTexture.needsUpdate = true;
   }
 
@@ -337,7 +385,8 @@ export function createShadowStage(scene) {
     slab.position.set(0, height / 2 - MARGIN, back - 0.07);
     const face = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshBasicMaterial({ map: wallTexture }));
     face.position.set(0, height / 2 - MARGIN, back);
-    const floor = new THREE.Mesh(new THREE.BoxGeometry(size + 0.2, 0.1, gap), new THREE.MeshLambertMaterial({ color: col.floor }));
+    const floor = new THREE.Mesh(new THREE.BoxGeometry(size + 0.2, 0.1, gap), new THREE.MeshLambertMaterial({ color: col.floor, transparent: true }));
+    floorMesh = floor;
     floor.position.set(0, -0.05, -(size / 2 + 0.1) - gap / 2);
 
     // sun / moon on the other side, LEVEL with the building (half its height): only light that comes in horizontally
@@ -368,15 +417,13 @@ export function createShadowStage(scene) {
     // drawn before the transparent cubes that fade in: otherwise they would cut cube-shaped holes into the beam
     beam.renderOrder = -2;
     group.add(floor, slab, face, beam, makeDust(near, far, col), sky);
-    // light from the right: the same set-up turned by 90° (wall on the left, sun on the right)
-    group.rotation.y = view === 'side' ? Math.PI / 2 : 0;
-
     scene.setExtent([
       [height, Math.hypot(width / 2, -back + 0.15)],
       [-0.1, Math.hypot(width / 2, -back + 0.15)],
       [sunY + sun / 2, sunZ + sun / 2],
       [sunY - sun / 2, sunZ + sun / 2],
-    ]);
+    ], { refit: false });
+    scene.setBeamLight({ axis: view === 'side' ? 'x' : 'z', top: maxHeight });
     run();
   }
 
@@ -388,12 +435,42 @@ export function createShadowStage(scene) {
   scene.attach(group);
 
   return {
-    /** a new puzzle: wall, wanted shadow, sun/moon, beam */
-    set({ structure, view, shadow }) {
+    /** a new puzzle: wall, wanted shadow, sun/moon, beam. animate: turn / grow from the previous one, fade in. */
+    set({ structure, view, shadow }, { smooth = false } = {}) {
+      finishTweens();
+      const before = puzzle;
       puzzle = { size: structure.size, maxHeight: structure.maxHeight, view, shadow };
       candidate = null;
       build();
-      scene.renderNow();
+      // light from the right: the same set-up turned by 90° (wall on the left, sun on the right)
+      const angle = view === 'side' ? Math.PI / 2 : 0;
+      if (!smooth || !before) {
+        group.rotation.y = angle;
+        group.scale.setScalar(1);
+        shadowAlpha = 1;
+        draw();
+        scene.renderNow();
+        return;
+      }
+      const fromAngle = group.rotation.y;
+      if (fromAngle !== angle) {
+        animate(TURN_MS, t => {
+          group.rotation.y = fromAngle + (angle - fromAngle) * easeInOut(t);
+          if (floorMesh) floorMesh.material.opacity = 1 - Math.sin(Math.PI * t);
+        });
+      }
+      if (before.size !== puzzle.size) {
+        const ratio = (before.size + 0.2) / (puzzle.size + 0.2);
+        group.scale.setScalar(ratio);
+        animate(GROW_MS, t => group.scale.setScalar(ratio + (1 - ratio) * easeOutElastic(t)));
+      }
+      shadowAlpha = 0;
+      draw();
+      fadeShadow(1, Math.min(TURN_MS, GROW_MS) * 0.6);
+    },
+    /** the old puzzle goes: its shadow (and the comparison) fades out */
+    fadeOut() {
+      if (puzzle) fadeShadow(0);
     },
     /** the shadow of the picked building over the wanted one (null: only the wanted one) */
     compare(grid) {
@@ -406,6 +483,8 @@ export function createShadowStage(scene) {
       document.removeEventListener('visibilitychange', run);
       watch.disconnect();
       cancelAnimationFrame(frame);
+      finishTweens();
+      scene.setBeamLight(null);
       puzzle = null;
       build();
       scene.detach(group);

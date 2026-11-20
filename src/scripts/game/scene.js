@@ -30,6 +30,8 @@ const CAMERA_DISTANCE = 30;
 const DROP = { height: 1.6, duration: 320, layerDelay: 110, cellDelay: 28 };
 // another grid size: the plate springs to its new size first (elastic), then the new cubes drop in
 const GROW = { duration: 700, cubesAfter: 430 };
+// shadow mode, faces in the light beam: turned to the light brighter, turned away darker, the other sides a bit darker
+const BEAM = { lit: 0.42, away: 0.38, side: 0.12 };
 const FADE_OUT = 200;
 const ISO_ELEVATION = Math.asin(1 / Math.sqrt(3));   // 35.26° – camera height angle of the iso view
 // direction arrow: base this far outside the plate edge (front/side, level, just above the ground – a tilted arrow
@@ -115,6 +117,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   let dropTexture = null;
   let lightingDirty = false;
   let contentHeights = null;   // fitContent: the building to frame
+  let beamLight = null;        // shadow mode: { axis: 'x' | 'z', top } – faces turned to the light get brighter
   let extraPoints = [];        // [y, d] – more things to keep in the frame (shadow mode: wall, sun) – see setExtent
   let tool = 'add';
   let markerView = null;
@@ -278,7 +281,11 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       }
       const colors = mesh.geometry.attributes.color;
       cubeAO(occupied, x, y, z, BOX_POS, BOX_NRM, colors.array);
-      colors.needsUpdate = true;
+      mesh.userData.ao = colors.array.slice();
+      // in the light beam, a face turned to the light is lit – unless another cube stands in front of it (its shadow)
+      mesh.userData.blocked = Boolean(beamLight) && Array.from({ length: size }, (_, i) => i).some(i =>
+        beamLight.axis === 'z' ? i > z && landed.has(`${x},${y},${i}`) : i > x && landed.has(`${i},${y},${z}`));
+      applyBeam(mesh);
     }
     const plane = base.getObjectByName('plate-shadow');
     if (plane) {
@@ -287,6 +294,32 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       plane.material.alphaMap = shadowTexture;
       plane.material.needsUpdate = true;
     }
+  }
+
+  /** Light beam on the cube faces (vertex colours on top of the AO, may go above 1): the face turned to the light gets
+   *  brighter (unless another cube stands in front of it), the one turned away darker, the other side faces a little
+   *  darker – only as far as the cube is inside the beam, so a falling cube lights up while it drops into it. */
+  function applyBeam(mesh) {
+    const ao = mesh.userData.ao;
+    if (!ao) return;
+    const colors = mesh.geometry.attributes.color;
+    let inside = 0;
+    if (beamLight) {
+      const c = mesh.position.y;   // centre of the cube
+      inside = Math.max(0, Math.min(1, Math.min(c + 0.5, beamLight.top) - Math.max(c - 0.5, 0)));
+    }
+    const axis = beamLight?.axis === 'x' ? 0 : 2;
+    const lit = 1 + (mesh.userData.blocked ? 0 : BEAM.lit) * inside;
+    const away = 1 - BEAM.away * inside;
+    const side = 1 - BEAM.side * inside;
+    for (let v = 0; v < ao.length; v += 3) {
+      const facing = BOX_NRM[v + axis];
+      const k = !inside ? 1 : facing > 0.5 ? lit : facing < -0.5 ? away : Math.abs(BOX_NRM[v + 1]) > 0.5 ? 1 : side;
+      colors.array[v] = ao[v] * k;
+      colors.array[v + 1] = ao[v + 1] * k;
+      colors.array[v + 2] = ao[v + 2] * k;
+    }
+    colors.needsUpdate = true;
   }
 
   /** Grid size and height limit: rebuilds the base plate and fits the camera. */
@@ -505,6 +538,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
           const below = cubeMap.get(`${x},${y - 1},${z}`);
           const floor = below ? below.position.y + 1 : yEnd;
           mesh.position.y = Math.max(floor, yEnd + DROP.height * (1 - easeOutCubic(t)));
+          if (beamLight) applyBeam(mesh);   // lights up while it drops into the beam
           setOpacity(mesh, Math.min(1, t * 1.6));
         },
         done: () => {
@@ -831,10 +865,17 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       pivot.remove(object);
       render();
     },
-    /** More points to keep in the frame while turning: [height, horizontal distance from the centre][] */
-    setExtent(points) {
+    /** More points to keep in the frame while turning: [height, horizontal distance from the centre][].
+     *  refit: false – only remember them (the next setStructure eases the frame over, e.g. when the grid grows). */
+    setExtent(points, { refit = true } = {}) {
       extraPoints = points;
-      frame3d();
+      if (refit) frame3d();
+    },
+    /** Shadow mode: light beam along +z ('z', from the front) or +x ('x', from the right) up to `top`; null: none. */
+    setBeamLight(light) {
+      beamLight = light;
+      refreshLighting();
+      render();
     },
     /** Turns the building to an angle (rad) at once – still pictures of the options in the shadow mode. */
     setTurn(angle) {
