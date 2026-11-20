@@ -18,6 +18,10 @@
       "title": "Guess the view",
       "text": "Which picture shows the building from the front? Find the right one out of six."
     },
+    "shadow": {
+      "title": "Shadows",
+      "text": "The sun or the moon casts a shadow on the wall. Which of the six buildings was it?"
+    },
     "build": {
       "title": "Build it",
       "text": "You get three blueprints – place the cubes so everything fits."
@@ -100,6 +104,21 @@
       "mirrorTop": "That’s mirrored – left and right are swapped.",
       "flipped": "Front and back are swapped. Seen from the top, the front is always at the bottom.",
       "nearMiss": "So close! Take another look at the marked squares."
+    }
+  },
+  "shadow": {
+    "question": "Which building casts this shadow?",
+    "correct": "Exactly! This building casts exactly this shadow.",
+    "option": "Building {n}",
+    "turn": "Turn the buildings",
+    "hintDone": "Look: this is how the buildings look from the light. Which one fits the shadow?",
+    "why": {
+      "mirroredLR": "Mirrored – left and right are swapped.",
+      "mirroredFB": "Mirrored – front and back are swapped.",
+      "fromSide": "It casts this shadow when the light comes from the side – not from the front.",
+      "fromFront": "It casts this shadow when the light comes from the front – not from the side.",
+      "heights": "The ground plan fits, but the towers have different heights.",
+      "nearMiss": "Almost! Look at the marked squares: one cube too many or too few."
     }
   },
   "build": {

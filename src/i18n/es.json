@@ -18,6 +18,10 @@
       "title": "Adivina la vista",
       "text": "¿Qué imagen muestra el edificio desde delante? Encuentra la correcta entre seis."
     },
+    "shadow": {
+      "title": "Sombras",
+      "text": "El sol o la luna proyecta una sombra en la pared. ¿Cuál de los seis edificios era?"
+    },
     "build": {
       "title": "Constrúyelo",
       "text": "Ves tres planos: coloca los cubos para que todo encaje."
@@ -100,6 +104,21 @@
       "mirrorTop": "Está reflejado: la izquierda y la derecha están cambiadas.",
       "flipped": "Delante y detrás están cambiados. Visto desde arriba, la parte delantera siempre está abajo.",
       "nearMiss": "¡Casi! Mira otra vez las casillas marcadas."
+    }
+  },
+  "shadow": {
+    "question": "¿Qué edificio proyecta esta sombra?",
+    "correct": "¡Exacto! Este edificio proyecta justo esta sombra.",
+    "option": "Edificio {n}",
+    "turn": "Girar los edificios",
+    "hintDone": "Mira: así se ven los edificios desde la luz. ¿Cuál encaja con la sombra?",
+    "why": {
+      "mirroredLR": "Reflejado: izquierda y derecha están cambiadas.",
+      "mirroredFB": "Reflejado: delante y detrás están cambiados.",
+      "fromSide": "Proyecta esta sombra cuando la luz viene de un lado, no de delante.",
+      "fromFront": "Proyecta esta sombra cuando la luz viene de delante, no de un lado.",
+      "heights": "La planta coincide, pero las torres tienen otra altura.",
+      "nearMiss": "¡Casi! Mira las casillas marcadas: sobra o falta un cubo."
     }
   },
   "build": {

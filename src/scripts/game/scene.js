@@ -28,6 +28,8 @@ const DRAG_THRESHOLD = 6;     // px – below this a pointer gesture counts as a
 const LONG_PRESS = 450;       // ms – touch held this long removes a cube
 const CAMERA_DISTANCE = 30;
 const DROP = { height: 1.6, duration: 320, layerDelay: 110, cellDelay: 28 };
+// another grid size: the plate springs to its new size first (elastic), then the new cubes drop in
+const GROW = { duration: 700, cubesAfter: 430 };
 const FADE_OUT = 200;
 const ISO_ELEVATION = Math.asin(1 / Math.sqrt(3));   // 35.26° – camera height angle of the iso view
 // direction arrow: base this far outside the plate edge (front/side, level, just above the ground – a tilted arrow
@@ -44,7 +46,8 @@ const CAMERA_VIEWS = {
 
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 const easeInOut = t => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
-const easeOutCubic = t => 1 - (1 - t) ** 3;   // no overshoot: a cube never dips below its place (into the one below)
+const easeOutCubic = t => 1 - (1 - t) ** 3;
+const easeOutElastic = t => (t <= 0 ? 0 : t >= 1 ? 1 : 2 ** (-9 * t) * Math.sin((t * 8 - 0.75) * ((2 * Math.PI) / 3)) + 1);   // no overshoot: a cube never dips below its place (into the one below)
 const theme = () => (document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
 
 /**
@@ -112,6 +115,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   let dropTexture = null;
   let lightingDirty = false;
   let contentHeights = null;   // fitContent: the building to frame
+  let extraPoints = [];        // [y, d] – more things to keep in the frame (shadow mode: wall, sun) – see setExtent
   let tool = 'add';
   let markerView = null;
   let halfWidth = 1;    // half extents the camera has to show (rotation-safe around the vertical axis)
@@ -295,13 +299,41 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     eyesLookAtViewer();
   }
 
+  /** The plate springs from the old grid size to the new one (elastic), the camera frame follows smoothly – no jump
+   *  when the next building is bigger or smaller. */
+  function growPlate(from) {
+    const ratio = (from.size + 0.2) / (size + 0.2);
+    const to = { halfWidth, halfHeight, y: target.y };
+    const lerp = (a, b, k) => a + (b - a) * k;
+    base.scale.set(ratio, 1, ratio);
+    addTween({
+      start: performance.now(), duration: GROW.duration,
+      step: t => {
+        const s = lerp(ratio, 1, easeOutElastic(t));
+        base.scale.set(s, 1, s);
+        const k = easeOutCubic(Math.min(1, t * 1.6));
+        halfWidth = lerp(from.halfWidth, to.halfWidth, k);
+        halfHeight = lerp(from.halfHeight, to.halfHeight, k);
+        target.y = lerp(from.y, to.y, k);
+        fitCamera();
+      },
+      done: () => {
+        base.scale.set(1, 1, 1);
+        halfWidth = to.halfWidth;
+        halfHeight = to.halfHeight;
+        target.y = to.y;
+        fitCamera();
+      },
+    });
+  }
+
   /** Tight camera frame for plate + building (+ arrow): horizontally the circle the plate sweeps when turned,
    *  vertically the iso projection of that cylinder – much less empty space than a bounding sphere. */
   function frame3d() {
     const side = markerView === 'front' || markerView === 'side';
     const fs = frameFor?.size ?? size;
     const fh = frameFor?.maxHeight ?? maxHeight;
-    const reach = Math.max((fs / 2 + 0.25) * Math.SQRT2, side ? fs / 2 + ARROW.gap + 0.15 : 0);
+    const reach = Math.max((fs / 2 + 0.25) * Math.SQRT2, side ? fs / 2 + ARROW.gap + 0.15 : 0, ...extraPoints.map(([, d]) => d));
     halfWidth = reach;
 
     // vertical: every relevant point at height y and horizontal distance d from the centre can appear anywhere between
@@ -335,6 +367,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     }));
     if (side) point(ARROW.height + 0.35, fs / 2 + ARROW.gap + 0.1);
     if (markerView === 'top') point(markerTop() + 0.1, 0.4);
+    for (const [y, d] of extraPoints) point(y, d);
     const centre = (up + down) / 2 / cos;
     target.set(0, centre, 0);
     // also enough for the straight views: front/side (heights around the centre), top (the whole plate)
@@ -417,7 +450,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
    * Cube heights (heights[z][x]). Only the difference is animated: new cubes drop in, removed ones fade out.
    * @param {{ stagger?: boolean, animate?: boolean }} [opts]  stagger: a whole building assembles layer by layer
    */
-  function setHeights(newHeights, { stagger = false, animate = true } = {}) {
+  function setHeights(newHeights, { stagger = false, animate = true, delay: after = 0 } = {}) {
     heights = newHeights.map(row => [...row]);
     const motion = animate && !reducedMotion();
     const wanted = new Set();
@@ -463,7 +496,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       cubes.add(mesh);
       if (!motion) continue;
       const yEnd = mesh.position.y;
-      const delay = stagger ? y * DROP.layerDelay + (x + z) * DROP.cellDelay : 0;
+      const delay = after + (stagger ? y * DROP.layerDelay + (x + z) * DROP.cellDelay : 0);
       mesh.position.y = yEnd + DROP.height;
       addTween(mesh.userData.tween = {
         start: now + delay, duration: DROP.duration,
@@ -507,8 +540,9 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
 
   // ---- camera moves --------------------------------------------------------------------------
 
-  /** Moves the camera straight onto a view ('front' | 'side' | 'top') or back to 'iso'. Resolves when done. */
-  function lookFrom(view) {
+  /** Moves the camera straight onto a view ('front' | 'side' | 'top') or back to 'iso'. Resolves when done.
+   *  instant: no animation (still pictures). */
+  function lookFrom(view, { instant = false } = {}) {
     const to = CAMERA_VIEWS[view] ?? CAMERA_VIEWS.iso;
     currentView = view in CAMERA_VIEWS ? view : 'iso';
     if (cameraAnimation) cancelAnimationFrame(cameraAnimation.frame);
@@ -524,7 +558,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       applyCamera();
       render();
     };
-    if (reducedMotion()) {
+    if (instant || reducedMotion()) {
       finish();
       return Promise.resolve();
     }
@@ -771,8 +805,11 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
         pivot.rotation.y = 0;
       }
       contentHeights = structure.heights.map(row => [...row]);
+      const grow = animate && !reducedMotion() && plate && size !== structure.size;
+      const from = { size, halfWidth, halfHeight, y: target.y };
       setGrid(structure.size, structure.maxHeight);
-      setHeights(structure.heights, { stagger: true, animate });
+      if (grow) growPlate(from);
+      setHeights(structure.heights, { stagger: true, animate, delay: grow ? GROW.cubesAfter : 0 });
     },
     /** Fades all cubes out (they rise a little); resolves when they are gone. */
     clear() {
@@ -785,6 +822,33 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       if (speed && !frame) frame = requestAnimationFrame(loop);
     },
     lookFrom,
+    /** Adds an object that turns with the building (shadow mode: wall, sun); the caller owns and disposes it. */
+    attach(object) {
+      pivot.add(object);
+      render();
+    },
+    detach(object) {
+      pivot.remove(object);
+      render();
+    },
+    /** More points to keep in the frame while turning: [height, horizontal distance from the centre][] */
+    setExtent(points) {
+      extraPoints = points;
+      frame3d();
+    },
+    /** Turns the building to an angle (rad) at once – still pictures of the options in the shadow mode. */
+    setTurn(angle) {
+      pivot.rotation.y = angle;
+      render();
+    },
+    /** Draws now (the canvas can be copied right after, e.g. into a still picture). */
+    renderNow() {
+      fitCamera();
+      render();
+    },
+    get canvas() {
+      return canvas;
+    },
     get view() {
       return currentView;
     },

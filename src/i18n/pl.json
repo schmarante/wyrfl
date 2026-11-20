@@ -23,6 +23,10 @@
       "title": "Zgadnij widok",
       "text": "Który obrazek pokazuje budowlę z przodu? Znajdź właściwy spośród sześciu."
     },
+    "shadow": {
+      "title": "Cienie",
+      "text": "Słońce albo księżyc rzuca cień na ścianę. Który z sześciu budynków to był?"
+    },
     "build": {
       "title": "Zbuduj",
       "text": "Widzisz trzy plany – ustaw klocki tak, żeby wszystko pasowało."
@@ -105,6 +109,21 @@
       "mirrorTop": "To jest lustrzane odbicie – lewa i prawa strona są zamienione.",
       "flipped": "Przód i tył są zamienione. Patrząc z góry, przód jest zawsze na dole.",
       "nearMiss": "Prawie! Przyjrzyj się jeszcze raz zaznaczonym polom."
+    }
+  },
+  "shadow": {
+    "question": "Który budynek rzuca ten cień?",
+    "correct": "Dokładnie! Ten budynek rzuca właśnie ten cień.",
+    "option": "Budynek {n}",
+    "turn": "Obróć budynki",
+    "hintDone": "Zobacz: tak wyglądają budynki od strony światła. Który pasuje do cienia?",
+    "why": {
+      "mirroredLR": "Odbicie lustrzane – lewa i prawa strona są zamienione.",
+      "mirroredFB": "Odbicie lustrzane – przód i tył są zamienione.",
+      "fromSide": "Taki cień rzuca, gdy światło pada z boku – nie z przodu.",
+      "fromFront": "Taki cień rzuca, gdy światło pada z przodu – nie z boku.",
+      "heights": "Podstawa się zgadza, ale wieże mają inną wysokość.",
+      "nearMiss": "Prawie! Spójrz na zaznaczone pola: o jedną kostkę za dużo albo za mało."
     }
   },
   "build": {

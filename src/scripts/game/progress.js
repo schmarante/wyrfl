@@ -83,7 +83,7 @@ export const debugUnlockAll = () => import.meta.env.PUBLIC_DEBUG === 'true' && s
 
 export function unlockEverything(skins) {
   const data = load();
-  data.solved = Object.fromEntries(MODES.map(mode => [mode, Object.fromEntries(LEVELS.map(level => [level, UNLOCK_AFTER]))]));
+  data.solved = Object.fromEntries([...MODES, 'shadow'].map(mode => [mode, Object.fromEntries(LEVELS.map(level => [level, UNLOCK_AFTER]))]));
   data.duelWins = Math.max(1, data.duelWins ?? 0);
   data.skinsSeen = skins;   // no celebration for each of them
   save(data);

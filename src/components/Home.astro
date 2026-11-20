@@ -11,8 +11,9 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 const modes = [
   { id: 'guess', icon: 'eye', tint: 'bg-cube/15 text-cube' },
-  { id: 'build', icon: 'build', tint: 'bg-front/20 text-front' },
-  { id: 'duel', icon: 'duel', tint: 'bg-cube/15 text-cube' },
+  { id: 'shadow', icon: 'sun', tint: 'bg-front/20 text-front' },
+  { id: 'build', icon: 'build', tint: 'bg-cube/15 text-cube' },
+  { id: 'duel', icon: 'duel', tint: 'bg-front/20 text-front' },
 ] as const;
 const side = 'lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] land:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]';
 ---
@@ -27,7 +28,7 @@ const side = 'lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] land:grid-cols-[minm
   <h1 class="px-1 text-2xl font-extrabold leading-tight sm:text-3xl lg:mb-2 lg:text-4xl land:mb-2">
     {t('home.claim')}
   </h1>
-  <ul class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 land:grid-cols-1">
+  <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 land:grid-cols-1">
     {modes.map(mode => (
       <li>
         <a href={localePath(locale, mode.id)}

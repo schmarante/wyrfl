@@ -10,16 +10,24 @@ import Icon from './Icon.astro';
 
 interface Props {
   locale: string;
+  shadow?: boolean;   // shadow mode: four big building answers (2 × 2), 3D view and answers 50 / 50 in landscape
 }
 const t = useTranslations(Astro.props.locale);
+const { shadow = false } = Astro.props;
 const overlayButton = 'press pointer-events-auto grid h-10 w-10 place-items-center rounded-full bg-surface/85 text-text shadow-sm backdrop-blur hover:bg-line disabled:cursor-not-allowed disabled:opacity-35';
 // --opt = one option's width in landscape: three rows of options + feedback + button have to fit under the header
 // landscape grid: 3D view on the left over all rows; right: question, options, feedback (+ slot)
-const layout = [
-  'land:grid land:grid-cols-[minmax(0,1fr)_auto] land:grid-rows-[auto_auto_1fr] land:gap-x-5',
-  'land:[--opt:clamp(4.5rem,calc((100dvh-24rem)/3),11rem)]',
-].join(' ');
-const rightColumn = 'land:col-start-2 land:w-[calc(var(--opt)*2+0.75rem)]';
+const layout = shadow
+  ? 'land:grid land:grid-cols-2 land:grid-rows-[auto_auto_1fr] land:gap-x-5'
+  : [
+    'land:grid land:grid-cols-[minmax(0,1fr)_auto] land:grid-rows-[auto_auto_1fr] land:gap-x-5',
+    'land:[--opt:clamp(4.5rem,calc((100dvh-24rem)/3),11rem)]',
+  ].join(' ');
+const rightColumn = shadow ? 'land:col-start-2 land:min-w-0' : 'land:col-start-2 land:w-[calc(var(--opt)*2+0.75rem)]';
+// shadow mode: two rows of square answers must fit beside the 3D view – their width comes from the screen height
+const optionGrid = shadow
+  ? 'grid-cols-2 gap-3 land:w-full land:max-w-[calc(100dvh-19rem)]'
+  : 'grid-cols-3 gap-2 sm:gap-3 land:grid-cols-2';
 ---
 
 <div data-guess-board class={layout}>
@@ -48,7 +56,7 @@ const rightColumn = 'land:col-start-2 land:w-[calc(var(--opt)*2+0.75rem)]';
     </div>
   </div>
 
-  <ul data-options class={`mt-3 grid grid-cols-3 gap-2 sm:gap-3 land:mt-0 land:row-start-2 land:grid-cols-2 land:content-start ${rightColumn}`}></ul>
+  <ul data-options class={`mt-3 grid ${optionGrid} land:mt-0 land:row-start-2 land:content-start ${rightColumn}`}></ul>
 
   <div class={`land:row-start-3 ${rightColumn}`}>
     <p data-feedback class="mt-3 min-h-6 px-1 text-base font-semibold land:text-sm" aria-live="polite"></p>

@@ -1,0 +1,58 @@
+---
+// Shadow mode (practice): the sun or the moon casts a building's shadow on the wall – which of six buildings is it?
+// Same playing field as the View Guesser (GuessBoard.astro, `shadow`: four answers, 50 / 50 in landscape), logic in
+// src/scripts/ui/shadow-board.js, puzzles in src/scripts/game/shadow.js.
+import { useTranslations } from '../i18n/index.js';
+import GuessBoard from './GuessBoard.astro';
+
+interface Props {
+  locale: string;
+}
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<section id="shadow" class="rounded-3xl border-2 border-line bg-surface p-3 sm:p-5">
+  <GuessBoard locale={locale} shadow>
+    <button type="button" data-next hidden
+            class="press mt-2 min-h-12 w-full rounded-full bg-cube px-6 text-lg font-bold text-on-cube hover:brightness-110">
+      {t('game.next')} →
+    </button>
+  </GuessBoard>
+</section>
+
+<script>
+  import { useTranslations } from '../i18n/index.js';
+  import { createShadowPuzzle } from '../scripts/game/shadow.js';
+  import { recordSolved } from '../scripts/game/progress.js';
+  import { createShadowBoard } from '../scripts/ui/shadow-board.js';
+  import { createLevelPicker, practiceSeed } from '../scripts/ui/level-picker.js';
+  import { levelUp } from '../scripts/ui/level-up.js';
+
+  const MODE = 'shadow';
+  const t = useTranslations(document.documentElement.lang);
+  const root = document.getElementById('shadow')!;
+  const nextButton = root.querySelector<HTMLButtonElement>('[data-next]')!;
+
+  const board = createShadowBoard(root.querySelector('[data-guess-board]')!, t, {
+    onSolved() {
+      const result = recordSolved(MODE, picker.level);
+      picker.refresh();
+      const showNext = () => {
+        nextButton.hidden = false;
+        nextButton.focus({ preventScroll: true });
+      };
+      if (result.completed) levelUp(t, result, picker).then(moved => moved || showNext());
+      else showNext();
+    },
+  });
+  const picker = createLevelPicker(root.querySelector('[data-level-picker]')!, MODE, t, () => newPuzzle());
+
+  function newPuzzle() {
+    nextButton.hidden = true;
+    board.show(createShadowPuzzle(practiceSeed(), picker.level));
+  }
+
+  nextButton.addEventListener('click', newPuzzle);
+  newPuzzle();
+</script>

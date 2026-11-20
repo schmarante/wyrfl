@@ -23,6 +23,10 @@
       "title": "Uhodni pohled",
       "text": "Který obrázek ukazuje stavbu zepředu? Najdi ten správný ze šesti."
     },
+    "shadow": {
+      "title": "Stíny",
+      "text": "Slunce nebo měsíc vrhá stín na zeď. Která ze šesti budov to byla?"
+    },
     "build": {
       "title": "Postav to",
       "text": "Vidíš tři plány – rozmísti kostky tak, aby všechno sedělo."
@@ -105,6 +109,21 @@
       "mirrorTop": "Tohle je zrcadlově – levá a pravá strana jsou prohozené.",
       "flipped": "Předek a zadek jsou prohozené. Při pohledu shora je předek vždycky dole.",
       "nearMiss": "Těsně vedle! Podívej se ještě jednou na označená políčka."
+    }
+  },
+  "shadow": {
+    "question": "Která budova vrhá tento stín?",
+    "correct": "Přesně! Tahle budova vrhá přesně tento stín.",
+    "option": "Budova {n}",
+    "turn": "Otočit budovy",
+    "hintDone": "Podívej: takhle vypadají budovy ze strany světla. Která sedí ke stínu?",
+    "why": {
+      "mirroredLR": "Zrcadlově – vlevo a vpravo jsou prohozené.",
+      "mirroredFB": "Zrcadlově – vpředu a vzadu jsou prohozené.",
+      "fromSide": "Tento stín vrhá, když světlo svítí z boku – ne zepředu.",
+      "fromFront": "Tento stín vrhá, když světlo svítí zepředu – ne z boku.",
+      "heights": "Půdorys sedí, ale věže mají jinou výšku.",
+      "nearMiss": "Skoro! Podívej se na označená pole: jedna kostka navíc nebo chybí."
     }
   },
   "build": {

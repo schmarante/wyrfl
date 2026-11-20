@@ -24,15 +24,17 @@ export const OTHER_LOCALES = LANGUAGES.map(l => l.code).filter(c => c !== DEFAUL
 
 /** Pages by id ('' = home) and their URL slug per language – ASCII only, so links survive messengers and copy & paste.
  *  The old English slugs (/guess/, /fr/guess/ …) redirect to these (src/pages/guess/…, src/pages/[lang]/[slug]/). */
-export const PAGES = ['guess', 'build', 'duel', 'about'];
+export const PAGES = ['guess', 'shadow', 'build', 'duel', 'about'];
+// pages that had English slugs before the slugs were translated – only these get redirect pages
+const LEGACY_PAGES = ['guess', 'build', 'duel', 'about'];
 export const SLUGS = {
-  de: { guess: 'raten', build: 'bauen', duel: 'duell', about: 'ueber' },
-  en: { guess: 'guess', build: 'build', duel: 'duel', about: 'about' },
-  fr: { guess: 'deviner', build: 'construire', duel: 'duel', about: 'a-propos' },
-  es: { guess: 'adivinar', build: 'construir', duel: 'duelo', about: 'acerca-de' },
-  hr: { guess: 'pogodi', build: 'sagradi', duel: 'dvoboj', about: 'o-igri' },
-  pl: { guess: 'zgadnij', build: 'zbuduj', duel: 'pojedynek', about: 'o-grze' },
-  cs: { guess: 'uhodni', build: 'postav', duel: 'souboj', about: 'o-hre' },
+  de: { guess: 'raten', shadow: 'schatten', build: 'bauen', duel: 'duell', about: 'ueber' },
+  en: { guess: 'guess', shadow: 'shadows', build: 'build', duel: 'duel', about: 'about' },
+  fr: { guess: 'deviner', shadow: 'ombres', build: 'construire', duel: 'duel', about: 'a-propos' },
+  es: { guess: 'adivinar', shadow: 'sombras', build: 'construir', duel: 'duelo', about: 'acerca-de' },
+  hr: { guess: 'pogodi', shadow: 'sjene', build: 'sagradi', duel: 'dvoboj', about: 'o-igri' },
+  pl: { guess: 'zgadnij', shadow: 'cienie', build: 'zbuduj', duel: 'pojedynek', about: 'o-grze' },
+  cs: { guess: 'uhodni', shadow: 'stiny', build: 'postav', duel: 'souboj', about: 'o-hre' },
 };
 
 /** t('duel.round', { n: 2, total: 5 }) → text with {placeholders} filled in; falls back to German. */
@@ -64,5 +66,5 @@ export const otherLocalePaths = () => OTHER_LOCALES.map(lang => ({ params: { lan
 export const otherLocalePagePaths = () =>
   OTHER_LOCALES.flatMap(lang => [
     ...PAGES.map(page => ({ params: { lang, slug: SLUGS[lang][page] }, props: { page } })),
-    ...PAGES.filter(page => SLUGS[lang][page] !== page).map(page => ({ params: { lang, slug: page }, props: { page, redirect: true } })),
+    ...LEGACY_PAGES.filter(page => SLUGS[lang][page] !== page).map(page => ({ params: { lang, slug: page }, props: { page, redirect: true } })),
   ]);

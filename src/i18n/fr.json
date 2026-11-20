@@ -18,6 +18,10 @@
       "title": "Devine la vue",
       "text": "Quelle image montre le bâtiment vu de face ? Trouve la bonne parmi six."
     },
+    "shadow": {
+      "title": "Ombres",
+      "text": "Le soleil ou la lune projette une ombre sur le mur. Lequel des six bâtiments était-ce ?"
+    },
     "build": {
       "title": "Construis-le",
       "text": "Tu vois trois plans – place les cubes pour que tout corresponde."
@@ -100,6 +104,21 @@
       "mirrorTop": "C’est en miroir – la gauche et la droite sont inversées.",
       "flipped": "L’avant et l’arrière sont inversés. Vu de dessus, l’avant est toujours en bas.",
       "nearMiss": "Presque ! Regarde encore les cases marquées."
+    }
+  },
+  "shadow": {
+    "question": "Quel bâtiment projette cette ombre ?",
+    "correct": "Exactement ! Ce bâtiment projette exactement cette ombre.",
+    "option": "Bâtiment {n}",
+    "turn": "Tourner les bâtiments",
+    "hintDone": "Regarde : voilà les bâtiments vus depuis la lumière. Lequel correspond à l’ombre ?",
+    "why": {
+      "mirroredLR": "En miroir – la gauche et la droite sont inversées.",
+      "mirroredFB": "En miroir – l’avant et l’arrière sont inversés.",
+      "fromSide": "Il projette cette ombre quand la lumière vient du côté – pas de devant.",
+      "fromFront": "Il projette cette ombre quand la lumière vient de devant – pas du côté.",
+      "heights": "Le plan au sol est bon, mais les tours n’ont pas la bonne hauteur.",
+      "nearMiss": "Presque ! Regarde les cases marquées : il y a un cube de trop ou de moins."
     }
   },
   "build": {

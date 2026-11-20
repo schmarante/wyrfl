@@ -18,6 +18,10 @@
       "title": "Ansichten raten",
       "text": "Welches Bild zeigt das Gebäude von vorne? Finde das richtige von sechs."
     },
+    "shadow": {
+      "title": "Schattenwurf",
+      "text": "Sonne oder Mond werfen einen Schatten an die Wand. Welches der sechs Gebäude war das?"
+    },
     "build": {
       "title": "Nachbauen",
       "text": "Du siehst drei Baupläne – stell die Würfel so hin, dass alles passt."
@@ -100,6 +104,21 @@
       "mirrorTop": "Das ist gespiegelt – links und rechts sind vertauscht.",
       "flipped": "Vorne und hinten sind vertauscht. Von oben gesehen ist vorne immer unten.",
       "nearMiss": "Ganz knapp! Schau dir die markierten Kästchen noch mal genau an."
+    }
+  },
+  "shadow": {
+    "question": "Welches Gebäude wirft diesen Schatten?",
+    "correct": "Genau! Dieses Gebäude wirft genau diesen Schatten.",
+    "option": "Gebäude {n}",
+    "turn": "Gebäude drehen",
+    "hintDone": "Schau: So sehen die Gebäude vom Licht aus. Welches passt zum Schatten?",
+    "why": {
+      "mirroredLR": "Gespiegelt – links und rechts sind vertauscht.",
+      "mirroredFB": "Gespiegelt – vorne und hinten sind vertauscht.",
+      "fromSide": "Diesen Schatten wirft es, wenn das Licht von der Seite kommt – nicht von vorne.",
+      "fromFront": "Diesen Schatten wirft es, wenn das Licht von vorne kommt – nicht von der Seite.",
+      "heights": "Die Grundfläche passt, aber die Türme sind unterschiedlich hoch.",
+      "nearMiss": "Fast! Schau auf die markierten Kästchen: Da ist ein Würfel zu viel oder zu wenig."
     }
   },
   "build": {

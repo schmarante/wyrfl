@@ -23,6 +23,10 @@
       "title": "Pogodi pogled",
       "text": "Koja slika prikazuje građevinu sprijeda? Pronađi pravu među šest."
     },
+    "shadow": {
+      "title": "Sjene",
+      "text": "Sunce ili mjesec bacaju sjenu na zid. Koja je od šest zgrada to bila?"
+    },
     "build": {
       "title": "Sagradi",
       "text": "Vidiš tri nacrta – postavi kockice tako da sve odgovara."
@@ -105,6 +109,21 @@
       "mirrorTop": "To je zrcaljeno – lijevo i desno su zamijenjeni.",
       "flipped": "Prednja i stražnja strana su zamijenjene. Gledano odozgo, prednja strana uvijek je dolje.",
       "nearMiss": "Za dlaku! Pogledaj još jednom označena polja."
+    }
+  },
+  "shadow": {
+    "question": "Koja zgrada baca ovu sjenu?",
+    "correct": "Točno! Ova zgrada baca baš ovu sjenu.",
+    "option": "Zgrada {n}",
+    "turn": "Okreni zgrade",
+    "hintDone": "Pogledaj: ovako zgrade izgledaju iz smjera svjetla. Koja odgovara sjeni?",
+    "why": {
+      "mirroredLR": "Zrcaljeno – lijevo i desno su zamijenjeni.",
+      "mirroredFB": "Zrcaljeno – sprijeda i straga su zamijenjeni.",
+      "fromSide": "Ovu sjenu baca kad svjetlo dolazi sa strane – ne sprijeda.",
+      "fromFront": "Ovu sjenu baca kad svjetlo dolazi sprijeda – ne sa strane.",
+      "heights": "Tlocrt odgovara, ali tornjevi su različite visine.",
+      "nearMiss": "Skoro! Pogledaj označena polja: jedna kocka previše ili premalo."
     }
   },
   "build": {
