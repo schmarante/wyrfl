@@ -509,29 +509,38 @@ const JELLY_VERTEX = /* glsl */ `
   vJellyWorld = (modelMatrix * vec4(position, 1.0)).xyz;
   transformed += objectNormal * (jNoise(vJellyWorld * 2.6) - 0.5) * 0.08;`;
 
-// watery slime: translucent (rims more opaque – fresnel, like real gel), light scattered strongly inside (the body
-// glows, shading gets soft, much light comes through at the thin rims), wet look: sharp white highlight + a bright
-// streak where the rounded edges reflect the sky above
+// watery slime. Light passing through it is refracted and blurred by three's transmission (the scene behind is drawn
+// into a buffer and read back offset and soft – real refraction and blur, an extra pass only while rendering, and
+// only for this style); clearcoat gives the wet outer gloss. On top, faked subsurface scattering in the shader:
+// light glowing out of the body and much more at the thin rims (fresnel), a little irregular (noise), plus a
+// bright streak where the rounded upper edges reflect the sky.
 const JELLY_FRAGMENT = /* glsl */ `
   {
     vec3 jView = isOrthographic ? vec3(0.0, 0.0, 1.0) : normalize(vViewPosition);
-    float jFacing = clamp(abs(dot(normal, jView)), 0.0, 1.0);
-    float jFres = pow(1.0 - jFacing, 2.0);
+    float jFres = pow(1.0 - clamp(abs(dot(normal, jView)), 0.0, 1.0), 2.0);
     float jDensity = jNoise(vJellyWorld * 3.5);
-    vec3 jBody = diffuseColor.rgb;
-    vec3 jGlow = mix(jBody, vec3(0.86, 1.0, 0.62), 0.45);
-    vec3 jScatter = jBody * (0.62 + 0.25 * jDensity) + jGlow * jFres * 1.1;
-    outgoingLight = mix(outgoingLight, jScatter, 0.6) + jGlow * jFres * 0.25;
+    vec3 jGlow = mix(diffuseColor.rgb, vec3(0.86, 1.0, 0.62), 0.45);
+    outgoingLight = outgoingLight * (0.9 + 0.2 * jDensity) + diffuseColor.rgb * 0.16 + jGlow * jFres * 0.65;
     vec3 jReflect = reflect(-jView, normal);
-    outgoingLight += vec3(1.0) * (pow(max(jReflect.y, 0.0), 14.0) * 0.55 + pow(jFres, 5.0) * 0.4);
-    diffuseColor.a *= mix(0.72, 1.0, jFres);
+    outgoingLight += vec3(1.0) * pow(max(jReflect.y, 0.0), 14.0) * 0.4;
   }`;
 
 function jellySkin() {
   const geometry = new RoundedBoxGeometry(1, 1, 1, 3, 0.17);
   const materials = JELLY_COLORS.map(color => {
-    // transparent: cubes behind shimmer through (sorted back to front per cube); depthWrite stays on
-    const material = new THREE.MeshPhongMaterial({ color, vertexColors: true, shininess: 45, specular: 0x9fb39a, transparent: true });
+    const material = new THREE.MeshPhysicalMaterial({
+      color,
+      vertexColors: true,
+      transmission: 1,          // see-through …
+      thickness: 1,             // … refracted like a body of about one cube …
+      ior: 1.36,
+      roughness: 0.34,          // … and blurred
+      attenuationColor: new THREE.Color(color),
+      attenuationDistance: 0.85,
+      clearcoat: 1,             // wet outer gloss
+      clearcoatRoughness: 0.08,
+      specularIntensity: 0.8,
+    });
     material.userData.shared = true;
     material.onBeforeCompile = shader => {
       shader.vertexShader = shader.vertexShader
