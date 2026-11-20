@@ -58,8 +58,9 @@ const theme = () => (document.documentElement.dataset.theme === 'light' ? 'light
  *           onTap?: (column: { x: number, z: number }, tool: 'add' | 'remove') => void }} [options]
  *   frameFor: keep the camera frame for this grid (home page hero – buildings of different sizes look different in size)
  *   fitContent: frame the building that is shown, not the tallest one possible (View Guesser – the building is fixed)
+ *   drips: slime drips on the cubes (off for small still pictures – they only matter in the big view)
  */
-export function createCubeScene(canvas, { editable = false, marker: withMarker = false, frameFor = null, fitContent = false, onTap } = {}) {
+export function createCubeScene(canvas, { editable = false, marker: withMarker = false, frameFor = null, fitContent = false, drips = true, onTap } = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
@@ -489,7 +490,7 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   const DRIP_OUT = 0.07;   // how far the strand's axis sits outside the face
   function addDrip(mesh) {
     const { x, y, z } = mesh.userData;
-    const spot = skin.drip?.pick(x, y, z);
+    const spot = drips ? skin.drip?.pick(x, y, z) : null;
     if (!spot) return;
     const [nx, nz] = DRIP_FACES[spot.face];
     const drip = new THREE.Mesh(skin.drip.geometry, skin.drip.material(mats(mesh.userData.base)[0]));

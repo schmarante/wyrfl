@@ -544,7 +544,8 @@ const JELLY_BUMP = /* glsl */ `
 function dripGeometry() {
   const profile = [[0, 0.06], [0.085, 0.025], [0.078, -0.09], [0.058, -0.23], [0.054, -0.38], [0.074, -0.5],
     [0.115, -0.6], [0.13, -0.68], [0.112, -0.76], [0.065, -0.81], [0, -0.83]];
-  const geometry = new THREE.LatheGeometry(profile.map(([r, y]) => new THREE.Vector2(r, y)), 14);
+  // lathe points go from bottom to top – the other way round the normals would point inwards
+  const geometry = new THREE.LatheGeometry(profile.reverse().map(([r, y]) => new THREE.Vector2(r, y)), 14);
   // the style's materials use vertex colours (AO): plain white here, no corners to darken
   geometry.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(geometry.attributes.position.count * 3).fill(1), 3));
   return geometry;

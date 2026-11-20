@@ -42,7 +42,7 @@ export function createShadowBoard(root, t, { onSolved } = {}) {
       hidden.setAttribute('aria-hidden', 'true');
       hidden.style.cssText = `position:fixed;left:-10000px;top:0;width:${THUMB}px;height:${THUMB}px;pointer-events:none`;
       document.body.append(hidden);
-      thumbs = createCubeScene(hidden);
+      thumbs = createCubeScene(hidden, { drips: false });   // small pictures: no slime drips
       if (puzzle) present(true);
       requestAnimationFrame(() => $('[data-canvas]').classList.add('is-ready'));   // fade in, no loading text
     })
