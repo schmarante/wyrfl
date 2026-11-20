@@ -841,6 +841,10 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       pivot.rotation.y = angle;
       render();
     },
+    /** Draws the current state again (animated extras like the dust in the shadow mode's light beam). */
+    redraw() {
+      render();
+    },
     /** Draws now (the canvas can be copied right after, e.g. into a still picture). */
     renderNow() {
       fitCamera();
