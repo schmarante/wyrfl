@@ -245,10 +245,12 @@
       "gifts": "Arrive à la Saint-Nicolas et à Noël.",
       "eyes": "Réussis « Moyen » dans Devine la vue et dans Construis-le.",
       "galaxy": "Réussis « Difficile » dans Devine la vue et dans Construis-le.",
-      "city": "Réussis « Expert » dans Devine la vue et dans Construis-le."
+      "city": "Réussis « Expert » dans Devine la vue et dans Construis-le.",
+      "jelly": "Termine « Expert » dans Ombres."
     },
     "eyes": "Yeux rigolos",
     "galaxy": "Galaxie",
-    "city": "Gratte-ciel"
+    "city": "Gratte-ciel",
+    "jelly": "Slime"
   }
 }

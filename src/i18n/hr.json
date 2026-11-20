@@ -245,10 +245,12 @@
       "gifts": "Stiže za Svetog Nikolu i Božić.",
       "eyes": "Riješi razinu „Srednje“ u igrama Pogodi pogled i Sagradi.",
       "galaxy": "Riješi razinu „Teško“ u igrama Pogodi pogled i Sagradi.",
-      "city": "Riješi razinu „Profi“ u igrama Pogodi pogled i Sagradi."
+      "city": "Riješi razinu „Profi“ u igrama Pogodi pogled i Sagradi.",
+      "jelly": "Završi „Profi” u načinu Sjene."
     },
     "eyes": "Okice",
     "galaxy": "Galaksija",
-    "city": "Neboderi"
+    "city": "Neboderi",
+    "jelly": "Sluz"
   }
 }

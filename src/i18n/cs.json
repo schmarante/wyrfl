@@ -245,10 +245,12 @@
       "gifts": "Přichází na Mikuláše a o Vánocích.",
       "eyes": "Zvládni úroveň „Střední“ v hrách Uhodni pohled a Postav to.",
       "galaxy": "Zvládni úroveň „Těžká“ v hrách Uhodni pohled a Postav to.",
-      "city": "Zvládni úroveň „Mistr“ v hrách Uhodni pohled a Postav to."
+      "city": "Zvládni úroveň „Mistr“ v hrách Uhodni pohled a Postav to.",
+      "jelly": "Dokonči „Mistr“ v režimu Stíny."
     },
     "eyes": "Očička",
     "galaxy": "Galaxie",
-    "city": "Mrakodrapy"
+    "city": "Mrakodrapy",
+    "jelly": "Sliz"
   }
 }

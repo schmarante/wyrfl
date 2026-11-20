@@ -245,10 +245,12 @@
       "gifts": "Comes on St. Nicholas’ Day and at Christmas.",
       "eyes": "Complete “Medium” in Guess the view and in Build it.",
       "galaxy": "Complete “Hard” in Guess the view and in Build it.",
-      "city": "Complete “Hardcore” in Guess the view and in Build it."
+      "city": "Complete “Hardcore” in Guess the view and in Build it.",
+      "jelly": "Complete “Hardcore” in Shadows."
     },
     "eyes": "Googly eyes",
     "galaxy": "Galaxy",
-    "city": "Skyscrapers"
+    "city": "Skyscrapers",
+    "jelly": "Slime"
   }
 }

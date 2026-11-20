@@ -245,10 +245,12 @@
       "gifts": "Kommt an Nikolaus und Weihnachten.",
       "eyes": "Schaffe „Mittel“ beim Raten und beim Nachbauen.",
       "galaxy": "Schaffe „Schwer“ beim Raten und beim Nachbauen.",
-      "city": "Schaffe „Profi“ beim Raten und beim Nachbauen."
+      "city": "Schaffe „Profi“ beim Raten und beim Nachbauen.",
+      "jelly": "Schaffe „Profi“ beim Schattenwurf."
     },
     "eyes": "Kulleraugen",
     "galaxy": "Galaxie",
-    "city": "Hochhäuser"
+    "city": "Hochhäuser",
+    "jelly": "Schleim"
   }
 }

@@ -245,10 +245,12 @@
       "gifts": "Przychodzi na Mikołajki i Boże Narodzenie.",
       "eyes": "Ukończ poziom „Średni” w trybach Zgadnij widok i Zbuduj.",
       "galaxy": "Ukończ poziom „Trudny” w trybach Zgadnij widok i Zbuduj.",
-      "city": "Ukończ poziom „Mistrz” w trybach Zgadnij widok i Zbuduj."
+      "city": "Ukończ poziom „Mistrz” w trybach Zgadnij widok i Zbuduj.",
+      "jelly": "Ukończ „Mistrz” w trybie Cienie."
     },
     "eyes": "Oczka",
     "galaxy": "Galaktyka",
-    "city": "Wieżowce"
+    "city": "Wieżowce",
+    "jelly": "Glut"
   }
 }

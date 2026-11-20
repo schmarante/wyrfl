@@ -9,7 +9,7 @@
 // - fake global illumination (lighting.js): voxel AO as vertex colors, soft shadows on and under the plate
 
 import * as THREE from 'three';
-import { cubeAO, plateShadow, dropShadow } from './lighting.js';
+import { cubeAO, cubeAOSmooth, plateShadow, dropShadow } from './lighting.js';
 import { createSkin } from './skins.js';
 import { currentSkin } from './skin-pref.js';
 
@@ -280,7 +280,8 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
         if (!mesh.userData.fading) applyStyle(mesh);
       }
       const colors = mesh.geometry.attributes.color;
-      cubeAO(occupied, x, y, z, BOX_POS, BOX_NRM, colors.array);
+      const { pos, nrm, smooth } = mesh.userData.shape;
+      (smooth ? cubeAOSmooth : cubeAO)(occupied, x, y, z, pos, nrm, colors.array);
       mesh.userData.ao = colors.array.slice();
       // in the light beam, a face turned to the light is lit – unless another cube stands in front of it (its shadow)
       mesh.userData.blocked = Boolean(beamLight) && Array.from({ length: size }, (_, i) => i).some(i =>
@@ -309,12 +310,13 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
       inside = Math.max(0, Math.min(1, Math.min(c + 0.5, beamLight.top) - Math.max(c - 0.5, 0)));
     }
     const axis = beamLight?.axis === 'x' ? 0 : 2;
+    const NRM = mesh.userData.shape.nrm;
     const lit = 1 + (mesh.userData.blocked ? 0 : BEAM.lit) * inside;
     const away = 1 - BEAM.away * inside;
     const side = 1 - BEAM.side * inside;
     for (let v = 0; v < ao.length; v += 3) {
-      const facing = BOX_NRM[v + axis];
-      const k = !inside ? 1 : facing > 0.5 ? lit : facing < -0.5 ? away : Math.abs(BOX_NRM[v + 1]) > 0.5 ? 1 : side;
+      const facing = NRM[v + axis];
+      const k = !inside ? 1 : facing > 0.5 ? lit : facing < -0.5 ? away : Math.abs(NRM[v + 1]) > 0.5 ? 1 : side;
       colors.array[v] = ao[v] * k;
       colors.array[v + 1] = ao[v + 1] * k;
       colors.array[v + 2] = ao[v + 2] * k;
@@ -469,12 +471,36 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
   }
 
   /** A cube mesh; `fading` starts it invisible with transparent copies (for the drop-in). */
+  /** The cube shape of a style: the plain box, or its own (slime: rounded) – normals snapped to the face axis for AO
+   *  and the light beam. Worked out once per style. */
+  function shapeOf(style) {
+    if (!style.geometry) return { geometry: cubeGeometry, pos: BOX_POS, nrm: BOX_NRM, smooth: false };
+    style.shape ??= (() => {
+      const n = style.geometry.attributes.normal.array;
+      const axes = new Float32Array(n.length);
+      for (let v = 0; v < n.length; v += 3) {
+        const abs = [Math.abs(n[v]), Math.abs(n[v + 1]), Math.abs(n[v + 2])];
+        const axis = abs.indexOf(Math.max(...abs));
+        axes[v + axis] = Math.sign(n[v + axis]);
+      }
+      return { geometry: style.geometry, pos: style.geometry.attributes.position.array, nrm: axes, smooth: true };
+    })();
+    return style.shape;
+  }
+  /** a cube's own geometry (own vertex colours for AO) in the current style's shape */
+  function cubeGeometryFor(mesh) {
+    const shape = shapeOf(skin);
+    const geometry = shape.geometry.clone();
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(shape.pos.length).fill(1), 3));
+    mesh.userData.shape = shape;
+    return geometry;
+  }
+
   function makeCube(x, y, z, fading) {
-    const geometry = cubeGeometry.clone();   // own vertex colors for AO
-    geometry.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(BOX_POS.length).fill(1), 3));
-    const mesh = new THREE.Mesh(geometry);
+    const mesh = new THREE.Mesh();
     mesh.add(new THREE.LineSegments(edgeGeometry, edgeOf()));
     mesh.userData = { x, y, z, base: skin.material(x, y, z, { topFree: true }), fading: false };
+    mesh.geometry = cubeGeometryFor(mesh);
     applyStyle(mesh);
     if (fading) {
       startFade(mesh);
@@ -809,6 +835,10 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     for (const mesh of cubeMap.values()) {
       const { x, y, z } = mesh.userData;
       mesh.userData.base = skin.material(x, y, z, { topFree: true });
+      if (mesh.userData.shape !== shapeOf(skin)) {
+        mesh.geometry.dispose();
+        mesh.geometry = cubeGeometryFor(mesh);   // another shape (rounded slime ↔ box)
+      }
       applyStyle(mesh);
     }
     old.dispose();

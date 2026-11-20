@@ -7,6 +7,7 @@
 // - eyes:    unlocked by completing "medium" in both game modes
 // - galaxy:  unlocked by completing "hard" in both game modes
 // - city:    unlocked by completing "hardcore" in both game modes
+// - jelly:   slime – unlocked by completing "hardcore" in the shadow mode
 // - gifts:   comes by itself on St. Nicholas' Day (Dec 6) and at Christmas (Dec 24–26) – active automatically on those
 //            days unless the player picked another style that day
 // The choice is stored on this device only (scrambled + signed, store.js).
@@ -15,7 +16,7 @@ import { dailyDate } from './rng.js';
 import { levelDone, duelWins, MODES, seenSkins, markSkinsSeen, debugUnlockAll } from './progress.js';
 import { secureGet, secureSet } from './store.js';
 
-export const SKINS = ['classic', 'colors', 'pixel', 'eyes', 'galaxy', 'city', 'gifts'];
+export const SKINS = ['classic', 'colors', 'pixel', 'eyes', 'galaxy', 'city', 'jelly', 'gifts'];
 const KEY = 'wyrfl:skin';
 const DAY_KEY = 'wyrfl:skin-day';
 
@@ -40,6 +41,8 @@ export function skinUnlocked(name, date = dailyDate()) {
       return MODES.every(mode => levelDone(mode, 'hard'));
     case 'city':
       return MODES.every(mode => levelDone(mode, 'hardcore'));
+    case 'jelly':
+      return levelDone('shadow', 'hardcore');
     case 'gifts':
       return isGiftDay(date);
     default:

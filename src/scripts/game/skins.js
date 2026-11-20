@@ -6,8 +6,11 @@
 // - eyes:    'googly eyes' – only eyes (own design, drawn in the shader); they follow the pointer and blink now and then
 // - galaxy:  every cube a window into the same night sky (shader), glowing cyan outline
 // - city:    skyscrapers – one building per column, a floor per cube; windows glow at night (dark theme)
+// - jelly:   slime – rounded, a little lumpy cubes (own shape: `geometry`), glossy, light scattering inside (faked:
+//            glowing translucent rim + a little body light – no real subsurface scattering, too expensive for old phones)
 // - gifts:   six wrapping papers with a ribbon cross
 import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { createRng } from './rng.js';
 
 const PALETTE = [0x22c3ee, 0xfacc15, 0xa855f7, 0x22c55e, 0xef4444, 0x3b82f6, 0xf97316];
@@ -479,6 +482,70 @@ function classicSkin() {
   };
 }
 
+// ---- slime ------------------------------------------------------------------------------------------------------
+
+const JELLY_COLORS = [0x7ee04d, 0x5fd86a, 0x9be04a, 0x4ccf7e];   // a few slime greens, picked per cube
+
+const JELLY_NOISE = /* glsl */ `
+  varying vec3 vJellyWorld;
+  float jHash(vec3 p) {
+    p = fract(p * 0.3183099 + 0.1);
+    p *= 17.0;
+    return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+  }
+  float jNoise(vec3 x) {
+    vec3 i = floor(x);
+    vec3 f = fract(x);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(
+      mix(mix(jHash(i), jHash(i + vec3(1.0, 0.0, 0.0)), f.x), mix(jHash(i + vec3(0.0, 1.0, 0.0)), jHash(i + vec3(1.0, 1.0, 0.0)), f.x), f.y),
+      mix(mix(jHash(i + vec3(0.0, 0.0, 1.0)), jHash(i + vec3(1.0, 0.0, 1.0)), f.x), mix(jHash(i + vec3(0.0, 1.0, 1.0)), jHash(i + vec3(1.0)), f.x), f.y),
+      f.z);
+  }`;
+
+// lumpy: every vertex pushed in or out a little by a noise over the world position (the same for every viewer)
+const JELLY_VERTEX = /* glsl */ `
+  vJellyWorld = (modelMatrix * vec4(position, 1.0)).xyz;
+  transformed += objectNormal * (jNoise(vJellyWorld * 2.6) - 0.5) * 0.08;`;
+
+// faked subsurface scattering: some light comes out of the body itself, much more at the thin, rounded rims
+// (fresnel – where light shines through), plus a soft sheen; the density varies a little (noise)
+const JELLY_FRAGMENT = /* glsl */ `
+  {
+    vec3 jView = isOrthographic ? vec3(0.0, 0.0, 1.0) : normalize(vViewPosition);
+    float jFres = pow(1.0 - clamp(abs(dot(normal, jView)), 0.0, 1.0), 2.2);
+    float jDensity = jNoise(vJellyWorld * 4.0);
+    vec3 jBody = diffuseColor.rgb;
+    outgoingLight = outgoingLight * (0.88 + 0.2 * jDensity) + jBody * (0.2 + 0.55 * jFres);
+    outgoingLight += vec3(0.85, 1.0, 0.8) * pow(jFres, 5.0) * 0.3;
+  }`;
+
+function jellySkin() {
+  const geometry = new RoundedBoxGeometry(1, 1, 1, 3, 0.17);
+  const materials = JELLY_COLORS.map(color => {
+    const material = new THREE.MeshPhongMaterial({ color, vertexColors: true, shininess: 70, specular: 0x5a7a50 });
+    material.userData.shared = true;
+    material.onBeforeCompile = shader => {
+      shader.vertexShader = shader.vertexShader
+        .replace('#include <common>', `#include <common>${JELLY_NOISE}`)
+        .replace('#include <begin_vertex>', `#include <begin_vertex>${JELLY_VERTEX}`);
+      shader.fragmentShader = shader.fragmentShader
+        .replace('#include <common>', `#include <common>${JELLY_NOISE}`)
+        .replace('#include <opaque_fragment>', `${JELLY_FRAGMENT}\n#include <opaque_fragment>`);
+    };
+    material.customProgramCacheKey = () => 'wyrfl-jelly';
+    return material;
+  });
+  return {
+    geometry,   // own cube shape: rounded (the scene clones it per cube)
+    material: (x, y, z) => materials[cellHash(x, y, z) % materials.length],
+    dispose() {
+      materials.forEach(m => m.dispose());
+      geometry.dispose();
+    },
+  };
+}
+
 export function createSkin(name) {
-  return { colors: colorSkin, pixel: pixelSkin, eyes: eyesSkin, galaxy: galaxySkin, city: citySkin, gifts: giftSkin }[name]?.() ?? classicSkin();
+  return { colors: colorSkin, pixel: pixelSkin, eyes: eyesSkin, galaxy: galaxySkin, city: citySkin, jelly: jellySkin, gifts: giftSkin }[name]?.() ?? classicSkin();
 }

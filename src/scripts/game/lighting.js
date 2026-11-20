@@ -40,6 +40,39 @@ export function cubeAO(occupied, x, y, z, positions, normals, out = new Float32A
   return out;
 }
 
+/**
+ * Like cubeAO, for any cube-like shape (rounded cubes): the four corners of each face as above, every vertex
+ * blended between them by its position on the face – smooth, and the same as cubeAO for a plain box.
+ * @param {ArrayLike<number>} normals  per vertex the face's axis (unit vector along x, y or z)
+ */
+export function cubeAOSmooth(occupied, x, y, z, positions, normals, out = new Float32Array(positions.length)) {
+  const cell = [x, y, z];
+  const level = (n, a, b, sa, sb) => {
+    const at = (da, db) => {
+      const p = [cell[0] + n[0], cell[1] + n[1], cell[2] + n[2]];
+      p[a] += da;
+      p[b] += db;
+      return occupied(p[0], p[1], p[2]);
+    };
+    const side1 = at(sa, 0);
+    const side2 = at(0, sb);
+    return AO_LEVELS[side1 && side2 ? 0 : 3 - (side1 + side2 + at(sa, sb))];
+  };
+  const cache = new Map();   // per face: its four corner values
+  for (let v = 0; v < positions.length; v += 3) {
+    const n = [Math.round(normals[v]), Math.round(normals[v + 1]), Math.round(normals[v + 2])];
+    const axis = n.findIndex(c => c !== 0);
+    const [a, b] = [0, 1, 2].filter(i => i !== axis);
+    const key = n.join(',');
+    if (!cache.has(key)) cache.set(key, [level(n, a, b, -1, -1), level(n, a, b, 1, -1), level(n, a, b, -1, 1), level(n, a, b, 1, 1)]);
+    const [c00, c10, c01, c11] = cache.get(key);
+    const u = Math.min(1, Math.max(0, positions[v + a] + 0.5));
+    const w = Math.min(1, Math.max(0, positions[v + b] + 0.5));
+    out[v] = out[v + 1] = out[v + 2] = (c00 * (1 - u) + c10 * u) * (1 - w) + (c01 * (1 - u) + c11 * u) * w;
+  }
+  return out;
+}
+
 function boxBlur(src, w, h, r) {
   if (r < 1) return src;
   const tmp = new Float32Array(src.length);
