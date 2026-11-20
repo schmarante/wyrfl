@@ -58,6 +58,16 @@ html {
 .press:active {
   transform: scale(0.96);
 }
+/* the same press, played once from code – for things that can also be dragged (shadow mode answers are turned by
+   dragging: they only "press in" when an answer is really picked, not while turning) */
+.press-once {
+  animation: press-once 220ms ease;
+}
+@keyframes press-once {
+  40% {
+    transform: scale(0.96);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     transition-duration: 0ms !important;

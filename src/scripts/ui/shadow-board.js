@@ -118,7 +118,7 @@ export function createShadowBoard(root, t, { onSolved } = {}) {
         const li = document.createElement('li');
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'press relative flex w-full cursor-grab touch-pan-y items-center justify-center rounded-2xl border-2 border-line bg-bg/60 p-1 hover:border-cube active:cursor-grabbing aria-disabled:hover:border-line';
+        button.className = 'relative flex w-full cursor-grab touch-pan-y items-center justify-center rounded-2xl border-2 border-line bg-bg/60 p-1 hover:border-cube active:cursor-grabbing aria-disabled:hover:border-line';
         button.title = t('shadow.turn');
         button.innerHTML = `<span class="sr-only">${t('shadow.option', { n: i + 1 })}</span><canvas data-thumb class="aspect-square w-full" aria-hidden="true"></canvas><span data-badge class="hidden"></span>`;
         // drag sideways = turn this building (also after answering – to look at it), tap = pick it
@@ -174,6 +174,10 @@ export function createShadowBoard(root, t, { onSolved } = {}) {
     if (!puzzle || state.solved || changing) return;
     const option = puzzle.options[index];
     state.tries++;
+    // press in now – not while it is held to be turned (no :active scaling on these answers)
+    button.classList.remove('press-once');
+    void button.offsetWidth;
+    button.classList.add('press-once');
     place(option);
     if (option.correct) {
       state.solved = true;
