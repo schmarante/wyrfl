@@ -422,6 +422,11 @@ export function createCubeScene(canvas, { editable = false, marker: withMarker =
     const copy = m.clone();
     copy.userData = {};   // a copy is never shared
     copy.transparent = true;
+    // clone() does not carry a style's own shader parts (galaxy sky, googly eyes …) – without them a fading cube would
+    // be plain white and the real look would pop in when it lands
+    if (Object.hasOwn(m, 'onBeforeCompile')) copy.onBeforeCompile = m.onBeforeCompile;
+    if (Object.hasOwn(m, 'customProgramCacheKey')) copy.customProgramCacheKey = m.customProgramCacheKey;
+    if (m.defines) copy.defines = { ...m.defines };
     return copy;
   };
   const edgeOf = () => skin.edge ?? noEdge;
