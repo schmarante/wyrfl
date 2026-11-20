@@ -7,12 +7,12 @@
 // compare(candidate): the picked building's shadow laid over the wanted one – extra cells hatched, missing ones
 // dashed (never colour alone).
 // The dust is the only thing that moves: ~30 frames a second, paused while the stage is off screen or the tab is
-// hidden, standing still with prefers-reduced-motion.
+// hidden, standing still with prefers-reduced-motion. It belongs to the room (see moveDust) – the light moves, not it.
 import * as THREE from 'three';
 
 const PX = 96;          // texture pixels per cube
 const MARGIN = 0.12;    // wall border around the cells (world units)
-const DUST = 70;        // particles in the beam
+const DUST = 220;       // dust specks in the room (only those in the beam are seen)
 const FPS = 30;
 // next puzzle: the old shadow fades out, the stage turns to the new side (and springs to a new grid size together
 // with the plate – same timing and curve as GROW in scene.js), then the new shadow fades in. Nothing pops.
@@ -149,7 +149,6 @@ export function createShadowStage(scene) {
   let wallTexture = null;
   let skyTex = null;
   let canvas = null;
-  let dust = null;        // { points, specks, near, far }
   let frame = 0;
   let last = 0;
   let visible = true;
@@ -175,6 +174,7 @@ export function createShadowStage(scene) {
       tw.step(t);
       if (t >= 1) tweens.delete(tw);
     }
+    moveDust(now);   // which specks are lit changes while the light turns
     scene.redraw();
     if (tweens.size) tweenFrame = requestAnimationFrame(runTweens);
   }
@@ -278,21 +278,25 @@ export function createShadowStage(scene) {
     if (wallTexture) wallTexture.needsUpdate = true;
   }
 
-  // ---- dust in the beam --------------------------------------------------------------------------
+  // ---- dust ---------------------------------------------------------------------------------------
+  // The dust belongs to the room, not to the light: it floats where it is (also while the light turns to the other
+  // side or the next puzzle comes) and is only seen where the beam passes through it. It lives in the two regions the
+  // beam can take (from the front / from the right); a speck that drifts out of them comes back elsewhere – always
+  // unseen (outside the beam it is invisible anyway) and fading in.
 
-  function makeDust(near, far, col) {
-    const specks = Array.from({ length: DUST }, () => ({
-      t: 0.08 + Math.random() * 0.84,   // along the beam
-      a: Math.random() - 0.5,           // across
-      b: Math.random() - 0.5,           // up / down
-      phase: Math.random() * Math.PI * 2,
-      speed: 0.6 + Math.random() * 0.8,
-    }));
+  const room = new THREE.Group();   // not turned with the stage
+  scene.attach(room);
+  let spawn = [];      // boxes in room coordinates where dust lives
+  let beamBox = null;  // the beam in stage coordinates
+  const inverse = new THREE.Matrix4();
+  const at = new THREE.Vector3();
+
+  function makeDust() {
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(DUST * 3), 3));
     geometry.setAttribute('alpha', new THREE.Float32BufferAttribute(new Float32Array(DUST), 1));
     const material = new THREE.ShaderMaterial({
-      uniforms: { color: { value: col.dust }, size: { value: 3.2 * Math.min(window.devicePixelRatio || 1, 2) } },
+      uniforms: { color: { value: COLORS[theme()].dust.clone() }, size: { value: 3.2 * Math.min(window.devicePixelRatio || 1, 2) } },
       vertexShader: DUST_VERTEX,
       fragmentShader: DUST_FRAGMENT,
       transparent: true,
@@ -301,50 +305,75 @@ export function createShadowStage(scene) {
     const points = new THREE.Points(geometry, material);
     points.renderOrder = -1;   // before the fading cubes (see the beam)
     points.frustumCulled = false;
-    dust = { points, specks, near, far };
-    moveDust(0);
-    return points;
+    room.add(points);
+    const specks = Array.from({ length: DUST }, () => ({
+      x: 0, y: 0, z: 0, life: 0, placed: false,
+      phase: Math.random() * Math.PI * 2,
+      speed: 0.6 + Math.random() * 0.8,
+    }));
+    return { points, specks };
+  }
+  const dust = makeDust();
+
+  const inBox = (b, x, y, z, m = 0) => x > b.x0 - m && x < b.x1 + m && y > b.y0 - m && y < b.y1 + m && z > b.z0 - m && z < b.z1 + m;
+  function place(p, life) {
+    const b = spawn[Math.floor(Math.random() * spawn.length)];
+    p.x = b.x0 + Math.random() * (b.x1 - b.x0);
+    p.y = b.y0 + Math.random() * (b.y1 - b.y0);
+    p.z = b.z0 + Math.random() * (b.z1 - b.z0);
+    p.life = life;
+    p.placed = true;
+  }
+  /** how far inside the beam (soft at its edges) – in the stage's own coordinates, so it follows the turning light */
+  function lit(x, y, z) {
+    at.set(x, y, z).applyMatrix4(inverse);
+    const b = beamBox;
+    const edge = 0.35;
+    const f = (v, lo, hi) => Math.max(0, Math.min(1, (v - lo) / edge, (hi - v) / edge));
+    return f(at.x, b.x0, b.x1) * f(at.y, b.y0, b.y1) * f(at.z, b.z0, b.z1);
   }
 
-  /** dust drifts slowly and twinkles a little; it fades out towards the beam's edges instead of popping */
-  function moveDust(time) {
-    const { points, specks, near, far } = dust;
-    const pos = points.geometry.attributes.position.array;
-    const alpha = points.geometry.attributes.alpha.array;
+  /** drift a little (dt seconds), twinkle, light up only inside the beam */
+  function moveDust(time, dt = 0) {
+    if (!spawn.length || !beamBox) return;
+    group.updateMatrix();
+    inverse.copy(group.matrix).invert();
+    const pos = dust.points.geometry.attributes.position.array;
+    const alpha = dust.points.geometry.attributes.alpha.array;
     const s = time / 1000;
-    specks.forEach((p, i) => {
-      if (time) {
-        p.a += Math.sin(s * 0.31 * p.speed + p.phase) * 0.0016;
-        p.b += Math.cos(s * 0.23 * p.speed + p.phase * 1.7) * 0.0016 + 0.0005 * p.speed;   // rises a little
-        p.t += Math.sin(s * 0.17 * p.speed + p.phase * 0.5) * 0.0009;
-        if (p.b > 0.5) p.b -= 1;
-        p.a = Math.max(-0.5, Math.min(0.5, p.a));
-        p.t = Math.max(0.05, Math.min(0.95, p.t));
+    dust.specks.forEach((p, i) => {
+      if (!p.placed) place(p, Math.random());
+      if (dt) {
+        p.x += Math.sin(s * 0.31 * p.speed + p.phase) * 0.12 * dt;
+        p.z += Math.cos(s * 0.27 * p.speed + p.phase * 1.3) * 0.12 * dt;
+        p.y += (Math.cos(s * 0.23 * p.speed + p.phase * 1.7) * 0.1 + 0.05 * p.speed) * dt;   // rises a little
+        p.life = Math.min(1, p.life + dt * 0.5);
       }
-      const w = near.w + (far.w - near.w) * p.t;
-      const h = near.h + (far.h - near.h) * p.t;
-      pos[i * 3] = near.x + (far.x - near.x) * p.t + p.a * 2 * w * 0.9;
-      pos[i * 3 + 1] = near.y + (far.y - near.y) * p.t + p.b * 2 * h * 0.9;
-      pos[i * 3 + 2] = near.z + (far.z - near.z) * p.t;
-      const fade = Math.min(1, (0.5 - Math.abs(p.b)) * 6, (0.5 - Math.abs(p.a)) * 6);
-      alpha[i] = Math.max(0, fade) * (0.45 + 0.35 * Math.sin(s * 1.3 * p.speed + p.phase));
+      if (!spawn.some(b => inBox(b, p.x, p.y, p.z, 0.3))) place(p, 0);   // out of the dusty regions: back, unseen
+      pos[i * 3] = p.x;
+      pos[i * 3 + 1] = p.y;
+      pos[i * 3 + 2] = p.z;
+      alpha[i] = lit(p.x, p.y, p.z) * p.life * (0.45 + 0.35 * Math.sin(s * 1.3 * p.speed + p.phase));
     });
-    points.geometry.attributes.position.needsUpdate = true;
-    points.geometry.attributes.alpha.needsUpdate = true;
+    dust.points.geometry.attributes.position.needsUpdate = true;
+    dust.points.geometry.attributes.alpha.needsUpdate = true;
   }
 
   function tick(now) {
     frame = 0;
-    if (!dust || !visible || document.hidden || reducedMotion()) return;
+    if (!puzzle || !visible || document.hidden || reducedMotion()) return;
     if (now - last >= 1000 / FPS) {
+      moveDust(now, last ? Math.min(0.1, (now - last) / 1000) : 0);
       last = now;
-      moveDust(now);
       scene.redraw();
     }
     frame = requestAnimationFrame(tick);
   }
   const run = () => {
-    if (!frame && dust && visible && !document.hidden && !reducedMotion()) frame = requestAnimationFrame(tick);
+    if (!frame && puzzle && visible && !document.hidden && !reducedMotion()) {
+      last = 0;
+      frame = requestAnimationFrame(tick);
+    }
   };
   const watch = new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting;
@@ -363,7 +392,6 @@ export function createShadowStage(scene) {
     }
     wallTexture?.dispose();
     skyTex?.dispose();
-    dust = null;
     if (!puzzle) return;
     const { size, maxHeight, view } = puzzle;
     const col = COLORS[theme()];
@@ -416,7 +444,11 @@ export function createShadowStage(scene) {
     );
     // drawn before the transparent cubes that fade in: otherwise they would cut cube-shaped holes into the beam
     beam.renderOrder = -2;
-    group.add(floor, slab, face, beam, makeDust(near, far, col), sky);
+    group.add(floor, slab, face, beam, sky);
+    dust.points.material.uniforms.color.value.copy(col.dust);
+    // where dust lives (room): the beam's region from the front and from the right; the beam itself (stage coordinates)
+    beamBox = { x0: -far.w, x1: far.w, y0: far.y - far.h, y1: far.y + far.h, z0: back, z1: sunZ };
+    spawn = [beamBox, { x0: back, x1: sunZ, y0: beamBox.y0, y1: beamBox.y1, z0: -far.w, z1: far.w }];
     scene.setExtent([
       [height, Math.hypot(width / 2, -back + 0.15)],
       [-0.1, Math.hypot(width / 2, -back + 0.15)],
@@ -449,6 +481,7 @@ export function createShadowStage(scene) {
         group.scale.setScalar(1);
         shadowAlpha = 1;
         draw();
+        moveDust(performance.now());
         scene.renderNow();
         return;
       }
@@ -484,6 +517,9 @@ export function createShadowStage(scene) {
       watch.disconnect();
       cancelAnimationFrame(frame);
       finishTweens();
+      dust.points.geometry.dispose();
+      dust.points.material.dispose();
+      scene.detach(room);
       scene.setBeamLight(null);
       puzzle = null;
       build();
